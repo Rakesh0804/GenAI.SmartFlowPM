@@ -2,6 +2,8 @@ import axios, { AxiosResponse, AxiosError } from 'axios';
 import { 
   LoginRequest, 
   LoginResponse, 
+  RefreshTokenRequest,
+  RefreshTokenResponse,
   ApiResponse,
   UserDto,
   ProjectDto,
@@ -11,16 +13,8 @@ import {
 
 // Get API URL from dynamic config or fallback to environment variables
 const getApiUrl = (): string => {
-  // Try to get from dynamically generated config first
-  if (typeof window !== 'undefined' && (window as any).APP_CONFIG) {
-    return (window as any).APP_CONFIG.API_URL;
-  }
-  
-  // Fallback to environment variables or Aspire service discovery
-  return process.env.NEXT_PUBLIC_API_URL || 
-         process.env.services__api__https__0 || 
-         process.env.services__api__http__0 || 
-         'https://localhost:7149/api';
+  // Use environment variable if set, otherwise fallback to default
+  return process.env.NEXT_PUBLIC_API_URL || 'https://localhost:7149/api';
 };
 
 // Create axios instance with base configuration
@@ -207,20 +201,20 @@ export const authApi = {
     return handleApiResponse(response);
   },
   
-  refreshToken: async (): Promise<string> => {
+  refreshToken: async (): Promise<RefreshTokenResponse> => {
     const refreshToken = tokenManager.getRefreshToken();
     if (!refreshToken) {
       throw new Error('No refresh token available');
     }
     
-    const response = await api.post<ApiResponse<{ token: string }>>('/auth/refresh', {
+    const response = await api.post<ApiResponse<RefreshTokenResponse>>('/auth/refresh', {
       refreshToken,
     });
     
     const result = handleApiResponse(response);
     tokenManager.setToken(result.token);
     
-    return result.token;
+    return result;
   },
 };
 
@@ -331,17 +325,22 @@ export const dashboardApi = {
     const response = await api.get<ApiResponse<DashboardStatsDto>>('/dashboard/stats');
     return handleApiResponse(response);
   },
-  
+
+  getHomeDashboard: async (): Promise<any> => {
+    const response = await api.get<ApiResponse<any>>('/dashboards/home');
+    return handleApiResponse(response);
+  },
+
   getRecentTasks: async (limit: number = 5): Promise<TaskDto[]> => {
     const response = await api.get<ApiResponse<TaskDto[]>>(`/dashboard/recent-tasks?limit=${limit}`);
     return handleApiResponse(response);
   },
-  
+
   getRecentProjects: async (limit: number = 5): Promise<ProjectDto[]> => {
     const response = await api.get<ApiResponse<ProjectDto[]>>(`/dashboard/recent-projects?limit=${limit}`);
     return handleApiResponse(response);
   },
-  
+
   getTeamMembers: async (): Promise<UserDto[]> => {
     const response = await api.get<ApiResponse<UserDto[]>>('/dashboard/team-members');
     return handleApiResponse(response);

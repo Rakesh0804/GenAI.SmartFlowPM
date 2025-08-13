@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useSidebar } from '../../contexts/SidebarContext';
+import { useAuth } from '../../hooks/useAuth';
+import { enhancedTokenManager } from '../../lib/cookieManager';
 import {
     HomeIcon,
     FolderIcon,
@@ -21,7 +23,8 @@ import {
     LogOutIcon,
     ChevronLeftIcon,
     ChevronRightIcon,
-    LucideIcon
+    LucideIcon,
+    UserIcon
 } from 'lucide-react';
 
 // Client-side check
@@ -51,11 +54,6 @@ const menuItems: MenuItem[] = [
     { id: 'toast-demo', label: 'Toast Demo', icon: BellIcon, href: '/toast-demo' },
 ];
 
-const bottomMenuItems: MenuItem[] = [
-    { id: 'settings', label: 'Settings', icon: SettingsIcon, href: '/settings' },
-    { id: 'logout', label: 'Logout', icon: LogOutIcon, href: '/logout' },
-];
-
 export const Sidebar: React.FC = () => {
     const { isCollapsed, toggleSidebar } = useSidebar();
     const [mounted, setMounted] = useState(false);
@@ -68,14 +66,7 @@ export const Sidebar: React.FC = () => {
 
     const handleNavigation = (href: string) => {
         if (!router || !mounted) return;
-
-        if (href === '/logout') {
-            // Handle logout logic
-            localStorage.removeItem('token');
-            router.push('/login');
-        } else {
-            router.push(href);
-        }
+        router.push(href);
     };
 
     const isActive = (href: string) => {
@@ -86,30 +77,35 @@ export const Sidebar: React.FC = () => {
     // Don't render until mounted on client to avoid hydration issues
     if (!mounted) {
         return (
-            <div className="fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200 z-50">
+            <div className="fixed left-0 top-0 h-full w-64 bg-gradient-to-b from-primary-600 to-primary-700 border-r border-primary-500 z-50">
                 <div className="p-4">
-                    <div className="h-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div className="h-8 bg-white/20 rounded animate-pulse"></div>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className={`fixed left-0 top-0 h-full bg-white border-r border-gray-200 transition-all duration-300 z-50 ${isCollapsed ? 'w-16' : 'w-64'
-            }`}>
+        <>
+            <div className={`fixed left-0 top-0 h-full bg-gradient-to-b from-primary-600 to-primary-700 border-r border-primary-500 transition-all duration-300 ease-in-out z-50 ${isCollapsed ? 'w-16' : 'w-64'
+                }`}>
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+            <div className={`flex items-center p-4 border-b border-primary-500/30 ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
                 {!isCollapsed && (
-                    <div className="flex items-center space-x-2">
-                        <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center">
+                    <div className={`flex items-center space-x-2 transition-all duration-300 ease-in-out ${isCollapsed ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}>
+                        <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center ring-1 ring-white/30">
                             <span className="text-white font-bold text-sm">SF</span>
                         </div>
-                        <span className="font-bold text-gray-900">SmartFlowPM</span>
+                        <span className={`font-bold text-white transition-all duration-300 ease-in-out ${isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'
+                            }`}>
+                            SmartFlowPM
+                        </span>
                     </div>
                 )}
                 <button
                     onClick={toggleSidebar}
-                    className="p-1 rounded-md hover:bg-gray-100 text-gray-500 hover:text-gray-700"
+                    className="p-1 rounded-md hover:bg-white/10 text-white/70 hover:text-white transition-colors duration-200 flex-shrink-0"
+                    title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
                 >
                     {isCollapsed ? (
                         <ChevronRightIcon size={20} />
@@ -129,60 +125,162 @@ export const Sidebar: React.FC = () => {
                         <button
                             key={item.id}
                             onClick={() => handleNavigation(item.href)}
-                            className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors group ${active
-                                ? 'bg-primary-50 text-primary-700 border-r-2 border-primary-600'
-                                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                            className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ease-in-out group ${active
+                                ? 'bg-white/20 text-white backdrop-blur-sm border-r-2 border-white/50 shadow-lg'
+                                : 'text-white/70 hover:text-white hover:bg-white/10'
                                 }`}
                             title={isCollapsed ? item.label : undefined}
                         >
                             <Icon
                                 size={20}
-                                className={`${isCollapsed ? 'mx-auto' : 'mr-3'} ${active ? 'text-primary-600' : 'text-gray-400 group-hover:text-gray-500'
+                                className={`${isCollapsed ? 'mx-auto' : 'mr-3'} transition-all duration-200 ease-in-out ${active ? 'text-white' : 'text-white/70 group-hover:text-white'
                                     }`}
                             />
-                            {!isCollapsed && (
-                                <>
-                                    <span className="flex-1 text-left">{item.label}</span>
-                                    {item.badge && (
-                                        <span className="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full">
-                                            {item.badge}
-                                        </span>
-                                    )}
-                                </>
-                            )}
+                            <div className={`flex items-center justify-between flex-1 transition-all duration-300 ease-in-out overflow-hidden ${isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'
+                                }`}>
+                                <span className="text-left whitespace-nowrap">{item.label}</span>
+                                {item.badge && (
+                                    <span className="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-primary-600 bg-white rounded-full shadow-sm">
+                                        {item.badge}
+                                    </span>
+                                )}
+                            </div>
                         </button>
                     );
                 })}
             </nav>
 
-            {/* Bottom Navigation */}
-            <div className="border-t border-gray-200 px-2 py-4 space-y-1">
-                {bottomMenuItems.map((item) => {
-                    const Icon = item.icon;
-                    const active = isActive(item.href);
-
-                    return (
-                        <button
-                            key={item.id}
-                            onClick={() => handleNavigation(item.href)}
-                            className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors group ${active
-                                ? 'bg-primary-50 text-primary-700'
-                                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                                }`}
-                            title={isCollapsed ? item.label : undefined}
-                        >
-                            <Icon
-                                size={20}
-                                className={`${isCollapsed ? 'mx-auto' : 'mr-3'} ${active ? 'text-primary-600' : 'text-gray-400 group-hover:text-gray-500'
-                                    }`}
-                            />
-                            {!isCollapsed && (
-                                <span className="flex-1 text-left">{item.label}</span>
-                            )}
-                        </button>
-                    );
-                })}
+            {/* User Profile Section - Replaces Bottom Navigation */}
+            <div className="border-t border-primary-500/30 px-2 py-4">
+                <UserProfileSection isCollapsed={isCollapsed} />
             </div>
+        </div>
+        
+        {/* Floating Expand Button - Only visible when collapsed */}
+        {isCollapsed && (
+            <button
+                onClick={toggleSidebar}
+                className="fixed left-2 top-20 z-60 p-2 bg-primary-600 hover:bg-primary-700 text-white rounded-full shadow-lg transition-all duration-200 hover:scale-110"
+                title="Expand sidebar"
+            >
+                <ChevronRightIcon size={16} />
+            </button>
+        )}
+        </>
+    );
+};
+
+// User Profile Section Component
+const UserProfileSection: React.FC<{ isCollapsed: boolean }> = ({ isCollapsed }) => {
+    const { user, logout } = useAuth();
+    const [showProfileMenu, setShowProfileMenu] = useState(false);
+
+    const getUserDisplayName = () => {
+        if (!user) return 'Guest User';
+        return user.firstName && user.lastName 
+            ? `${user.firstName} ${user.lastName}`
+            : user.email || 'Unknown User';
+    };
+
+    const getUserInitials = () => {
+        if (!user) return 'GU';
+        if (user.firstName && user.lastName) {
+            return `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`;
+        }
+        if (user.email) {
+            return user.email.substring(0, 2).toUpperCase();
+        }
+        return 'SA';
+    };
+
+    const getUserRole = () => {
+        if (!user) return 'Guest';
+        
+        // Try to get role from token
+        try {
+            const token = enhancedTokenManager.getToken();
+            if (token) {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const role = payload.role || payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+                if (role) return role;
+            }
+        } catch (error) {
+            console.warn('Could not parse role from token:', error);
+        }
+        
+        // Fallback to default
+        return 'User';
+    };
+
+    const handleLogout = () => {
+        logout();
+        setShowProfileMenu(false);
+    };
+
+    return (
+        <div className="relative">
+            {/* User Info Display - Styled like other menu items */}
+            <button
+                onClick={() => setShowProfileMenu(!showProfileMenu)}
+                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ease-in-out group text-white/70 hover:text-white hover:bg-white/10 ${
+                    isCollapsed ? 'justify-center' : ''
+                } ${showProfileMenu ? 'bg-white/20 text-white backdrop-blur-sm' : ''}`}
+                title={isCollapsed ? getUserDisplayName() : undefined}
+            >
+                <div className="w-5 h-5 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center ring-1 ring-white/30 flex-shrink-0">
+                    <span className="text-white font-medium text-xs">
+                        {getUserInitials()}
+                    </span>
+                </div>
+                
+                {/* Only show text when expanded */}
+                {!isCollapsed && (
+                    <div className={`flex-1 text-left transition-all duration-300 ease-in-out overflow-hidden ml-3`}>
+                        <div className="text-sm font-medium text-white truncate">
+                            {getUserDisplayName()}
+                        </div>
+                        <div className="text-xs text-white/70 truncate">
+                            {getUserRole()}
+                        </div>
+                    </div>
+                )}
+            </button>
+
+            {/* Profile Menu Dropdown - Only show when expanded and menu is open */}
+            {showProfileMenu && !isCollapsed && (
+                <div className="absolute bottom-full left-0 right-0 mb-2 bg-white rounded-lg shadow-lg py-2 z-50 border border-gray-200">
+                    <div className="px-4 py-2 border-b border-gray-200">
+                        <div className="text-sm font-medium text-gray-900 truncate">
+                            {getUserDisplayName()}
+                        </div>
+                        <div className="text-xs text-gray-600 truncate">
+                            {user?.email || 'No email'}
+                        </div>
+                    </div>
+                    
+                    <button
+                        onClick={() => {
+                            setShowProfileMenu(false);
+                            // Navigate to profile page
+                            window.location.href = '/profile';
+                        }}
+                        className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150"
+                    >
+                        <UserIcon size={16} className="mr-3 flex-shrink-0" />
+                        Profile Settings
+                    </button>
+                    
+                    <div className="border-t border-gray-200 my-1"></div>
+                    
+                    <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150"
+                    >
+                        <LogOutIcon size={16} className="mr-3 flex-shrink-0" />
+                        Sign Out
+                    </button>
+                </div>
+            )}
         </div>
     );
 };

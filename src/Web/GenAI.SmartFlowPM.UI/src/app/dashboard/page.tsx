@@ -3,7 +3,27 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../hooks/useAuth';
-import { Megaphone, CalendarDays, Activity, TrendingUp, BarChart3, PieChart } from 'lucide-react';
+import { 
+  Megaphone, 
+  CalendarDays, 
+  Activity, 
+  TrendingUp, 
+  BarChart3, 
+  PieChart,
+  Users,
+  FolderOpen,
+  CheckSquare,
+  Shield,
+  Building,
+  UserCheck,
+  Clock,
+  FileText,
+  MessageSquare,
+  BarChart2,
+  MapPin,
+  CreditCard,
+  Settings
+} from 'lucide-react';
 import { 
   BarChart, 
   Bar, 
@@ -47,9 +67,13 @@ export default function DashboardPage() {
   return <DashboardContent />;
 }
 
+import { dashboardApi } from '../../lib/api';
+
 function DashboardContent() {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [dashboard, setDashboard] = useState<any>(null);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -57,7 +81,16 @@ function DashboardContent() {
     }
   }, [isAuthenticated, isLoading, router]);
 
-  if (isLoading) {
+  useEffect(() => {
+    if (isAuthenticated) {
+      setLoading(true);
+      dashboardApi.getHomeDashboard()
+        .then(setDashboard)
+        .finally(() => setLoading(false));
+    }
+  }, [isAuthenticated]);
+
+  if (isLoading || loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -68,48 +101,11 @@ function DashboardContent() {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !dashboard) {
     return null;
   }
 
-  // Chart data
-  const taskStatusData = [
-    { name: 'Open', value: 15, color: '#3B82F6' },
-    { name: 'In Progress', value: 22, color: '#F59E0B' },
-    { name: 'Completed', value: 47, color: '#10B981' },
-    { name: 'Blocked', value: 6, color: '#EF4444' }
-  ];
-
-  const projectStatusData = [
-    { name: 'Project Alpha', open: 5, inProgress: 8, completed: 12, total: 25 },
-    { name: 'Project Beta', open: 3, inProgress: 6, completed: 15, total: 24 },
-    { name: 'Project Gamma', open: 4, inProgress: 5, completed: 11, total: 20 },
-    { name: 'Project Delta', open: 2, inProgress: 3, completed: 8, total: 13 },
-    { name: 'Project Echo', open: 1, inProgress: 0, completed: 1, total: 2 }
-  ];
-
-  const taskTypeData = [
-    { name: 'Task', value: 35, color: '#8B5CF6' },
-    { name: 'Bug', value: 12, color: '#EF4444' },
-    { name: 'Spike', value: 8, color: '#F59E0B' },
-    { name: 'Story', value: 25, color: '#10B981' },
-    { name: 'Epic', value: 10, color: '#3B82F6' }
-  ];
-
-  const burndownData = [
-    { day: 'Day 1', planned: 100, actual: 100 },
-    { day: 'Day 2', planned: 90, actual: 95 },
-    { day: 'Day 3', planned: 80, actual: 88 },
-    { day: 'Day 4', planned: 70, actual: 78 },
-    { day: 'Day 5', planned: 60, actual: 65 },
-    { day: 'Day 6', planned: 50, actual: 52 },
-    { day: 'Day 7', planned: 40, actual: 45 },
-    { day: 'Day 8', planned: 30, actual: 35 },
-    { day: 'Day 9', planned: 20, actual: 22 },
-    { day: 'Day 10', planned: 10, actual: 15 },
-    { day: 'Day 11', planned: 0, actual: 8 }
-  ];
-
+  const { totalProjects, activeTasks, teamMembers, completed, taskStatusData, projectStatusData, taskTypeData, burndownData } = dashboard;
   const COLORS = ['#3B82F6', '#F59E0B', '#10B981', '#EF4444', '#8B5CF6'];
 
   return (
@@ -120,7 +116,7 @@ function DashboardContent() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-500">Total Projects</p>
-              <p className="text-3xl font-bold text-gray-900">12</p>
+              <p className="text-3xl font-bold text-gray-900">{totalProjects}</p>
             </div>
             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
               <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -134,7 +130,7 @@ function DashboardContent() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-500">Active Tasks</p>
-              <p className="text-3xl font-bold text-gray-900">47</p>
+              <p className="text-3xl font-bold text-gray-900">{activeTasks}</p>
             </div>
             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
               <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -148,7 +144,7 @@ function DashboardContent() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-500">Team Members</p>
-              <p className="text-3xl font-bold text-gray-900">8</p>
+              <p className="text-3xl font-bold text-gray-900">{teamMembers}</p>
             </div>
             <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
               <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -162,7 +158,7 @@ function DashboardContent() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-500">Completed</p>
-              <p className="text-3xl font-bold text-gray-900">156</p>
+              <p className="text-3xl font-bold text-gray-900">{completed}</p>
             </div>
             <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
               <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -199,7 +195,7 @@ function DashboardContent() {
                   dataKey="value"
                   label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                 >
-                  {taskStatusData.map((entry, index) => (
+                  {taskStatusData.map((entry: any, index: number) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
@@ -306,6 +302,237 @@ function DashboardContent() {
                 />
               </AreaChart>
             </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+      {/* New Row: My Leaves, Pending Tasks, Quick Links */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* My Leaves Card with Circular Progress */}
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+          <div className="flex items-center mb-6">
+            <div className="flex-shrink-0">
+              <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
+                <CalendarDays className="h-6 w-6 text-indigo-600" />
+              </div>
+            </div>
+            <div className="ml-4">
+              <h3 className="text-lg font-semibold text-gray-900">My Leaves</h3>
+              <p className="text-gray-500 text-sm mt-1">Leave balance overview</p>
+            </div>
+          </div>
+          
+          <div className="space-y-4">
+            {/* Compensatory Off - Circular Progress */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="relative w-12 h-12">
+                  <svg className="w-12 h-12 transform -rotate-90" viewBox="0 0 36 36">
+                    <path
+                      d="m18,2.0845 a 15.9155,15.9155 0 0,1 0,31.831 a 15.9155,15.9155 0 0,1 0,-31.831"
+                      fill="none"
+                      stroke="#E5E7EB"
+                      strokeWidth="2"
+                    />
+                    <path
+                      d="m18,2.0845 a 15.9155,15.9155 0 0,1 0,31.831 a 15.9155,15.9155 0 0,1 0,-31.831"
+                      fill="none"
+                      stroke="#10B981"
+                      strokeWidth="2"
+                      strokeDasharray="75, 100"
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-xs font-semibold text-gray-900">15</span>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-900">Compensatory Off</p>
+                  <p className="text-xs text-gray-500">Available: 15 days</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Earned Leave - Circular Progress */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="relative w-12 h-12">
+                  <svg className="w-12 h-12 transform -rotate-90" viewBox="0 0 36 36">
+                    <path
+                      d="m18,2.0845 a 15.9155,15.9155 0 0,1 0,31.831 a 15.9155,15.9155 0 0,1 0,-31.831"
+                      fill="none"
+                      stroke="#E5E7EB"
+                      strokeWidth="2"
+                    />
+                    <path
+                      d="m18,2.0845 a 15.9155,15.9155 0 0,1 0,31.831 a 15.9155,15.9155 0 0,1 0,-31.831"
+                      fill="none"
+                      stroke="#3B82F6"
+                      strokeWidth="2"
+                      strokeDasharray="60, 100"
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-xs font-semibold text-gray-900">12</span>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-900">Earned Leave</p>
+                  <p className="text-xs text-gray-500">Available: 12 days</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Leave Without Pay - Circular Progress */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="relative w-12 h-12">
+                  <svg className="w-12 h-12 transform -rotate-90" viewBox="0 0 36 36">
+                    <path
+                      d="m18,2.0845 a 15.9155,15.9155 0 0,1 0,31.831 a 15.9155,15.9155 0 0,1 0,-31.831"
+                      fill="none"
+                      stroke="#E5E7EB"
+                      strokeWidth="2"
+                    />
+                    <path
+                      d="m18,2.0845 a 15.9155,15.9155 0 0,1 0,31.831 a 15.9155,15.9155 0 0,1 0,-31.831"
+                      fill="none"
+                      stroke="#F59E0B"
+                      strokeWidth="2"
+                      strokeDasharray="20, 100"
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-xs font-semibold text-gray-900">4</span>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-900">Leave Without Pay</p>
+                  <p className="text-xs text-gray-500">Used: 4 days</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <button className="text-indigo-600 text-sm hover:text-indigo-700 transition-colors">
+              Apply for Leave →
+            </button>
+          </div>
+        </div>
+
+        {/* My Pending Tasks Card */}
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                  <Activity className="h-6 w-6 text-orange-600" />
+                </div>
+              </div>
+              <div className="ml-4">
+                <h3 className="text-lg font-semibold text-gray-900">My Pending Tasks</h3>
+                <p className="text-gray-500 text-sm mt-1">Tasks requiring attention</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-center w-8 h-8 bg-red-100 rounded-full">
+              <span className="text-sm font-bold text-red-600">8</span>
+            </div>
+          </div>
+          
+          <div className="space-y-3">
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div className="flex-1">
+                <h4 className="text-sm font-medium text-gray-900">API Documentation Update</h4>
+                <p className="text-xs text-gray-500 mt-1">Project Alpha • High Priority</p>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">High</span>
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div className="flex-1">
+                <h4 className="text-sm font-medium text-gray-900">Bug Fix: Login Issues</h4>
+                <p className="text-xs text-gray-500 mt-1">Project Beta • Medium Priority</p>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">Medium</span>
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div className="flex-1">
+                <h4 className="text-sm font-medium text-gray-900">UI/UX Review</h4>
+                <p className="text-xs text-gray-500 mt-1">Project Gamma • Low Priority</p>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">Low</span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <button className="text-orange-600 text-sm hover:text-orange-700 transition-colors">
+              View All Tasks →
+            </button>
+          </div>
+        </div>
+
+        {/* Quick Links Card */}
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+          <div className="flex items-center mb-6">
+            <div className="flex-shrink-0">
+              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                <TrendingUp className="h-6 w-6 text-purple-600" />
+              </div>
+            </div>
+            <div className="ml-4">
+              <h3 className="text-lg font-semibold text-gray-900">Quick Links</h3>
+              <p className="text-gray-500 text-sm mt-1">Frequently used actions</p>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-3">
+            <button className="flex flex-col items-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 rounded-lg transition-all duration-200 border border-blue-200">
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center mb-2">
+                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+              </div>
+              <span className="text-sm font-medium text-blue-900">Add Project</span>
+            </button>
+            
+            <button className="flex flex-col items-center p-4 bg-gradient-to-br from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 rounded-lg transition-all duration-200 border border-green-200">
+              <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center mb-2">
+                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+              </div>
+              <span className="text-sm font-medium text-green-900">Add Task</span>
+            </button>
+            
+            <button className="flex flex-col items-center p-4 bg-gradient-to-br from-yellow-50 to-yellow-100 hover:from-yellow-100 hover:to-yellow-200 rounded-lg transition-all duration-200 border border-yellow-200">
+              <div className="w-8 h-8 bg-yellow-600 rounded-lg flex items-center justify-center mb-2">
+                <CalendarDays className="w-4 h-4 text-white" />
+              </div>
+              <span className="text-sm font-medium text-yellow-900">Apply Leave</span>
+            </button>
+            
+            <button className="flex flex-col items-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 rounded-lg transition-all duration-200 border border-purple-200">
+              <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center mb-2">
+                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <span className="text-sm font-medium text-purple-900">Calendar</span>
+            </button>
+          </div>
+          
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <button className="text-purple-600 text-sm hover:text-purple-700 transition-colors">
+              More Actions →
+            </button>
           </div>
         </div>
       </div>
@@ -449,6 +676,197 @@ function DashboardContent() {
             <button className="text-blue-600 text-sm hover:text-blue-700 transition-colors">
               View all announcements →
             </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Project Modules/Features Section */}
+      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <div className="flex items-center mb-6">
+          <div className="flex-shrink-0">
+            <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
+              <Settings className="h-6 w-6 text-indigo-600" />
+            </div>
+          </div>
+          <div className="ml-4">
+            <h3 className="text-xl font-semibold text-gray-900">Project Features & Modules</h3>
+            <p className="text-gray-500 text-sm mt-1">Comprehensive project management capabilities with multi-tenant architecture</p>
+          </div>
+        </div>
+
+        {/* Feature Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          
+          {/* User Management Module */}
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200 hover:shadow-md transition-all">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                <Users className="h-5 w-5 text-white" />
+              </div>
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                Complete
+              </span>
+            </div>
+            <h4 className="font-semibold text-gray-900 mb-2">User Management</h4>
+            <p className="text-sm text-gray-600 mb-3">Complete CRUD operations, authentication, role-based authorization with organizational hierarchy and multi-tenant support.</p>
+            <div className="flex items-center text-xs text-gray-500">
+              <CheckSquare className="h-3 w-3 mr-1" />
+              Backend & Frontend Complete
+            </div>
+          </div>
+
+          {/* Project Management Module */}
+          <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg border border-green-200 hover:shadow-md transition-all">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
+                <FolderOpen className="h-5 w-5 text-white" />
+              </div>
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                Backend Only
+              </span>
+            </div>
+            <h4 className="font-semibold text-gray-900 mb-2">Project Management</h4>
+            <p className="text-sm text-gray-600 mb-3">Complete project lifecycle management with CQRS pattern, comprehensive validation, and full REST API endpoints.</p>
+            <div className="flex items-center text-xs text-gray-500">
+              <Clock className="h-3 w-3 mr-1" />
+              Frontend Implementation Pending
+            </div>
+          </div>
+
+          {/* Task Management Module */}
+          <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200 hover:shadow-md transition-all">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center">
+                <CheckSquare className="h-5 w-5 text-white" />
+              </div>
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                Backend Only
+              </span>
+            </div>
+            <h4 className="font-semibold text-gray-900 mb-2">Task Management</h4>
+            <p className="text-sm text-gray-600 mb-3">Comprehensive task tracking with auto-generated task numbers, assignments, status updates, and dashboard analytics.</p>
+            <div className="flex items-center text-xs text-gray-500">
+              <Clock className="h-3 w-3 mr-1" />
+              Frontend Implementation Pending
+            </div>
+          </div>
+
+          {/* Organization Management Module */}
+          <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 p-4 rounded-lg border border-indigo-200 hover:shadow-md transition-all">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center">
+                <Building className="h-5 w-5 text-white" />
+              </div>
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                Backend Only
+              </span>
+            </div>
+            <h4 className="font-semibold text-gray-900 mb-2">Organization Management</h4>
+            <p className="text-sm text-gray-600 mb-3">Complete organizational structure with branch management, policies, holidays, and settings (Admin only).</p>
+            <div className="flex items-center text-xs text-gray-500">
+              <Clock className="h-3 w-3 mr-1" />
+              Frontend Implementation Pending
+            </div>
+          </div>
+
+          {/* Claims & Security Module */}
+          <div className="bg-gradient-to-br from-red-50 to-red-100 p-4 rounded-lg border border-red-200 hover:shadow-md transition-all">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center">
+                <Shield className="h-5 w-5 text-white" />
+              </div>
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                Backend Only
+              </span>
+            </div>
+            <h4 className="font-semibold text-gray-900 mb-2">Claims & Security</h4>
+            <p className="text-sm text-gray-600 mb-3">Fine-grained permission system with role-based security and comprehensive claims management.</p>
+            <div className="flex items-center text-xs text-gray-500">
+              <Clock className="h-3 w-3 mr-1" />
+              Frontend Implementation Pending
+            </div>
+          </div>
+
+          {/* Team Management Module */}
+          <div className="bg-gradient-to-br from-teal-50 to-teal-100 p-4 rounded-lg border border-teal-200 hover:shadow-md transition-all">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 bg-teal-600 rounded-lg flex items-center justify-center">
+                <UserCheck className="h-5 w-5 text-white" />
+              </div>
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                Planned
+              </span>
+            </div>
+            <h4 className="font-semibold text-gray-900 mb-2">Team Management</h4>
+            <p className="text-sm text-gray-600 mb-3">Team collaboration features with member management, role assignments, and team-based project organization.</p>
+            <div className="flex items-center text-xs text-gray-500">
+              <Clock className="h-3 w-3 mr-1" />
+              Development Planned
+            </div>
+          </div>
+
+          {/* Time Tracker Module */}
+          <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-4 rounded-lg border border-orange-200 hover:shadow-md transition-all">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center">
+                <Clock className="h-5 w-5 text-white" />
+              </div>
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                Planned
+              </span>
+            </div>
+            <h4 className="font-semibold text-gray-900 mb-2">Time Tracker</h4>
+            <p className="text-sm text-gray-600 mb-3">Comprehensive time tracking with project-based logging, reporting, and productivity analytics.</p>
+            <div className="flex items-center text-xs text-gray-500">
+              <Clock className="h-3 w-3 mr-1" />
+              Development Planned
+            </div>
+          </div>
+
+          {/* Reports & Analytics Module */}
+          <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 p-4 rounded-lg border border-emerald-200 hover:shadow-md transition-all">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 bg-emerald-600 rounded-lg flex items-center justify-center">
+                <BarChart2 className="h-5 w-5 text-white" />
+              </div>
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                Planned
+              </span>
+            </div>
+            <h4 className="font-semibold text-gray-900 mb-2">Reports & Analytics</h4>
+            <p className="text-sm text-gray-600 mb-3">Advanced reporting and analytics with customizable dashboards, performance metrics, and data visualization.</p>
+            <div className="flex items-center text-xs text-gray-500">
+              <Clock className="h-3 w-3 mr-1" />
+              Development Planned
+            </div>
+          </div>
+
+        </div>
+
+        {/* Technology Stack Overview */}
+        <div className="mt-8 pt-6 border-t border-gray-200">
+          <h4 className="text-lg font-semibold text-gray-900 mb-4">Technology Stack</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h5 className="font-medium text-gray-900 mb-2">Backend (.NET 9)</h5>
+              <ul className="text-sm text-gray-600 space-y-1">
+                <li>• Clean Architecture with CQRS Pattern</li>
+                <li>• Entity Framework Core with PostgreSQL</li>
+                <li>• JWT Authentication & Authorization</li>
+                <li>• AutoMapper & FluentValidation</li>
+                <li>• .NET Aspire Orchestration</li>
+              </ul>
+            </div>
+            <div>
+              <h5 className="font-medium text-gray-900 mb-2">Frontend (Next.js 15 + React 19)</h5>
+              <ul className="text-sm text-gray-600 space-y-1">
+                <li>• TypeScript 5.9.2 with Full Type Safety</li>
+                <li>• Tailwind CSS with Custom Theme</li>
+                <li>• Modern Toast Notification System</li>
+                <li>• Responsive Design & Mobile Support</li>
+                <li>• Professional Dashboard Analytics</li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>

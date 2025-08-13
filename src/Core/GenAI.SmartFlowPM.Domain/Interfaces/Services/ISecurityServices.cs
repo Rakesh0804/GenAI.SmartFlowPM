@@ -9,4 +9,6 @@ public interface IPasswordHashingService
 public interface IJwtTokenService
 {
     string GenerateToken(string userId, string email, string userName, IEnumerable<string> roles);
+    bool ValidateToken(string token);
+    string? GetUserIdFromToken(string token);
 }

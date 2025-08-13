@@ -28,15 +28,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={inter.variable}>
-      <head>
-        <script src="/config.js"></script>
-      </head>
       <body className="font-inter antialiased">
-        <AuthProvider>
-          <ToastProvider>
+        <ToastProvider>
+          <AuthProvider>
             {children}
-          </ToastProvider>
-        </AuthProvider>
+          </AuthProvider>
+        </ToastProvider>
       </body>
     </html>
   );

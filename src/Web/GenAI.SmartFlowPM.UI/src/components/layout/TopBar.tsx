@@ -1,67 +1,79 @@
-import React, { useState } from 'react';
-import { BellIcon, SearchIcon, UserIcon, ChevronDownIcon } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { BellIcon, SearchIcon } from 'lucide-react';
+import { useAuth } from '../../hooks/useAuth';
+import { enhancedTokenManager } from '../../lib/cookieManager';
 
 export const TopBar: React.FC = () => {
-    const [showUserMenu, setShowUserMenu] = useState(false);
+    const [tokenExpiry, setTokenExpiry] = useState<Date | null>(null);
+    const { user, isAuthenticated, refreshUser } = useAuth();
+
+    // Monitor token expiration
+    useEffect(() => {
+        const checkTokenExpiration = () => {
+            const expiry = enhancedTokenManager.getTokenExpiration();
+            setTokenExpiry(expiry);
+
+            if (expiry) {
+                const timeUntilExpiry = expiry.getTime() - Date.now();
+                const fiveMinutes = 5 * 60 * 1000; // 5 minutes in milliseconds
+
+                // Show warning if token expires in less than 5 minutes
+                if (timeUntilExpiry < fiveMinutes && timeUntilExpiry > 0) {
+                    console.warn('Token expiring soon, consider refreshing');
+                    // Optionally show a toast notification here
+                }
+            }
+        };
+
+        // Check immediately
+        checkTokenExpiration();
+
+        // Set up interval to check every minute
+        const interval = setInterval(checkTokenExpiration, 60000);
+
+        return () => clearInterval(interval);
+    }, [user]);
+
+    // Auto-refresh user data periodically
+    useEffect(() => {
+        if (isAuthenticated && enhancedTokenManager.isTokenValid()) {
+            const refreshInterval = setInterval(() => {
+                refreshUser().catch(console.error);
+            }, 15 * 60 * 1000); // Refresh every 15 minutes
+
+            return () => clearInterval(refreshInterval);
+        }
+    }, [isAuthenticated, refreshUser]);
 
     return (
-        <header className="bg-white border-b border-gray-200 px-6 py-2">
+        <header className="bg-gradient-to-r from-primary-500 to-primary-600 border-b border-primary-400/30 px-6 py-1.5 shadow-lg backdrop-blur-sm">
             <div className="flex items-center justify-between">
                 {/* Search Section */}
                 <div className="flex-1 max-w-lg">
                     <div className="relative">
-                        <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                        <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/80 z-10" size={18} />
                         <input
                             type="text"
                             placeholder="Search projects, tasks, team members..."
-                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                            className="w-full pl-10 pr-4 py-1.5 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/40 text-white placeholder-white/60 backdrop-blur-sm"
                         />
                     </div>
                 </div>
 
                 {/* Right Section */}
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-3">
+                    {/* Token Expiry Indicator (dev only) */}
+                    {process.env.NODE_ENV === 'development' && tokenExpiry && (
+                        <div className="text-xs text-white/70 bg-white/10 px-2 py-1 rounded">
+                            Expires: {tokenExpiry.toLocaleTimeString()}
+                        </div>
+                    )}
+
                     {/* Notifications */}
-                    <button className="relative p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg">
-                        <BellIcon size={20} />
-                        <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
+                    <button className="relative p-1.5 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200">
+                        <BellIcon size={18} />
+                        <span className="absolute -top-0.5 -right-0.5 h-2 w-2 bg-red-400 rounded-full ring-2 ring-white/30"></span>
                     </button>
-
-                    {/* User Menu */}
-                    <div className="relative">
-                        <button
-                            onClick={() => setShowUserMenu(!showUserMenu)}
-                            className="flex items-center space-x-3 p-2 text-gray-700 hover:bg-gray-100 rounded-lg"
-                        >
-                            <div className="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center">
-                                <UserIcon size={16} className="text-white" />
-                            </div>
-                            <div className="hidden md:block text-left">
-                                <div className="text-sm font-medium">John Doe</div>
-                                <div className="text-xs text-gray-500">Administrator</div>
-                            </div>
-                            <ChevronDownIcon size={16} className="text-gray-400" />
-                        </button>
-
-                        {/* User Dropdown */}
-                        {showUserMenu && (
-                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
-                                <a href="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                    Profile Settings
-                                </a>
-                                <a href="/account" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                    Account Settings
-                                </a>
-                                <a href="/help" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                    Help & Support
-                                </a>
-                                <hr className="my-1" />
-                                <a href="/logout" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                    Sign Out
-                                </a>
-                            </div>
-                        )}
-                    </div>
                 </div>
             </div>
         </header>

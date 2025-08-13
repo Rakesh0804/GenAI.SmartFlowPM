@@ -99,13 +99,15 @@ src/
 The frontend integrates with the .NET backend API using:
 
 - **Base URL**: Configured via `NEXT_PUBLIC_API_URL` environment variable
-- **Authentication**: JWT tokens stored in localStorage
-- **Token Refresh**: Automatic token refresh on API calls
+- **Authentication**: JWT tokens with dual storage (localStorage/cookies) based on environment
+- **Token Refresh**: Automatic token refresh with proper error handling
+- **401 Error Handling**: Graceful session expiration with toast notifications
 - **Multi-tenancy**: Tenant ID sent in headers for all requests
 - **Type Safety**: Complete TypeScript interfaces matching backend DTOs
 
 ### API Endpoints Used
 - `POST /auth/login` - User authentication
+- `POST /auth/refresh` - Token refresh (returns new access token only)
 - `GET /auth/me` - Get current user
 - `GET /dashboard/stats` - Dashboard statistics
 - `GET /users` - User management
@@ -114,13 +116,14 @@ The frontend integrates with the .NET backend API using:
 
 ## 🔐 Authentication Flow
 
-1. User enters credentials on login page
+1. User enters credentials on login page with optional "Remember Me"
 2. Frontend sends login request to backend API
-3. Backend returns JWT token and user data
-4. Token stored in localStorage
-5. Token included in all subsequent API requests
-6. Automatic token refresh on expiration
-7. Redirect to login on authentication failure
+3. Backend returns JWT access token, refresh token, and user data
+4. Tokens stored using enhanced token manager (cookies for production, localStorage for development)
+5. Access token included in all subsequent API requests
+6. Automatic token refresh 5 minutes before expiration
+7. Toast notifications for authentication errors (session expired, network issues)
+8. Graceful logout with proper token cleanup on refresh failure
 
 ## 📱 Responsive Design
 

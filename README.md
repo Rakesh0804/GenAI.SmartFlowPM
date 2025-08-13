@@ -4,6 +4,20 @@ A comprehensive project management system built with Clean Architecture, featuri
 
 ## 📅 Recent Updates (August 13, 2025)
 
+### ✅ Authentication System Enhancement v2.0
+
+- **Graceful 401 Error Handling**: Toast notifications for session expiration with user-friendly messages
+- **Provider Hierarchy Fix**: ToastProvider now properly wraps AuthProvider for context availability
+- **API Accuracy**: Corrected refresh token API to match backend implementation
+- **Error Categorization**: Different messages for 401 (session expired), network errors, and general failures
+- **RefreshTokenResponse**: Updated frontend types to match backend `{ token: string, expires: Date }` structure
+- **Token Persistence**: Refresh tokens remain unchanged during access token refresh (security best practice)
+- **Enhanced Error Messages**:
+  - 401: "Your session has expired. Please log in again."
+  - Network: "Connection error. Please check your internet and try again."
+  - Server: "Unable to connect to server (status). Please try again."
+  - General: "An unexpected error occurred. Please try again."
+
 ### ✅ Toast Notification System v2.0 - Modern Redesign
 
 - **Sleek Modern Design**: Clean white background with colored left borders following current UI trends

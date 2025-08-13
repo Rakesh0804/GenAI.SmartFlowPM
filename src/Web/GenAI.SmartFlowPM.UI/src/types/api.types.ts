@@ -79,6 +79,15 @@ export interface LoginResponse {
   expiresAt: Date;
 }
 
+export interface RefreshTokenRequest {
+  refreshToken: string;
+}
+
+export interface RefreshTokenResponse {
+  token: string;
+  expires: Date;
+}
+
 export interface ChangePasswordDto {
   currentPassword: string;
   newPassword: string;

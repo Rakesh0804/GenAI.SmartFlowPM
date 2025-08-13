@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Mail, Loader2 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
@@ -21,6 +21,19 @@ export default function LoginForm() {
   const { success, error: showError, warning, info } = useToast();
   const router = useRouter();
 
+  // Security: Clear any URL parameters on component mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      if (url.searchParams.has('userNameOrEmail') || 
+          url.searchParams.has('password') || 
+          url.search.length > 0) {
+        // Clear all URL parameters immediately
+        window.history.replaceState({}, '', url.pathname);
+      }
+    }
+  }, []);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -32,6 +45,16 @@ export default function LoginForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
+
+    // Ensure no credentials leak into URL
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      if (url.searchParams.has('userNameOrEmail') || url.searchParams.has('password')) {
+        // Clear URL parameters immediately if they exist
+        window.history.replaceState({}, '', url.pathname);
+      }
+    }
 
     if (!formData.userNameOrEmail || !formData.password) {
       setError('Please fill in all fields');
@@ -49,7 +72,7 @@ export default function LoginForm() {
     info('Signing in...', 'Please wait while we authenticate you');
 
     try {
-      await login(formData);
+      await login(formData, rememberMe);
       success('Login Successful!', 'Welcome to SmartFlowPM System');
     } catch (err: any) {
       const errorMessage = err.message || 'Login failed. Please try again.';
@@ -83,7 +106,12 @@ export default function LoginForm() {
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form 
+              onSubmit={handleSubmit} 
+              method="POST" 
+              autoComplete="off"
+              className="space-y-6"
+            >
               {/* Email Input */}
               <div>
                 <label htmlFor="userNameOrEmail" className="block text-sm font-medium text-gray-700 mb-2">
@@ -95,6 +123,7 @@ export default function LoginForm() {
                     name="userNameOrEmail"
                     type="text"
                     required
+                    autoComplete="off"
                     value={formData.userNameOrEmail}
                     onChange={handleChange}
                     className="block w-full pr-10 py-3 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors bg-white"
@@ -117,6 +146,7 @@ export default function LoginForm() {
                     name="password"
                     type={showPassword ? 'text' : 'password'}
                     required
+                    autoComplete="new-password"
                     value={formData.password}
                     onChange={handleChange}
                     className="block w-full pr-10 py-3 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors bg-white"
