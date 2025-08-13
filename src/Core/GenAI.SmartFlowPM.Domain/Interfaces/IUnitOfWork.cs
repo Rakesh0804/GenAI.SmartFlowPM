@@ -11,6 +11,11 @@ public interface IUnitOfWork : IDisposable
     IProjectRepository Projects { get; }
     IUserProjectRepository UserProjects { get; }
     IProjectTaskRepository ProjectTasks { get; }
+    ICampaignRepository Campaigns { get; }
+    ICampaignGroupRepository CampaignGroups { get; }
+    ICampaignEvaluationRepository CampaignEvaluations { get; }
+    ICertificateRepository Certificates { get; }
+    ICertificateTemplateRepository CertificateTemplates { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     Task BeginTransactionAsync(CancellationToken cancellationToken = default);

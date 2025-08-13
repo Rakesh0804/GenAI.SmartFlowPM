@@ -151,7 +151,7 @@ public class LoginUserCommandHandler : IRequestHandler<LoginUserCommand, Result<
     {
         // Try to find user by email or username
         User? user = null;
-        
+
         if (request.LoginDto.UserNameOrEmail.Contains("@"))
         {
             user = await _unitOfWork.Users.GetByEmailAsync(request.LoginDto.UserNameOrEmail, cancellationToken);
@@ -181,10 +181,12 @@ public class LoginUserCommandHandler : IRequestHandler<LoginUserCommand, Result<
 
         var userDto = _mapper.Map<UserDto>(user);
         var token = _jwtTokenService.GenerateToken(user.Id.ToString(), user.Email, user.UserName, roleNames);
+        var refreshToken = _jwtTokenService.GenerateRefreshToken(user.Id.ToString(), user.Email, user.UserName, roleNames);
 
         var response = new LoginResponseDto
         {
             Token = token,
+            RefreshToken = refreshToken,
             Expires = DateTime.UtcNow.AddHours(1), // Should match JWT expiration
             User = userDto
         };

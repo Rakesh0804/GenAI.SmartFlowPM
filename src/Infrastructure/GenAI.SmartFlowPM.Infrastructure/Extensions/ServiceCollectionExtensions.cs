@@ -11,6 +11,7 @@ public static class ServiceCollectionExtensions
         // Add services
         services.AddScoped<Domain.Interfaces.Services.IJwtTokenService, JwtTokenService>();
         services.AddScoped<Domain.Interfaces.Services.IPasswordHashingService, PasswordHashingService>();
+        services.AddScoped<Domain.Interfaces.Services.ICurrentUserService, CurrentUserService>();
 
         return services;
     }

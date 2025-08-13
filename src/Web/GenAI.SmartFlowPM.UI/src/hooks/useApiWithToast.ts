@@ -2,7 +2,12 @@
 
 import { useCallback } from 'react';
 import { useToast } from '../contexts/ToastContext';
-import * as api from '../lib/api';
+import { 
+    authService, 
+    userService, 
+    projectService, 
+    taskService 
+} from '../services';
 import {
     LoginRequest,
     CreateUserDto,
@@ -65,7 +70,7 @@ export const useApiWithToast = () => {
     const loginWithToast = useCallback(async (credentials: LoginRequest) => {
         try {
             info('Signing in...', 'Authenticating your credentials');
-            const response = await api.authApi.login(credentials);
+            const response = await authService.login(credentials);
             success('Login Successful!', 'Welcome to SmartFlowPM System');
             return response;
         } catch (error) {
@@ -75,7 +80,7 @@ export const useApiWithToast = () => {
 
     const logoutWithToast = useCallback(async () => {
         try {
-            await api.authApi.logout();
+            await authService.logout();
             info('Logged out successfully', 'You have been securely logged out');
         } catch (error) {
             handleApiError(error, 'Logout');
@@ -86,7 +91,7 @@ export const useApiWithToast = () => {
     const createUserWithToast = useCallback(async (userData: CreateUserDto) => {
         try {
             info('Creating user...', 'Please wait while we create the user account');
-            const response = await api.usersApi.createUser(userData);
+            const response = await userService.createUser(userData);
             success('User Created!', `${userData.firstName} ${userData.lastName} has been added successfully`);
             return response;
         } catch (error) {
@@ -97,7 +102,7 @@ export const useApiWithToast = () => {
     const updateUserWithToast = useCallback(async (id: string, userData: UpdateUserDto) => {
         try {
             info('Updating user...', 'Saving changes to user account');
-            const response = await api.usersApi.updateUser(id, userData);
+            const response = await userService.updateUser(id, userData);
             success('User Updated!', 'User information has been updated successfully');
             return response;
         } catch (error) {
@@ -108,7 +113,7 @@ export const useApiWithToast = () => {
     const deleteUserWithToast = useCallback(async (id: string, userName?: string) => {
         try {
             warning('Deleting user...', 'This action cannot be undone', 10000);
-            await api.usersApi.deleteUser(id);
+            await userService.deleteUser(id);
             success('User Deleted', userName ? `${userName} has been removed from the system` : 'User has been removed successfully');
         } catch (error) {
             handleApiError(error, 'Delete User');
@@ -119,7 +124,7 @@ export const useApiWithToast = () => {
     const createProjectWithToast = useCallback(async (projectData: CreateProjectDto) => {
         try {
             info('Creating project...', 'Setting up your new project');
-            const response = await api.projectsApi.createProject(projectData);
+            const response = await projectService.createProject(projectData);
             success('Project Created!', `${projectData.name} has been created successfully`);
             return response;
         } catch (error) {
@@ -130,7 +135,7 @@ export const useApiWithToast = () => {
     const updateProjectWithToast = useCallback(async (id: string, projectData: UpdateProjectDto) => {
         try {
             info('Updating project...', 'Saving project changes');
-            const response = await api.projectsApi.updateProject(id, projectData);
+            const response = await projectService.updateProject(id, projectData);
             success('Project Updated!', 'Project has been updated successfully');
             return response;
         } catch (error) {
@@ -141,7 +146,7 @@ export const useApiWithToast = () => {
     const deleteProjectWithToast = useCallback(async (id: string, projectName?: string) => {
         try {
             warning('Deleting project...', 'All associated tasks and data will be removed', 15000);
-            await api.projectsApi.deleteProject(id);
+            await projectService.deleteProject(id);
             success('Project Deleted', projectName ? `${projectName} has been deleted` : 'Project has been deleted successfully');
         } catch (error) {
             handleApiError(error, 'Delete Project');
@@ -152,7 +157,7 @@ export const useApiWithToast = () => {
     const createTaskWithToast = useCallback(async (taskData: CreateTaskDto) => {
         try {
             info('Creating task...', 'Adding new task to the project');
-            const response = await api.tasksApi.createTask(taskData);
+            const response = await taskService.createTask(taskData);
             success('Task Created!', `${taskData.title} has been added successfully`);
             return response;
         } catch (error) {
@@ -163,7 +168,7 @@ export const useApiWithToast = () => {
     const updateTaskWithToast = useCallback(async (id: string, taskData: UpdateTaskDto) => {
         try {
             info('Updating task...', 'Saving task changes');
-            const response = await api.tasksApi.updateTask(id, taskData);
+            const response = await taskService.updateTask(id, taskData);
             success('Task Updated!', 'Task has been updated successfully');
             return response;
         } catch (error) {
@@ -174,7 +179,7 @@ export const useApiWithToast = () => {
     const deleteTaskWithToast = useCallback(async (id: string, taskTitle?: string) => {
         try {
             warning('Deleting task...', 'This action cannot be undone', 10000);
-            await api.tasksApi.deleteTask(id);
+            await taskService.deleteTask(id);
             success('Task Deleted', taskTitle ? `${taskTitle} has been deleted` : 'Task has been deleted successfully');
         } catch (error) {
             handleApiError(error, 'Delete Task');

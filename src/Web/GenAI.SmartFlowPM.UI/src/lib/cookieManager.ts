@@ -140,12 +140,26 @@ export const enhancedTokenManager = {
   getToken: (): string | null => {
     if (typeof window === 'undefined') return null;
 
-    const method = enhancedTokenManager.getStorageMethod();
-    if (method === 'cookie') {
-      return cookieManager.getCookie(AUTH_COOKIES.TOKEN);
-    } else {
-      return localStorage.getItem(AUTH_COOKIES.TOKEN);
+    // Always check cookies first since that's where tokens are actually stored
+    let token = cookieManager.getCookie(AUTH_COOKIES.TOKEN) || 
+                cookieManager.getCookie('token'); // Fallback to actual cookie name
+    
+    if (!token) {
+      const method = enhancedTokenManager.getStorageMethod();
+      if (method === 'localStorage') {
+        // First try localStorage with our expected key
+        token = localStorage.getItem(AUTH_COOKIES.TOKEN);
+        
+        // Fallback: check sessionStorage with different possible keys
+        if (!token) {
+          token = sessionStorage.getItem('token') || 
+                  sessionStorage.getItem(AUTH_COOKIES.TOKEN) ||
+                  localStorage.getItem('token');
+        }
+      }
     }
+    
+    return token;
   },
 
   // Set token in preferred storage
@@ -172,12 +186,26 @@ export const enhancedTokenManager = {
   getRefreshToken: (): string | null => {
     if (typeof window === 'undefined') return null;
 
-    const method = enhancedTokenManager.getStorageMethod();
-    if (method === 'cookie') {
-      return cookieManager.getCookie(AUTH_COOKIES.REFRESH_TOKEN);
-    } else {
-      return localStorage.getItem(AUTH_COOKIES.REFRESH_TOKEN);
+    // Always check cookies first since that's where tokens are actually stored
+    let refreshToken = cookieManager.getCookie(AUTH_COOKIES.REFRESH_TOKEN) || 
+                      cookieManager.getCookie('refreshToken'); // Fallback to actual cookie name
+    
+    if (!refreshToken) {
+      const method = enhancedTokenManager.getStorageMethod();
+      if (method === 'localStorage') {
+        // First try localStorage with our expected key
+        refreshToken = localStorage.getItem(AUTH_COOKIES.REFRESH_TOKEN);
+        
+        // Fallback: check sessionStorage with different possible keys
+        if (!refreshToken) {
+          refreshToken = sessionStorage.getItem('refreshToken') || 
+                        sessionStorage.getItem(AUTH_COOKIES.REFRESH_TOKEN) ||
+                        localStorage.getItem('refreshToken');
+        }
+      }
     }
+    
+    return refreshToken;
   },
 
   // Set refresh token

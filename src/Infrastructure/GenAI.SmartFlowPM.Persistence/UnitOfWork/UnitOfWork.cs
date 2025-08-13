@@ -13,7 +13,7 @@ public class UnitOfWork : IUnitOfWork
     public UnitOfWork(ApplicationDbContext context)
     {
         _context = context;
-        
+
         Tenants = new TenantRepository(_context);
         Users = new UserRepository(_context);
         Roles = new RoleRepository(_context);
@@ -23,6 +23,11 @@ public class UnitOfWork : IUnitOfWork
         Projects = new ProjectRepository(_context);
         UserProjects = new UserProjectRepository(_context);
         ProjectTasks = new ProjectTaskRepository(_context);
+        Campaigns = new CampaignRepository(_context);
+        CampaignGroups = new CampaignGroupRepository(_context);
+        CampaignEvaluations = new CampaignEvaluationRepository(_context);
+        Certificates = new CertificateRepository(_context);
+        CertificateTemplates = new CertificateTemplateRepository(_context);
     }
 
     public ITenantRepository Tenants { get; }
@@ -34,6 +39,11 @@ public class UnitOfWork : IUnitOfWork
     public IProjectRepository Projects { get; }
     public IUserProjectRepository UserProjects { get; }
     public IProjectTaskRepository ProjectTasks { get; }
+    public ICampaignRepository Campaigns { get; }
+    public ICampaignGroupRepository CampaignGroups { get; }
+    public ICampaignEvaluationRepository CampaignEvaluations { get; }
+    public ICertificateRepository Certificates { get; }
+    public ICertificateTemplateRepository CertificateTemplates { get; }
 
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {

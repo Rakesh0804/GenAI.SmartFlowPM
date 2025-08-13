@@ -25,6 +25,11 @@ public class ApplicationDbContext : DbContext
     public DbSet<OrganizationPolicy> OrganizationPolicies { get; set; }
     public DbSet<CompanyHoliday> CompanyHolidays { get; set; }
     public DbSet<OrganizationSetting> OrganizationSettings { get; set; }
+    public DbSet<Campaign> Campaigns { get; set; }
+    public DbSet<CampaignGroup> CampaignGroups { get; set; }
+    public DbSet<CampaignEvaluation> CampaignEvaluations { get; set; }
+    public DbSet<Certificate> Certificates { get; set; }
+    public DbSet<CertificateTemplate> CertificateTemplates { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -49,6 +54,11 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<OrganizationPolicy>().HasQueryFilter(e => !e.IsDeleted);
         modelBuilder.Entity<CompanyHoliday>().HasQueryFilter(e => !e.IsDeleted);
         modelBuilder.Entity<OrganizationSetting>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<Campaign>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<CampaignGroup>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<CampaignEvaluation>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<Certificate>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<CertificateTemplate>().HasQueryFilter(e => !e.IsDeleted);
     }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

@@ -66,10 +66,19 @@ src/
 │   ├── auth/             # Authentication components
 │   └── dashboard/        # Dashboard components
 ├── hooks/                # Custom React hooks
-│   └── useAuth.tsx       # Authentication hook
+│   ├── useAuth.tsx       # Authentication hook
+│   └── useApiWithToast.ts # API operations with toast notifications
 ├── lib/                  # Utility libraries
-│   ├── api.ts           # API client
-│   └── utils.ts         # Utility functions
+│   ├── base-api.service.ts # 🆕 Foundation API service with JWT management
+│   ├── cookieManager.ts   # Enhanced token management
+│   └── utils.ts          # Utility functions
+├── services/             # 🆕 Modular API Services (NEW - Aug 13, 2025)
+│   ├── auth.service.ts   # Authentication operations
+│   ├── user.service.ts   # User management
+│   ├── project.service.ts # Project lifecycle
+│   ├── task.service.ts   # Task management
+│   ├── dashboard.service.ts # Dashboard data
+│   └── index.ts          # Service exports
 ├── styles/              # Global styles
 │   └── globals.css      # Global CSS with Tailwind
 └── types/               # TypeScript type definitions
@@ -96,14 +105,29 @@ src/
 
 ## 🔗 API Integration
 
+> **🆕 Architecture Update (August 13, 2025)**: The frontend API layer has been completely refactored from a monolithic `api.ts` file to a modular service-based architecture. See the main project documentation for details.
+
 The frontend integrates with the .NET backend API using:
 
 - **Base URL**: Configured via `NEXT_PUBLIC_API_URL` environment variable
+- **🆕 Modular Services**: Domain-specific services (auth, user, project, task, dashboard) extending BaseApiService
+- **🆕 Automatic JWT Management**: All API calls automatically include Bearer tokens via BaseApiService
 - **Authentication**: JWT tokens with dual storage (localStorage/cookies) based on environment
-- **Token Refresh**: Automatic token refresh with proper error handling
+- **Token Refresh**: Automatic token refresh with proper error handling (handled by BaseApiService interceptors)
 - **401 Error Handling**: Graceful session expiration with toast notifications
-- **Multi-tenancy**: Tenant ID sent in headers for all requests
+- **Multi-tenancy**: Tenant ID sent in headers for all requests (automatic)
 - **Type Safety**: Complete TypeScript interfaces matching backend DTOs
+
+### API Service Usage
+```typescript
+// Import services as needed
+import { authService, userService, dashboardService } from '../services';
+
+// All services automatically include JWT tokens
+const dashboard = await dashboardService.getHomeDashboard();
+const users = await userService.getUsers();
+await authService.logout();
+```
 
 ### API Endpoints Used
 - `POST /auth/login` - User authentication

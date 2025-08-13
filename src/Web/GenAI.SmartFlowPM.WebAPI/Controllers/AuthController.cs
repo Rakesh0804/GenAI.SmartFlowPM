@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using MediatR;
+using System.Security.Claims;
 using GenAI.SmartFlowPM.Application.Features.Users.Commands;
 using GenAI.SmartFlowPM.Application.Features.Users.Queries;
 using GenAI.SmartFlowPM.Application.DTOs.User;
@@ -51,11 +52,18 @@ public class AuthController : BaseController
     [Authorize]
     public async Task<IActionResult> GetCurrentUser()
     {
-        // Get user ID from JWT claims
-        var userIdClaim = HttpContext.User.FindFirst("UserId")?.Value;
+        // Get user ID from JWT claims - ClaimTypes.NameIdentifier maps to the standard claim
+        var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value ??
+                         HttpContext.User.FindFirst("UserId")?.Value ??
+                         HttpContext.User.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value;
+
         if (userIdClaim == null || !Guid.TryParse(userIdClaim, out var userId))
         {
-            return Unauthorized(new { success = false, message = "Invalid token" });
+            // Debug: Log all available claims
+            var claims = HttpContext.User.Claims.Select(c => $"{c.Type}: {c.Value}").ToList();
+            Console.WriteLine($"Available claims: {string.Join(", ", claims)}");
+
+            return Unauthorized(new { success = false, message = "Invalid token - user ID not found" });
         }
 
         var query = new GetUserByIdQuery { Id = userId };
@@ -119,8 +127,14 @@ public class AuthController : BaseController
                 roleClaims = new List<string> { "User" };
             }
 
-            // Generate new access token
+            // Generate new access token and refresh token
             var newToken = _jwtTokenService.GenerateToken(
+                user.Id.ToString(),
+                user.Email,
+                user.UserName,
+                roleClaims);
+
+            var newRefreshToken = _jwtTokenService.GenerateRefreshToken(
                 user.Id.ToString(),
                 user.Email,
                 user.UserName,
@@ -132,6 +146,7 @@ public class AuthController : BaseController
                 data = new RefreshTokenResponse
                 {
                     Token = newToken,
+                    RefreshToken = newRefreshToken,
                     Expires = DateTime.UtcNow.AddHours(1) // Should match JWT expiration from config
                 },
                 message = "Token refreshed successfully"

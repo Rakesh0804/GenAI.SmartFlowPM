@@ -23,7 +23,7 @@ public class GetProjectByIdQueryHandler : IRequestHandler<GetProjectByIdQuery, R
         try
         {
             var project = await _projectRepository.GetByIdAsync(request.Id, cancellationToken);
-            
+
             if (project == null)
             {
                 return Result<ProjectDto>.Failure($"Project with ID {request.Id} not found.");
@@ -61,9 +61,9 @@ public class GetAllProjectsQueryHandler : IRequestHandler<GetAllProjectsQuery, R
             if (!string.IsNullOrWhiteSpace(request.PagedQuery.SearchTerm))
             {
                 var searchTerm = request.PagedQuery.SearchTerm.ToLower();
-                projects = projects.Where(p => 
+                projects = projects.Where(p =>
                     p.Name.ToLower().Contains(searchTerm) ||
-                    p.Description.ToLower().Contains(searchTerm) ||
+                    (p.Description != null && p.Description.ToLower().Contains(searchTerm)) ||
                     (p.ClientName != null && p.ClientName.ToLower().Contains(searchTerm))).ToList();
             }
 
@@ -73,27 +73,27 @@ public class GetAllProjectsQueryHandler : IRequestHandler<GetAllProjectsQuery, R
                 switch (request.PagedQuery.SortBy.ToLower())
                 {
                     case "name":
-                        projects = request.PagedQuery.SortDescending 
+                        projects = request.PagedQuery.SortDescending
                             ? projects.OrderByDescending(p => p.Name).ToList()
                             : projects.OrderBy(p => p.Name).ToList();
                         break;
                     case "startdate":
-                        projects = request.PagedQuery.SortDescending 
+                        projects = request.PagedQuery.SortDescending
                             ? projects.OrderByDescending(p => p.StartDate).ToList()
                             : projects.OrderBy(p => p.StartDate).ToList();
                         break;
                     case "enddate":
-                        projects = request.PagedQuery.SortDescending 
+                        projects = request.PagedQuery.SortDescending
                             ? projects.OrderByDescending(p => p.EndDate).ToList()
                             : projects.OrderBy(p => p.EndDate).ToList();
                         break;
                     case "status":
-                        projects = request.PagedQuery.SortDescending 
+                        projects = request.PagedQuery.SortDescending
                             ? projects.OrderByDescending(p => p.Status).ToList()
                             : projects.OrderBy(p => p.Status).ToList();
                         break;
                     case "priority":
-                        projects = request.PagedQuery.SortDescending 
+                        projects = request.PagedQuery.SortDescending
                             ? projects.OrderByDescending(p => p.Priority).ToList()
                             : projects.OrderBy(p => p.Priority).ToList();
                         break;
@@ -150,7 +150,7 @@ public class GetProjectsByUserIdQueryHandler : IRequestHandler<GetProjectsByUser
         {
             var projects = await _projectRepository.GetProjectsByUserIdAsync(request.UserId, cancellationToken);
             var projectDtos = _mapper.Map<IEnumerable<ProjectDto>>(projects);
-            
+
             return Result<IEnumerable<ProjectDto>>.Success(projectDtos);
         }
         catch (Exception ex)

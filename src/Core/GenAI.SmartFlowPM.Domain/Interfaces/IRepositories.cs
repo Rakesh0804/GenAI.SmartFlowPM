@@ -1,4 +1,5 @@
 using GenAI.SmartFlowPM.Domain.Entities;
+using GenAI.SmartFlowPM.Domain.Enums;
 
 namespace GenAI.SmartFlowPM.Domain.Interfaces;
 
@@ -109,4 +110,48 @@ public interface IOrganizationSettingRepository : IGenericRepository<Organizatio
     Task<IEnumerable<OrganizationSetting>> GetByOrganizationIdAsync(Guid organizationId, CancellationToken cancellationToken = default);
     Task<OrganizationSetting?> GetByKeyAsync(string key, Guid organizationId, CancellationToken cancellationToken = default);
     Task<IEnumerable<OrganizationSetting>> GetEditableSettingsAsync(Guid organizationId, CancellationToken cancellationToken = default);
+}
+
+public interface ICampaignRepository : IGenericRepository<Campaign>
+{
+    Task<Campaign?> GetByNameAsync(string name, CancellationToken cancellationToken = default);
+    Task<bool> IsNameExistsAsync(string name, Guid? excludeCampaignId = null, CancellationToken cancellationToken = default);
+    Task<IEnumerable<Campaign>> GetByManagerIdAsync(Guid managerId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<Campaign>> GetByStatusAsync(CampaignStatus status, CancellationToken cancellationToken = default);
+    Task<IEnumerable<Campaign>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
+    Task<Campaign?> GetWithEvaluationsAsync(Guid campaignId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<Campaign>> GetActiveCampaignsAsync(CancellationToken cancellationToken = default);
+}
+
+public interface ICampaignGroupRepository : IGenericRepository<CampaignGroup>
+{
+    Task<CampaignGroup?> GetByNameAsync(string name, CancellationToken cancellationToken = default);
+    Task<bool> IsNameExistsAsync(string name, Guid? excludeGroupId = null, CancellationToken cancellationToken = default);
+    Task<IEnumerable<CampaignGroup>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
+}
+
+public interface ICampaignEvaluationRepository : IGenericRepository<CampaignEvaluation>
+{
+    Task<IEnumerable<CampaignEvaluation>> GetByCampaignIdAsync(Guid campaignId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<CampaignEvaluation>> GetByEvaluatorIdAsync(Guid evaluatorId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<CampaignEvaluation>> GetByEvaluatedUserIdAsync(Guid evaluatedUserId, CancellationToken cancellationToken = default);
+    Task<CampaignEvaluation?> GetByEvaluatorAndUserAsync(Guid campaignId, Guid evaluatorId, Guid evaluatedUserId, CancellationToken cancellationToken = default);
+    Task<bool> ExistsAsync(Guid campaignId, Guid evaluatorId, Guid evaluatedUserId, CancellationToken cancellationToken = default);
+}
+
+public interface ICertificateRepository : IGenericRepository<Certificate>
+{
+    Task<IEnumerable<Certificate>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<Certificate>> GetByCampaignIdAsync(Guid campaignId, CancellationToken cancellationToken = default);
+    Task<Certificate?> GetByVerificationTokenAsync(string verificationToken, CancellationToken cancellationToken = default);
+    Task<IEnumerable<Certificate>> GetByStatusAsync(CertificateStatus status, CancellationToken cancellationToken = default);
+    Task<Certificate?> GetByCampaignAndUserAsync(Guid campaignId, Guid userId, CancellationToken cancellationToken = default);
+}
+
+public interface ICertificateTemplateRepository : IGenericRepository<CertificateTemplate>
+{
+    Task<CertificateTemplate?> GetByNameAsync(string name, CancellationToken cancellationToken = default);
+    Task<bool> IsNameExistsAsync(string name, Guid? excludeTemplateId = null, CancellationToken cancellationToken = default);
+    Task<CertificateTemplate?> GetDefaultTemplateAsync(CertificateType type, CancellationToken cancellationToken = default);
+    Task<IEnumerable<CertificateTemplate>> GetByTypeAsync(CertificateType type, CancellationToken cancellationToken = default);
 }

@@ -51,6 +51,28 @@ builder.Services.AddAuthentication(options =>
         ValidateLifetime = true,
         ClockSkew = TimeSpan.Zero
     };
+
+    // Add debugging for JWT authentication failures
+    options.Events = new JwtBearerEvents
+    {
+        OnAuthenticationFailed = context =>
+        {
+            Console.WriteLine($"JWT Authentication failed: {context.Exception.Message}");
+            return Task.CompletedTask;
+        },
+        OnTokenValidated = context =>
+        {
+            Console.WriteLine("JWT Token validated successfully");
+            var claims = context.Principal?.Claims?.Select(c => $"{c.Type}: {c.Value}") ?? new List<string>();
+            Console.WriteLine($"Token claims: {string.Join(", ", claims)}");
+            return Task.CompletedTask;
+        },
+        OnChallenge = context =>
+        {
+            Console.WriteLine($"JWT Challenge: {context.Error}, {context.ErrorDescription}");
+            return Task.CompletedTask;
+        }
+    };
 });
 
 builder.Services.AddAuthorization();
@@ -81,9 +103,9 @@ builder.Services.AddCors(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo 
-    { 
-        Title = "Project Management API", 
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Project Management API",
         Version = "v1",
         Description = "A comprehensive Project Management API with Clean Architecture"
     });
@@ -149,12 +171,12 @@ if (app.Environment.IsDevelopment())
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         var passwordService = scope.ServiceProvider.GetRequiredService<GenAI.SmartFlowPM.Domain.Interfaces.Services.IPasswordHashingService>();
         var counterService = scope.ServiceProvider.GetRequiredService<GenAI.SmartFlowPM.Domain.Interfaces.Services.ICounterService>();
-        
+
         // await context.Database.EnsureCreatedAsync();
-        
+
         var seeder = new DataSeeder(context, passwordService, counterService);
         await seeder.SeedAsync(forceReseed: false); // Enable seeding for testing
-        
+
         Console.WriteLine("Data seeding completed successfully.");
     }
     catch (Exception ex)

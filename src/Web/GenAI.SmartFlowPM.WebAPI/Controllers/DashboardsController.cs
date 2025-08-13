@@ -21,7 +21,17 @@ namespace GenAI.SmartFlowPM.WebAPI.Controllers
         [HttpGet("home")]
         public async Task<IActionResult> GetHomeDashboard()
         {
-            var result = await _mediator.Send(new GetHomeDashboardQuery());
+            // Get current user ID from JWT claims
+            var userIdClaim = HttpContext.User.FindFirst("UserId")?.Value;
+            var userId = Guid.Empty;
+
+            if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out var parsedUserId))
+            {
+                userId = parsedUserId;
+            }
+
+            var query = new GetHomeDashboardQuery(userId);
+            var result = await _mediator.Send(query);
             return HandleResult(Result<HomeDashboardDto>.Success(result));
         }
     }

@@ -7,9 +7,9 @@ export interface ApiResponse<T> {
 }
 
 export interface PaginatedResponse<T> {
-  data: T[];
+  items: T[];  // Changed from 'data' to 'items' to match actual API
   totalCount: number;
-  pageNumber: number;
+  currentPage: number;  // Changed from 'pageNumber' to 'currentPage'
   pageSize: number;
   totalPages: number;
   hasPreviousPage: boolean;
@@ -85,6 +85,7 @@ export interface RefreshTokenRequest {
 
 export interface RefreshTokenResponse {
   token: string;
+  refreshToken?: string;
   expires: Date;
 }
 
@@ -192,6 +193,109 @@ export interface DashboardStatsDto {
   overdueTasks: number;
   userTaskCount: number;
   userPendingTasks: TaskDto[];
+}
+
+// Enhanced Home Dashboard types matching backend
+export interface HomeDashboardDto {
+  // Basic Statistics
+  totalProjects: number;
+  activeTasks: number;
+  teamMembers: number;
+  completed: number;
+  overdueTasks: number;
+  
+  // Chart Data
+  taskStatusData: TaskStatusChartDto[];
+  projectStatusData: ProjectStatusChartDto[];
+  taskTypeData: TaskTypeChartDto[];
+  burndownData: BurndownChartDto[];
+  
+  // User-specific Data
+  userSummary: UserDashboardSummaryDto;
+  myPendingTasks: PendingTaskDto[];
+  leaveBalance: LeaveBalanceDto;
+  
+  // Activity & Announcements
+  recentActivities: RecentActivityDto[];
+  upcomingHolidays: UpcomingHolidayDto[];
+  latestAnnouncements: AnnouncementDto[];
+}
+
+export interface UserDashboardSummaryDto {
+  userId: string;
+  userName: string;
+  myTotalTasks: number;
+  myPendingTasksCount: number;
+  myCompletedTasks: number;
+  myOverdueTasks: number;
+}
+
+export interface PendingTaskDto {
+  id: string;
+  title: string;
+  projectName: string;
+  priority: string;
+  priorityColor: string;
+  dueDate?: Date;
+  isOverdue: boolean;
+}
+
+export interface LeaveBalanceDto {
+  totalLeaves: number;
+  usedLeaves: number;
+  remainingLeaves: number;
+  pendingRequests: number;
+}
+
+export interface RecentActivityDto {
+  userName: string;
+  userInitials: string;
+  action: string;
+  timestamp: Date;
+  timeAgo: string;
+  avatarColor: string;
+}
+
+export interface UpcomingHolidayDto {
+  name: string;
+  date: Date;
+  description: string;
+  dayOfWeek: string;
+  formattedDate: string;
+}
+
+export interface AnnouncementDto {
+  id: string;
+  title: string;
+  content: string;
+  createdAt: Date;
+  timeAgo: string;
+}
+
+export interface TaskStatusChartDto {
+  name: string;
+  value: number;
+  color: string;
+}
+
+export interface ProjectStatusChartDto {
+  name: string;
+  open: number;
+  inProgress: number;
+  completed: number;
+  total: number;
+}
+
+export interface TaskTypeChartDto {
+  name: string;
+  value: number;
+  color: string;
+}
+
+export interface BurndownChartDto {
+  day: string;
+  planned: number;
+  actual: number;
 }
 
 // Enums matching backend

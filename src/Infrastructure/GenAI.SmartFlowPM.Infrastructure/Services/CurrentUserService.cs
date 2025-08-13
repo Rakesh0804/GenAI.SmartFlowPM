@@ -4,14 +4,6 @@ using GenAI.SmartFlowPM.Domain.Interfaces.Services;
 
 namespace GenAI.SmartFlowPM.Infrastructure.Services;
 
-public interface ICurrentUserService
-{
-    string? UserId { get; }
-    string? UserName { get; }
-    string? Email { get; }
-    bool IsAuthenticated { get; }
-}
-
 public class CurrentUserService : ICurrentUserService
 {
     private readonly IHttpContextAccessor _httpContextAccessor;

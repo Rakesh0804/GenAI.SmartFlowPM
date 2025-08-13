@@ -1,6 +1,7 @@
 # Frontend Implementation - GenAI Smart Flow PM System
 
 ## 📅 Implementation Date: August 13, 2025
+## 🔄 Last Updated: August 13, 2025 (API Architecture Refactoring)
 
 This document details the complete frontend implementation of the GenAI Smart Flow PM System using Next.js 15, React 19, and Tailwind CSS.
 
@@ -14,6 +15,7 @@ This document details the complete frontend implementation of the GenAI Smart Fl
 - **Responsive Design**: Mobile-first approach with Tailwind CSS
 - **State Management**: Context-based sidebar state management
 - **Animation System**: CSS-based animations for React 19 compatibility
+- **🆕 Modular API Services**: Complete refactoring to service-based architecture (August 13, 2025)
 
 ## 🏗️ Architecture Implementation
 
@@ -52,10 +54,19 @@ src/Web/GenAI.SmartFlowPM.UI/
 │   ├── contexts/                     # React contexts
 │   │   └── SidebarContext.tsx        # Global sidebar state management
 │   ├── hooks/                        # Custom React hooks
-│   │   └── useAuth.tsx               # Authentication management hook
+│   │   ├── useAuth.tsx               # Authentication management hook
+│   │   └── useApiWithToast.ts        # API operations with toast notifications
 │   ├── lib/                          # Utility functions
-│   │   ├── api.ts                    # API client configuration
+│   │   ├── base-api.service.ts       # 🆕 Foundation API service with JWT management
+│   │   ├── cookieManager.ts          # Enhanced token management
 │   │   └── utils.ts                  # Utility functions with clsx
+│   ├── services/                     # 🆕 Modular API Services (NEW)
+│   │   ├── auth.service.ts           # Authentication operations
+│   │   ├── user.service.ts           # User management
+│   │   ├── project.service.ts        # Project lifecycle
+│   │   ├── task.service.ts           # Task management
+│   │   ├── dashboard.service.ts      # Dashboard data
+│   │   └── index.ts                  # Service exports
 │   └── types/                        # TypeScript type definitions
 │       └── api.types.ts              # API response types matching backend DTOs
 ├── public/                           # Static assets
@@ -65,6 +76,15 @@ src/Web/GenAI.SmartFlowPM.UI/
 ├── tsconfig.json                     # TypeScript configuration
 └── package.json                      # Dependencies and scripts
 ```
+
+### 🆕 API Architecture Upgrade (August 13, 2025)
+
+**Replaced**: Monolithic `api.ts` (353 lines) → Modular service architecture
+**Benefits**: 
+- Automatic JWT token injection across all API calls
+- Domain-specific services for better maintainability
+- Centralized error handling with token refresh
+- TypeScript integration with singleton pattern
 
 ## 🎨 Design System
 

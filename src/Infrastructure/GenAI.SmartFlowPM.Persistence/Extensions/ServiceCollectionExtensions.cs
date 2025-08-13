@@ -33,6 +33,11 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IOrganizationPolicyRepository, OrganizationPolicyRepository>();
         services.AddScoped<ICompanyHolidayRepository, CompanyHolidayRepository>();
         services.AddScoped<IOrganizationSettingRepository, OrganizationSettingRepository>();
+        services.AddScoped<ICampaignRepository, CampaignRepository>();
+        services.AddScoped<ICampaignGroupRepository, CampaignGroupRepository>();
+        services.AddScoped<ICampaignEvaluationRepository, CampaignEvaluationRepository>();
+        services.AddScoped<ICertificateRepository, CertificateRepository>();
+        services.AddScoped<ICertificateTemplateRepository, CertificateTemplateRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork.UnitOfWork>();
 
         // Add services

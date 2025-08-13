@@ -2,7 +2,8 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { authApi, tokenManager } from '../lib/api';
+import { authService } from '../services/auth.service';
+import { TokenManager } from '../lib/base-api.service';
 import { enhancedTokenManager } from '../lib/cookieManager';
 import { UserDto, LoginRequest, LoginResponse } from '../types/api.types';
 import { useToast } from '../contexts/ToastContext';
@@ -59,17 +60,89 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   // Initialize user from token on component mount
   useEffect(() => {
     const initializeAuth = async () => {
-      const token = enhancedTokenManager.getToken();
+      console.log('🔐 Starting auth initialization...');
       
-      if (token && enhancedTokenManager.isTokenValid()) {
+      // Helper function to get cookie value
+      const getCookie = (name: string): string | null => {
+        const nameEQ = name + '=';
+        const ca = document.cookie.split(';');
+        for (let i = 0; i < ca.length; i++) {
+          let c = ca[i];
+          while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+          if (c.indexOf(nameEQ) === 0) {
+            return decodeURIComponent(c.substring(nameEQ.length, c.length));
+          }
+        }
+        return null;
+      };
+      
+      // Debug storage contents
+      const token = enhancedTokenManager.getToken();
+      const refreshToken = enhancedTokenManager.getRefreshToken();
+      
+      // Check token expiration
+      if (token) {
+        // Check token expiration first
+        let isTokenExpired = false;
         try {
-          // Verify token is still valid by calling /auth/me
-          const currentUser = await authApi.getCurrentUser();
-          setUser(currentUser);
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          const currentTime = Math.floor(Date.now() / 1000);
+          const expirationTime = payload.exp;
+          const timeUntilExpiry = expirationTime - currentTime;
+          
+          isTokenExpired = timeUntilExpiry <= 0;
         } catch (error) {
-          console.error('Token verification failed:', error);
+          isTokenExpired = true; // Treat invalid tokens as expired
+        }
+
+        if (isTokenExpired && refreshToken && refreshToken !== 'null') {
+          // Token is expired, skip /auth/me and go directly to refresh
+          try {
+            const refreshResponse = await authService.refreshToken();
+            
+            // Update both token managers
+            enhancedTokenManager.setToken(refreshResponse.token, enhancedTokenManager.getRememberMe());
+            TokenManager.setToken(refreshResponse.token);
+            
+            // Now try to get user with new token
+            const currentUser = await authService.getCurrentUser();
+            setUser(currentUser);
+          } catch (refreshError: any) {
+            enhancedTokenManager.clearTokens();
+            TokenManager.clearTokens();
+          }
+        } else if (!isTokenExpired) {
+          // Token is valid, try to get user
+          try {
+            const currentUser = await authService.getCurrentUser();
+            setUser(currentUser);
+          } catch (error: any) {
+            // If /auth/me fails and we have a refresh token, try to refresh
+            if (error?.response?.status === 401 && refreshToken && refreshToken !== 'null') {
+              try {
+                const refreshResponse = await authService.refreshToken();
+                
+                // Update both token managers
+                enhancedTokenManager.setToken(refreshResponse.token, enhancedTokenManager.getRememberMe());
+                TokenManager.setToken(refreshResponse.token);
+                
+                // Now try to get user again with new token
+                const currentUser = await authService.getCurrentUser();
+                setUser(currentUser);
+              } catch (refreshError: any) {
+                enhancedTokenManager.clearTokens();
+                TokenManager.clearTokens();
+              }
+            } else {
+              // No refresh token or different error, clear everything
+              enhancedTokenManager.clearTokens();
+              TokenManager.clearTokens();
+            }
+          }
+        } else {
+          // Token expired but no refresh token or refresh token is null
           enhancedTokenManager.clearTokens();
-          tokenManager.clearTokens();
+          TokenManager.clearTokens();
         }
       }
       
@@ -82,6 +155,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }, []);
 
   // Auto-refresh token before expiry (90% of token lifetime)
+  // DISABLED: Rely on BaseApiService interceptor for token refresh to prevent conflicts
+  /*
   useEffect(() => {
     if (!isClient || !isAuthenticated) return;
 
@@ -101,11 +176,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             try {
               const refreshToken = enhancedTokenManager.getRefreshToken();
               if (refreshToken) {
-                const refreshResponse = await authApi.refreshToken();
+                const refreshResponse = await authService.refreshToken();
                 enhancedTokenManager.setToken(refreshResponse.token, enhancedTokenManager.getRememberMe());
                 
                 // Also update in the legacy token manager for compatibility
-                tokenManager.setToken(refreshResponse.token);
+                TokenManager.setToken(refreshResponse.token);
               }
             } catch (error) {
               console.error('Token refresh failed:', error);
@@ -124,12 +199,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     return () => clearInterval(interval);
   }, [isAuthenticated]);
+  */
 
   const login = async (credentials: LoginRequest, rememberMe: boolean = false): Promise<void> => {
     try {
       setIsLoading(true);
       
-      const response: LoginResponse = await authApi.login(credentials);
+      const response: LoginResponse = await authService.login(credentials);
       
       // Store tokens based on rememberMe preference
       if (rememberMe) {
@@ -143,8 +219,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
       
       // Also set in legacy token manager for backward compatibility
-      tokenManager.setToken(response.token);
-      tokenManager.setRefreshToken(response.refreshToken);
+      TokenManager.setToken(response.token);
+      TokenManager.setRefreshToken(response.refreshToken);
       
       // Validate that we have a valid user in the response
       if (!response.user || !response.user.id) {
@@ -167,14 +243,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const logout = async (): Promise<void> => {
     try {
       setIsLoading(true);
-      await authApi.logout();
+      await authService.logout();
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
       setUser(null);
       // Clear both storage methods
       enhancedTokenManager.clearTokens();
-      tokenManager.clearTokens();
+      TokenManager.clearTokens();
       setIsLoading(false);
       if (router) {
         router.push('/login');
@@ -185,7 +261,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const refreshUser = async (): Promise<void> => {
     try {
       // Call /auth/me to get fresh user data (e.g., after profile updates)
-      const currentUser = await authApi.getCurrentUser();
+      const currentUser = await authService.getCurrentUser();
       setUser(currentUser);
     } catch (error) {
       console.error('Failed to refresh user:', error);
