@@ -19,5 +19,7 @@ public class CurrentUserService : ICurrentUserService
 
     public string? Email => _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.Email);
 
+    public string? TenantId => _httpContextAccessor.HttpContext?.User?.FindFirstValue("TenantId");
+
     public bool IsAuthenticated => _httpContextAccessor.HttpContext?.User?.Identity?.IsAuthenticated ?? false;
 }

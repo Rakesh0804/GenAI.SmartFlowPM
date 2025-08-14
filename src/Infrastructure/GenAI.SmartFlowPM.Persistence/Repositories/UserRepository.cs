@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using GenAI.SmartFlowPM.Domain.Entities;
 using GenAI.SmartFlowPM.Domain.Interfaces;
@@ -32,26 +33,36 @@ public class UserRepository : GenericRepository<User>, IUserRepository
     public async Task<bool> IsEmailExistsAsync(string email, Guid? excludeUserId = null, CancellationToken cancellationToken = default)
     {
         var query = _dbSet.Where(x => x.Email == email);
-        
+
         if (excludeUserId.HasValue)
             query = query.Where(x => x.Id != excludeUserId.Value);
-            
+
         return await query.AnyAsync(cancellationToken);
     }
 
     public async Task<bool> IsUserNameExistsAsync(string userName, Guid? excludeUserId = null, CancellationToken cancellationToken = default)
     {
         var query = _dbSet.Where(x => x.UserName == userName);
-        
+
         if (excludeUserId.HasValue)
             query = query.Where(x => x.Id != excludeUserId.Value);
-            
+
         return await query.AnyAsync(cancellationToken);
     }
 
     public async Task<IEnumerable<User>> GetUsersByManagerIdAsync(Guid managerId, CancellationToken cancellationToken = default)
     {
         return await _dbSet
+            .Where(x => x.ManagerId == managerId)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<IEnumerable<User>> GetUsersByManagerIdWithRolesAsync(Guid managerId, CancellationToken cancellationToken = default)
+    {
+        return await _dbSet
+            .Include(x => x.UserRoles)
+            .ThenInclude(x => x.Role)
+            .Include(x => x.Manager)
             .Where(x => x.ManagerId == managerId)
             .ToListAsync(cancellationToken);
     }
@@ -72,5 +83,37 @@ public class UserRepository : GenericRepository<User>, IUserRepository
             .ThenInclude(x => x.Claim)
             .Include(x => x.Manager)
             .FirstOrDefaultAsync(x => x.Id == userId, cancellationToken);
+    }
+
+    public async Task<(IEnumerable<User> Items, int TotalCount)> GetPagedUsersWithRolesAsync(
+        int pageNumber,
+        int pageSize,
+        Expression<Func<User, bool>>? predicate = null,
+        Expression<Func<User, object>>? orderBy = null,
+        bool ascending = true,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _dbSet
+            .Include(x => x.UserRoles)
+            .ThenInclude(x => x.Role)
+            .Include(x => x.Manager)
+            .AsQueryable();
+
+        if (predicate != null)
+            query = query.Where(predicate);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        if (orderBy != null)
+        {
+            query = ascending ? query.OrderBy(orderBy) : query.OrderByDescending(orderBy);
+        }
+
+        var items = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
     }
 }

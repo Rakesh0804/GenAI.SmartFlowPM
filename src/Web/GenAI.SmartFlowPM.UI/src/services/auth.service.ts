@@ -99,22 +99,26 @@ export class AuthService extends BaseApiService {
       });
 
       // Handle the API response format properly
-      const result = response.data?.data || response.data;
-      
-      if (result.token) {
-        // Store new token in both managers
-        TokenManager.setToken(result.token);
-        enhancedTokenManager.setToken(result.token, enhancedTokenManager.getRememberMe());
+      if (response.data?.isSuccess && response.data?.data) {
+        const result = response.data.data;
         
-        // If new refresh token is provided, store it too
-        if (result.refreshToken) {
-          TokenManager.setRefreshToken(result.refreshToken);
-          enhancedTokenManager.setRefreshToken(result.refreshToken, enhancedTokenManager.getRememberMe());
+        if (result.token) {
+          // Store new token in both managers
+          TokenManager.setToken(result.token);
+          enhancedTokenManager.setToken(result.token, enhancedTokenManager.getRememberMe());
+          
+          // If new refresh token is provided, store it too
+          if (result.refreshToken) {
+            TokenManager.setRefreshToken(result.refreshToken);
+            enhancedTokenManager.setRefreshToken(result.refreshToken, enhancedTokenManager.getRememberMe());
+          }
+          
+          return result;
+        } else {
+          throw new Error('No token received from refresh endpoint');
         }
-        
-        return result;
       } else {
-        throw new Error('No token received from refresh endpoint');
+        throw new Error(response.data?.message || 'Refresh token failed');
       }
     } catch (error: any) {
       throw error;

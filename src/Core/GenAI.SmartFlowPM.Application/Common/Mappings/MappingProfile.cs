@@ -30,7 +30,10 @@ public class MappingProfile : Profile
         // User mappings
         CreateMap<User, UserDto>()
             .ForMember(dest => dest.ManagerName, opt => opt.MapFrom(src =>
-                src.Manager != null ? $"{src.Manager.FirstName} {src.Manager.LastName}" : null));
+                src.Manager != null ? $"{src.Manager.FirstName} {src.Manager.LastName}" : null))
+            .ForMember(dest => dest.TenantId, opt => opt.MapFrom(src => src.TenantId))
+            .ForMember(dest => dest.Roles, opt => opt.MapFrom(src =>
+                src.UserRoles.Select(ur => ur.Role.Name).ToList()));
 
         CreateMap<User, UserSummaryDto>()
             .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.UserName));

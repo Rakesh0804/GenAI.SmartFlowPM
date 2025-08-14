@@ -8,6 +8,9 @@ public class UserDto
     [JsonPropertyName("id")]
     public Guid Id { get; set; }
 
+    [JsonPropertyName("tenantId")]
+    public Guid TenantId { get; set; }
+
     [JsonPropertyName("firstName")]
     public string FirstName { get; set; } = string.Empty;
 
@@ -43,6 +46,9 @@ public class UserDto
 
     [JsonPropertyName("updatedAt")]
     public DateTime? UpdatedAt { get; set; }
+
+    [JsonPropertyName("roles")]
+    public List<string> Roles { get; set; } = new List<string>();
 }
 
 public class CreateUserDto

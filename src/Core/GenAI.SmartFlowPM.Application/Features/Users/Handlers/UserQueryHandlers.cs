@@ -20,7 +20,7 @@ public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, Result<
 
     public async Task<Result<UserDto>> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
     {
-        var user = await _unitOfWork.Users.GetByIdAsync(request.Id, cancellationToken);
+        var user = await _unitOfWork.Users.GetUserWithRolesAsync(request.Id, cancellationToken);
         if (user == null)
         {
             return Result<UserDto>.Failure("User not found");
@@ -44,10 +44,10 @@ public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, Result<
 
     public async Task<Result<PaginatedResult<UserDto>>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
     {
-        var (users, totalCount) = await _unitOfWork.Users.GetPagedAsync(
+        var (users, totalCount) = await _unitOfWork.Users.GetPagedUsersWithRolesAsync(
             request.PagedQuery.PageNumber,
             request.PagedQuery.PageSize,
-            predicate: string.IsNullOrEmpty(request.PagedQuery.SearchTerm) ? null : 
+            predicate: string.IsNullOrEmpty(request.PagedQuery.SearchTerm) ? null :
                 u => u.FirstName.Contains(request.PagedQuery.SearchTerm) ||
                      u.LastName.Contains(request.PagedQuery.SearchTerm) ||
                      u.Email.Contains(request.PagedQuery.SearchTerm) ||
@@ -96,9 +96,9 @@ public class GetUsersByManagerIdQueryHandler : IRequestHandler<GetUsersByManager
 
     public async Task<Result<IEnumerable<UserDto>>> Handle(GetUsersByManagerIdQuery request, CancellationToken cancellationToken)
     {
-        var users = await _unitOfWork.Users.GetUsersByManagerIdAsync(request.ManagerId, cancellationToken);
+        var users = await _unitOfWork.Users.GetUsersByManagerIdWithRolesAsync(request.ManagerId, cancellationToken);
         var userDtos = _mapper.Map<IEnumerable<UserDto>>(users);
-        
+
         return Result<IEnumerable<UserDto>>.Success(userDtos);
     }
 }

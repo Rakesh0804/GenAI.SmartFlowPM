@@ -1,7 +1,7 @@
 // API Response types matching backend structure
 export interface ApiResponse<T> {
   data: T;
-  success: boolean;
+  isSuccess: boolean;
   message?: string;
   errors?: string[];
 }
@@ -33,6 +33,7 @@ export interface UserDto {
   updatedAt?: Date;
   createdBy: string;
   updatedBy?: string;
+  roles: string[]; // NEW: User roles array
 }
 
 export interface CreateUserDto {
@@ -44,6 +45,7 @@ export interface CreateUserDto {
   password: string;
   managerId?: string;
   hasReportee: boolean; // NEW: Manager status
+  roleIds?: string[]; // NEW: Role IDs to assign to user
 }
 
 export interface UpdateUserDto {
@@ -55,6 +57,7 @@ export interface UpdateUserDto {
   managerId?: string;
   hasReportee?: boolean; // NEW: Update manager status
   isActive?: boolean;
+  roleIds?: string[]; // NEW: Role IDs to assign to user
 }
 
 export interface UserSummaryDto {
@@ -93,6 +96,28 @@ export interface ChangePasswordDto {
   currentPassword: string;
   newPassword: string;
   confirmPassword: string;
+}
+
+// Role types matching backend RoleDto structure
+export interface RoleDto {
+  id: string;
+  name: string;
+  description?: string;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
+export interface CreateRoleDto {
+  name: string;
+  description?: string;
+  isActive: boolean;
+}
+
+export interface UpdateRoleDto {
+  name: string;
+  description?: string;
+  isActive: boolean;
 }
 
 // Project types
@@ -355,6 +380,22 @@ export interface RoleDto {
 
 export interface ClaimDto {
   id: string;
+  name: string;
+  type: string;
+  description?: string;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
+export interface CreateClaimDto {
+  name: string;
+  type: string;
+  description?: string;
+  isActive: boolean;
+}
+
+export interface UpdateClaimDto {
   name: string;
   type: string;
   description?: string;

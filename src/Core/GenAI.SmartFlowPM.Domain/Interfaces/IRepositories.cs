@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using GenAI.SmartFlowPM.Domain.Entities;
 using GenAI.SmartFlowPM.Domain.Enums;
 
@@ -18,8 +19,16 @@ public interface IUserRepository : IGenericRepository<User>
     Task<bool> IsEmailExistsAsync(string email, Guid? excludeUserId = null, CancellationToken cancellationToken = default);
     Task<bool> IsUserNameExistsAsync(string userName, Guid? excludeUserId = null, CancellationToken cancellationToken = default);
     Task<IEnumerable<User>> GetUsersByManagerIdAsync(Guid managerId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<User>> GetUsersByManagerIdWithRolesAsync(Guid managerId, CancellationToken cancellationToken = default);
     Task<User?> GetUserWithRolesAsync(Guid userId, CancellationToken cancellationToken = default);
     Task<User?> GetUserWithClaimsAsync(Guid userId, CancellationToken cancellationToken = default);
+    Task<(IEnumerable<User> Items, int TotalCount)> GetPagedUsersWithRolesAsync(
+        int pageNumber,
+        int pageSize,
+        Expression<Func<User, bool>>? predicate = null,
+        Expression<Func<User, object>>? orderBy = null,
+        bool ascending = true,
+        CancellationToken cancellationToken = default);
 }
 
 public interface IRoleRepository : IGenericRepository<Role>

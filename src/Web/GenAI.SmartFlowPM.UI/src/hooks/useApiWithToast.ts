@@ -28,14 +28,23 @@ export const useApiWithToast = () => {
         if (error.response) {
             // Server responded with error status
             const status = error.response.status;
-            const message = error.response.data?.message || error.response.data?.title || error.message;
+            // Try multiple places to find the error message
+            const message = error.response.data?.message || 
+                           error.response.data?.title || 
+                           error.response.data?.detail ||
+                           error.response.data?.errors?.[0] ||
+                           error.message;
 
             switch (status) {
                 case 400:
                     showError('Bad Request', `Invalid ${operation.toLowerCase()} data: ${message}`);
                     break;
                 case 401:
-                    showError('Unauthorized', 'Please login again to continue', true);
+                    if (operation.toLowerCase() === 'login') {
+                        showError('Login Failed', message || 'Invalid email or password. Please try again.');
+                    } else {
+                        showError('Unauthorized', 'Please login again to continue', true);
+                    }
                     break;
                 case 403:
                     showError('Access Denied', `You don't have permission to ${operation.toLowerCase()}`, true);

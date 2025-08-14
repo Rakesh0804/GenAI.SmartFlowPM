@@ -213,8 +213,8 @@ export class BaseApiService {
               });
 
               // Handle the API response format properly
-              const newToken = response.data?.data?.token || response.data?.token;
-              if (newToken) {
+              if (response.data?.isSuccess && response.data?.data?.token) {
+                const newToken = response.data.data.token;
                 TokenManager.setToken(newToken);
                 return this.api(original);
               } else {
@@ -244,7 +244,7 @@ export class BaseApiService {
 
   // Generic API response handler
   protected handleResponse<T>(response: AxiosResponse<ApiResponse<T>>): T {
-    if (response.data.success) {
+    if (response.data.isSuccess) {
       return response.data.data;
     } else {
       throw new Error(response.data.message || 'An error occurred');

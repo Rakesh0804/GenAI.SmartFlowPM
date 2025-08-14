@@ -180,8 +180,8 @@ public class LoginUserCommandHandler : IRequestHandler<LoginUserCommand, Result<
         var roleNames = user.UserRoles.Select(ur => ur.Role.Name).ToList();
 
         var userDto = _mapper.Map<UserDto>(user);
-        var token = _jwtTokenService.GenerateToken(user.Id.ToString(), user.Email, user.UserName, roleNames);
-        var refreshToken = _jwtTokenService.GenerateRefreshToken(user.Id.ToString(), user.Email, user.UserName, roleNames);
+        var token = _jwtTokenService.GenerateToken(user.Id.ToString(), user.TenantId.ToString(), user.Email, user.UserName, roleNames);
+        var refreshToken = _jwtTokenService.GenerateRefreshToken(user.Id.ToString(), user.TenantId.ToString(), user.Email, user.UserName, roleNames);
 
         var response = new LoginResponseDto
         {

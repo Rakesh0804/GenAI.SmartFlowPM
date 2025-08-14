@@ -8,8 +8,8 @@ public interface IPasswordHashingService
 
 public interface IJwtTokenService
 {
-    string GenerateToken(string userId, string email, string userName, IEnumerable<string> roles);
-    string GenerateRefreshToken(string userId, string email, string userName, IEnumerable<string> roles);
+    string GenerateToken(string userId, string tenantId, string email, string userName, IEnumerable<string> roles);
+    string GenerateRefreshToken(string userId, string tenantId, string email, string userName, IEnumerable<string> roles);
     bool ValidateToken(string token);
     string? GetUserIdFromToken(string token);
 }
@@ -19,5 +19,6 @@ public interface ICurrentUserService
     string? UserId { get; }
     string? UserName { get; }
     string? Email { get; }
+    string? TenantId { get; }
     bool IsAuthenticated { get; }
 }

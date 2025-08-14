@@ -16,7 +16,7 @@ public class JwtTokenService : IJwtTokenService
         _configuration = configuration;
     }
 
-    public string GenerateToken(string userId, string email, string userName, IEnumerable<string> roles)
+    public string GenerateToken(string userId, string tenantId, string email, string userName, IEnumerable<string> roles)
     {
         var jwtSettings = _configuration.GetSection("JwtSettings");
         var secretKey = jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey is not configured");
@@ -31,7 +31,8 @@ public class JwtTokenService : IJwtTokenService
         {
             new Claim(ClaimTypes.NameIdentifier, userId),
             new Claim(ClaimTypes.Name, userName),
-            new Claim(ClaimTypes.Email, email)
+            new Claim(ClaimTypes.Email, email),
+            new Claim("TenantId", tenantId)
         };
 
         // Add role claims
@@ -51,7 +52,7 @@ public class JwtTokenService : IJwtTokenService
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    public string GenerateRefreshToken(string userId, string email, string userName, IEnumerable<string> roles)
+    public string GenerateRefreshToken(string userId, string tenantId, string email, string userName, IEnumerable<string> roles)
     {
         var jwtSettings = _configuration.GetSection("JwtSettings");
         var secretKey = jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey is not configured");
@@ -69,7 +70,8 @@ public class JwtTokenService : IJwtTokenService
             new Claim(ClaimTypes.NameIdentifier, userId),
             new Claim(ClaimTypes.Name, userName),
             new Claim(ClaimTypes.Email, email),
-            new Claim("TokenType", "refresh") // Mark as refresh token
+            new Claim("TokenType", "refresh"), // Mark as refresh token
+            new Claim("TenantId", tenantId)
         };
 
         // Add role claims

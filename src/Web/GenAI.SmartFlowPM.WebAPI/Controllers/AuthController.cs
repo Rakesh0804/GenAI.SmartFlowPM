@@ -130,12 +130,14 @@ public class AuthController : BaseController
             // Generate new access token and refresh token
             var newToken = _jwtTokenService.GenerateToken(
                 user.Id.ToString(),
+                user.TenantId.ToString(),
                 user.Email,
                 user.UserName,
                 roleClaims);
 
             var newRefreshToken = _jwtTokenService.GenerateRefreshToken(
                 user.Id.ToString(),
+                user.TenantId.ToString(),
                 user.Email,
                 user.UserName,
                 roleClaims);

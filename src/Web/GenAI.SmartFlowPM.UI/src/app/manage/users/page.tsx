@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { UserCockpit, NewUser, EditUser } from '@/components/users';
 import { UserDto } from '@/types/api.types';
 
-type ViewMode = 'cockpit' | 'new' | 'edit';
+type ViewMode = 'cockpit' | 'new' | 'edit' | 'view';
 
 export default function ManageUsersPage() {
   const [currentView, setCurrentView] = useState<ViewMode>('cockpit');
@@ -17,6 +17,11 @@ export default function ManageUsersPage() {
   const handleEditUser = (user: UserDto) => {
     setSelectedUserId(user.id);
     setCurrentView('edit');
+  };
+
+  const handleViewUser = (user: UserDto) => {
+    setSelectedUserId(user.id);
+    setCurrentView('view');
   };
 
   const handleBackToCockpit = () => {
@@ -54,6 +59,17 @@ export default function ManageUsersPage() {
             onBack={handleBackToCockpit}
           />
         ) : null;
+
+      case 'view':
+        return selectedUserId ? (
+          <EditUser
+            userId={selectedUserId}
+            onUserUpdated={handleUserUpdated}
+            onCancel={handleBackToCockpit}
+            onBack={handleBackToCockpit}
+            readOnly={true}
+          />
+        ) : null;
       
       case 'cockpit':
       default:
@@ -61,6 +77,7 @@ export default function ManageUsersPage() {
           <UserCockpit
             onNewUser={handleNewUser}
             onEditUser={handleEditUser}
+            onViewUser={handleViewUser}
           />
         );
     }

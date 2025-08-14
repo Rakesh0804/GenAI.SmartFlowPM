@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { UserDto } from '@/types/api.types';
+import { UserDto, PaginatedResponse } from '@/types/api.types';
 import { userService } from '@/services/user.service';
+import { useToast } from '@/contexts/ToastContext';
 import { 
   Search, 
   Filter, 
@@ -11,6 +12,7 @@ import {
   Edit, 
   Trash2, 
   Plus,
+  PlusCircle,
   User,
   Users,
   Mail,
@@ -30,6 +32,7 @@ import {
 interface UserCockpitProps {
   onNewUser?: () => void;
   onEditUser?: (user: UserDto) => void;
+  onViewUser?: (user: UserDto) => void;
   onBackClick?: () => void;
 }
 
@@ -37,11 +40,12 @@ interface UserCockpitProps {
 interface UserCardProps {
   user: UserDto;
   onEdit: () => void;
+  onView: () => void;
   onDelete: () => void;
   onToggleStatus: () => void;
 }
 
-const UserCard: React.FC<UserCardProps> = ({ user, onEdit, onDelete, onToggleStatus }) => {
+const UserCard: React.FC<UserCardProps> = ({ user, onEdit, onView, onDelete, onToggleStatus }) => {
   const [showDropdown, setShowDropdown] = useState(false);
 
   const formatDate = (date: Date | string) => {
@@ -81,18 +85,18 @@ const UserCard: React.FC<UserCardProps> = ({ user, onEdit, onDelete, onToggleSta
         {/* Action Icons in Header */}
         <div className="flex items-center space-x-1">
           <button
+            onClick={onView}
+            className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+            title="View User"
+          >
+            <Eye className="w-4 h-4" />
+          </button>
+          <button
             onClick={onEdit}
             className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
             title="Edit User"
           >
             <Edit className="w-4 h-4" />
-          </button>
-          <button
-            onClick={onToggleStatus}
-            className={`p-1 transition-colors ${user.isActive ? 'text-gray-400 hover:text-orange-600' : 'text-gray-400 hover:text-green-600'}`}
-            title={user.isActive ? 'Deactivate User' : 'Activate User'}
-          >
-            <Eye className="w-4 h-4" />
           </button>
           <div className="relative">
             <button
@@ -103,13 +107,36 @@ const UserCard: React.FC<UserCardProps> = ({ user, onEdit, onDelete, onToggleSta
               <MoreHorizontal className="w-4 h-4" />
             </button>
             {showDropdown && (
-              <div className="absolute right-0 top-full mt-1 w-32 bg-white border border-gray-200 rounded-md shadow-lg z-10">
+              <div className="absolute right-0 top-full mt-1 w-36 bg-white border border-gray-200 rounded-md shadow-lg z-10">
+                <button
+                  onClick={() => {
+                    onToggleStatus();
+                    setShowDropdown(false);
+                  }}
+                  className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center ${
+                    user.isActive 
+                      ? 'text-orange-600' 
+                      : 'text-green-600'
+                  }`}
+                >
+                  {user.isActive ? (
+                    <>
+                      <XCircle className="w-4 h-4 mr-2" />
+                      Disable
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Enable
+                    </>
+                  )}
+                </button>
                 <button
                   onClick={() => {
                     onDelete();
                     setShowDropdown(false);
                   }}
-                  className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center"
+                  className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center border-t border-gray-100"
                 >
                   <Trash2 className="w-4 h-4 mr-2" />
                   Delete
@@ -137,12 +164,25 @@ const UserCard: React.FC<UserCardProps> = ({ user, onEdit, onDelete, onToggleSta
             <span className="text-gray-900">{user.hasReportee ? 'Managers' : 'Employees'}</span>
           </div>
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-500">Plant:</span>
+            <span className="text-gray-500">Client:</span>
             <span className="text-gray-900">Company A</span>
           </div>
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-500">Unit:</span>
-            <span className="text-gray-900">user</span>
+            <span className="text-gray-500">Role:</span>
+            <div className="flex flex-wrap gap-1 justify-end">
+              {user.roles && user.roles.length > 0 ? (
+                user.roles.map((role, index) => (
+                  <span 
+                    key={index}
+                    className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                  >
+                    {role}
+                  </span>
+                ))
+              ) : (
+                <span className="text-gray-500 text-xs">No roles assigned</span>
+              )}
+            </div>
           </div>
         </div>
 
@@ -186,7 +226,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, onEdit, onDelete, onToggleSta
         <div className="flex items-center justify-between text-xs text-gray-500">
           <div className="flex items-center">
             <Clock className="w-3 h-3 mr-1" />
-            <span>Updated {formatDate(user.updatedAt || user.createdAt)}</span>
+            <span>Created {formatDate(user.createdAt)}</span>
           </div>
           {user.lastLoginAt && (
             <span>Modified {formatDate(user.lastLoginAt)}</span>
@@ -200,6 +240,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, onEdit, onDelete, onToggleSta
 export const UserCockpit: React.FC<UserCockpitProps> = ({
   onNewUser,
   onEditUser,
+  onViewUser,
   onBackClick
 }) => {
   const [users, setUsers] = useState<UserDto[]>([]);
@@ -211,84 +252,80 @@ export const UserCockpit: React.FC<UserCockpitProps> = ({
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const pageSize = 12; // Show 12 cards at a time
+  const { error: showError, success: showSuccess } = useToast();
 
   useEffect(() => {
     loadUsers();
   }, [currentPage, searchTerm, filterActive, filterManager]);
 
+  // Reset to page 1 when search term or filters change
+  useEffect(() => {
+    if (currentPage !== 1) {
+      setCurrentPage(1);
+    }
+  }, [searchTerm, filterActive, filterManager]);
+
   const loadUsers = async () => {
     try {
       setLoading(true);
       
-      // Use the userService method with proper pagination
-      console.log('Calling userService.getUsers...');
-      const allUsers = await userService.getUsers(1, 1000); // Get all users first
-      console.log('Raw API response:', allUsers);
-      
-      // Ensure allUsers is an array
-      if (!Array.isArray(allUsers)) {
-        console.error('API response is not an array:', allUsers);
-        
-        // Try to handle different response formats
-        if (allUsers && typeof allUsers === 'object') {
-          const response = allUsers as any;
-          // Check if it's a paginated response that wasn't properly extracted
-          if ('data' in response && Array.isArray(response.data)) {
-            console.log('Found data array in response:', response.data);
-            setUsers(response.data.slice(0, pageSize));
-            setTotalPages(Math.ceil(response.data.length / pageSize));
-            setTotalCount(response.data.length);
-            return;
-          }
-          // Check if it has items property
-          if ('items' in response && Array.isArray(response.items)) {
-            console.log('Found items array in response:', response.items);
-            setUsers(response.items.slice(0, pageSize));
-            setTotalPages(Math.ceil(response.items.length / pageSize));
-            setTotalCount(response.items.length);
-            return;
-          }
-        }
-        
-        // If we can't find an array, set empty results
-        setUsers([]);
-        setTotalPages(0);
-        setTotalCount(0);
-        return;
-      }
-      
-      // Filter users based on search and filters
-      let filteredUsers = allUsers;
+      // Use proper pagination with the current page and filters
+      let response: PaginatedResponse<UserDto>;
       
       if (searchTerm) {
-        filteredUsers = allUsers.filter(user => 
+        // If searching, get all users and filter client-side for now
+        // In a real app, you'd want server-side search
+        const allUsers = await userService.getUsers(1, 1000);
+        const filteredUsers = allUsers.filter(user => 
           user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
           user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
           user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
           user.userName.toLowerCase().includes(searchTerm.toLowerCase())
         );
+        
+        // Apply additional filters
+        let finalFilteredUsers = filteredUsers;
+        if (filterActive !== null) {
+          finalFilteredUsers = finalFilteredUsers.filter(user => user.isActive === filterActive);
+        }
+        if (filterManager !== null) {
+          finalFilteredUsers = finalFilteredUsers.filter(user => user.hasReportee === filterManager);
+        }
+        
+        // Create mock pagination response for filtered results
+        const startIndex = (currentPage - 1) * pageSize;
+        const endIndex = startIndex + pageSize;
+        const paginatedUsers = finalFilteredUsers.slice(startIndex, endIndex);
+        
+        setUsers(paginatedUsers);
+        setTotalPages(Math.ceil(finalFilteredUsers.length / pageSize));
+        setTotalCount(finalFilteredUsers.length);
+      } else {
+        // Use proper pagination when not searching
+        response = await userService.getUsersPaginated(currentPage, pageSize);
+        
+        let filteredUsers = response.items;
+        
+        // Apply filters client-side for now
+        if (filterActive !== null) {
+          filteredUsers = filteredUsers.filter(user => user.isActive === filterActive);
+        }
+        if (filterManager !== null) {
+          filteredUsers = filteredUsers.filter(user => user.hasReportee === filterManager);
+        }
+        
+        setUsers(filteredUsers);
+        setTotalPages(response.totalPages);
+        setTotalCount(response.totalCount);
       }
       
-      if (filterActive !== null) {
-        filteredUsers = filteredUsers.filter(user => user.isActive === filterActive);
-      }
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.message || 
+                          error?.message || 
+                          'Failed to load users. Please try again.';
+      showError('Load Users Failed', errorMessage);
       
-      if (filterManager !== null) {
-        filteredUsers = filteredUsers.filter(user => user.hasReportee === filterManager);
-      }
-      
-      // Apply pagination to filtered results
-      const startIndex = (currentPage - 1) * pageSize;
-      const endIndex = startIndex + pageSize;
-      const paginatedUsers = filteredUsers.slice(startIndex, endIndex);
-      
-      setUsers(paginatedUsers);
-      setTotalPages(Math.ceil(filteredUsers.length / pageSize));
-      setTotalCount(filteredUsers.length);
-      
-    } catch (error) {
-      console.error('Error loading users:', error);
-      // Set empty state on error instead of showing alert
+      // Set empty state on error
       setUsers([]);
       setTotalPages(0);
       setTotalCount(0);
@@ -304,22 +341,27 @@ export const UserCockpit: React.FC<UserCockpitProps> = ({
 
     try {
       await userService.deleteUser(userId);
-      alert('User deleted successfully');
+      showSuccess('User Deleted', 'User has been successfully deleted.');
       loadUsers();
-    } catch (error) {
-      console.error('Error deleting user:', error);
-      alert('Failed to delete user');
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.message || 
+                          error?.message || 
+                          'Failed to delete user. Please try again.';
+      showError('Delete Failed', errorMessage);
     }
   };
 
   const handleToggleStatus = async (user: UserDto) => {
     try {
       await userService.toggleUserStatus(user.id, !user.isActive);
-      alert(`User ${!user.isActive ? 'activated' : 'deactivated'} successfully`);
+      const statusText = !user.isActive ? 'activated' : 'deactivated';
+      showSuccess('Status Updated', `User has been successfully ${statusText}.`);
       loadUsers();
-    } catch (error) {
-      console.error('Error toggling user status:', error);
-      alert('Failed to update user status');
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.message || 
+                          error?.message || 
+                          'Failed to update user status. Please try again.';
+      showError('Status Update Failed', errorMessage);
     }
   };
 
@@ -349,10 +391,12 @@ export const UserCockpit: React.FC<UserCockpitProps> = ({
       a.click();
       window.URL.revokeObjectURL(url);
       
-      alert('Users exported successfully');
-    } catch (error) {
-      console.error('Error exporting users:', error);
-      alert('Failed to export users');
+      showSuccess('Export Successful', 'Users have been exported successfully.');
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.message || 
+                          error?.message || 
+                          'Failed to export users. Please try again.';
+      showError('Export Failed', errorMessage);
     }
   };
 
@@ -393,9 +437,9 @@ export const UserCockpit: React.FC<UserCockpitProps> = ({
             
             <button
               onClick={onNewUser}
-              className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+              className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
             >
-              <Plus className="w-4 h-4" />
+              <PlusCircle className="w-4 h-4" />
               <span>New User</span>
             </button>
 
@@ -436,7 +480,7 @@ export const UserCockpit: React.FC<UserCockpitProps> = ({
               <select
                 value={filterActive === null ? '' : filterActive.toString()}
                 onChange={(e) => setFilterActive(e.target.value === '' ? null : e.target.value === 'true')}
-                className="px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                className="w-32 px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
               >
                 <option value="">All Status</option>
                 <option value="true">Active</option>
@@ -490,9 +534,9 @@ export const UserCockpit: React.FC<UserCockpitProps> = ({
               {onNewUser && (
                 <button 
                   onClick={onNewUser} 
-                  className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
                 >
-                  <Plus className="w-4 h-4 mr-2" />
+                  <PlusCircle className="w-4 h-4 mr-2" />
                   Create New User
                 </button>
               )}
@@ -503,6 +547,7 @@ export const UserCockpit: React.FC<UserCockpitProps> = ({
                 <UserCard 
                   key={user.id} 
                   user={user} 
+                  onView={() => onViewUser?.(user)}
                   onEdit={() => onEditUser?.(user)}
                   onDelete={() => handleDeleteUser(user.id)}
                   onToggleStatus={() => handleToggleStatus(user)}

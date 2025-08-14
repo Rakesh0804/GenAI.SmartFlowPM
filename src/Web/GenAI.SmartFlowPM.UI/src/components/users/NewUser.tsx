@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
-import { CreateUserDto } from '@/types/api.types';
+import React, { useState, useEffect } from 'react';
+import { CreateUserDto, RoleDto, UserDto } from '@/types/api.types';
 import { userService } from '@/services/user.service';
+import { roleService } from '@/services/role.service';
+import { useToast } from '@/contexts/ToastContext';
 import { 
   User, 
   Mail, 
@@ -13,7 +15,10 @@ import {
   Eye, 
   EyeOff,
   UserPlus,
-  Users
+  Users,
+  Shield,
+  Loader2,
+  ChevronDown
 } from 'lucide-react';
 
 interface NewUserProps {
@@ -27,9 +32,16 @@ export const NewUser: React.FC<NewUserProps> = ({
   onCancel,
   onBack
 }) => {
+  const { success, error } = useToast();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [availableRoles, setAvailableRoles] = useState<RoleDto[]>([]);
+  const [selectedRoleIds, setSelectedRoleIds] = useState<string[]>([]);
+  const [availableUsers, setAvailableUsers] = useState<UserDto[]>([]);
+  const [managerSearchTerm, setManagerSearchTerm] = useState('');
+  const [showManagerDropdown, setShowManagerDropdown] = useState(false);
+  const [selectedManager, setSelectedManager] = useState<UserDto | null>(null);
   const [formData, setFormData] = useState<CreateUserDto & { confirmPassword: string }>({
     firstName: '',
     lastName: '',
@@ -39,10 +51,35 @@ export const NewUser: React.FC<NewUserProps> = ({
     password: '',
     confirmPassword: '',
     managerId: '',
-    hasReportee: false
+    hasReportee: false,
+    roleIds: []
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    loadAvailableRoles();
+    loadAvailableUsers();
+  }, []);
+
+  const loadAvailableRoles = async () => {
+    try {
+      const roles = await roleService.getAllRoles();
+      setAvailableRoles(roles);
+    } catch (error) {
+      console.error('Error loading roles:', error);
+      // You might want to show a toast notification here
+    }
+  };
+
+  const loadAvailableUsers = async () => {
+    try {
+      const users = await userService.getUsers(1, 1000); // Get all users for manager selection
+      setAvailableUsers(users);
+    } catch (error) {
+      console.error('Error loading users:', error);
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -61,6 +98,41 @@ export const NewUser: React.FC<NewUserProps> = ({
       }));
     }
   };
+
+  const handleRoleToggle = (roleId: string) => {
+    setSelectedRoleIds(prev => {
+      const newSelectedRoles = prev.includes(roleId)
+        ? prev.filter(id => id !== roleId)
+        : [...prev, roleId];
+      
+      // Update form data with selected role IDs
+      setFormData(prevForm => ({
+        ...prevForm,
+        roleIds: newSelectedRoles
+      }));
+      
+      return newSelectedRoles;
+    });
+  };
+
+  const handleManagerSearch = (searchTerm: string) => {
+    setManagerSearchTerm(searchTerm);
+    setShowManagerDropdown(true);
+  };
+
+  const handleManagerSelect = (manager: UserDto) => {
+    setSelectedManager(manager);
+    setManagerSearchTerm(`${manager.firstName} ${manager.lastName}`);
+    setShowManagerDropdown(false);
+    setFormData(prev => ({
+      ...prev,
+      managerId: manager.id
+    }));
+  };
+
+  const filteredManagers = availableUsers.filter(user =>
+    `${user.firstName} ${user.lastName}`.toLowerCase().includes(managerSearchTerm.toLowerCase())
+  );
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -116,12 +188,14 @@ export const NewUser: React.FC<NewUserProps> = ({
     try {
       const { confirmPassword, ...userData } = formData;
       await userService.createUser(userData);
+      success('User created successfully!');
       
       if (onUserCreated) {
         onUserCreated();
       }
-    } catch (error) {
-      console.error('Error creating user:', error);
+    } catch (err) {
+      console.error('Error creating user:', err);
+      error('Failed to create user. Please try again.');
       setErrors(prev => ({
         ...prev,
         submit: 'Failed to create user. Please try again.'
@@ -300,7 +374,7 @@ export const NewUser: React.FC<NewUserProps> = ({
 
                   <div className="space-y-2">
                     <label htmlFor="managerId" className="block text-sm font-medium text-gray-700">
-                      Manager ID
+                      Manager
                     </label>
                     <div className="relative">
                       <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -308,12 +382,59 @@ export const NewUser: React.FC<NewUserProps> = ({
                         type="text"
                         id="managerId"
                         name="managerId"
-                        value={formData.managerId}
-                        onChange={handleInputChange}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                        placeholder="Enter manager ID (optional)"
+                        value={managerSearchTerm}
+                        onChange={(e) => handleManagerSearch(e.target.value)}
+                        onFocus={() => setShowManagerDropdown(true)}
+                        className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        placeholder="Search for a manager (optional)"
                         disabled={loading}
+                        autoComplete="off"
                       />
+                      {managerSearchTerm ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setManagerSearchTerm('');
+                            setSelectedManager(null);
+                            setFormData(prev => ({ ...prev, managerId: '' }));
+                            setShowManagerDropdown(false);
+                          }}
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 w-4 h-4"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      ) : (
+                        <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                      )}
+                      
+                      {/* Manager Dropdown */}
+                      {showManagerDropdown && managerSearchTerm && (
+                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                          {filteredManagers.length > 0 ? (
+                            filteredManagers.map((user) => (
+                              <div
+                                key={user.id}
+                                onClick={() => handleManagerSelect(user)}
+                                className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center space-x-2"
+                              >
+                                <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                                  <span className="text-xs font-medium text-gray-600">
+                                    {user.firstName.charAt(0)}{user.lastName.charAt(0)}
+                                  </span>
+                                </div>
+                                <div>
+                                  <div className="text-sm font-medium text-gray-900">
+                                    {user.firstName} {user.lastName}
+                                  </div>
+                                  <div className="text-xs text-gray-500">{user.email}</div>
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="px-4 py-2 text-sm text-gray-500">No managers found</div>
+                          )}
+                        </div>
+                      )}
                     </div>
                     {errors.managerId && (
                       <p className="text-sm text-red-600">{errors.managerId}</p>
@@ -410,6 +531,86 @@ export const NewUser: React.FC<NewUserProps> = ({
                 </div>
               </div>
 
+              {/* Role Assignment */}
+              <div className="space-y-6">
+                <h3 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-3">Role Assignment</h3>
+                
+                <div className="space-y-4">
+                  <p className="text-sm text-gray-600">
+                    Select one or more roles for this user. Roles determine what actions the user can perform in the system.
+                  </p>
+                  
+                  {availableRoles.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {availableRoles.map((role) => (
+                        <div
+                          key={role.id}
+                          className={`relative rounded-lg border-2 cursor-pointer transition-colors p-4 ${
+                            selectedRoleIds.includes(role.id)
+                              ? 'border-blue-500 bg-blue-50'
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                          onClick={() => handleRoleToggle(role.id)}
+                        >
+                          <div className="flex items-start space-x-3">
+                            <div className="flex items-center h-5">
+                              <input
+                                type="checkbox"
+                                checked={selectedRoleIds.includes(role.id)}
+                                onChange={() => handleRoleToggle(role.id)}
+                                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                              />
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-2">
+                                <Shield className="w-4 h-4 text-blue-500" />
+                                <h4 className="text-sm font-medium text-gray-900">{role.name}</h4>
+                              </div>
+                              {role.description && (
+                                <p className="text-xs text-gray-500 mt-1">{role.description}</p>
+                              )}
+                              <div className="flex items-center justify-between mt-2">
+                                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                  role.isActive 
+                                    ? 'bg-green-100 text-green-800'
+                                    : 'bg-red-100 text-red-800'
+                                }`}>
+                                  {role.isActive ? 'Active' : 'Inactive'}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <Shield className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                      <p>No roles available. Please contact your administrator.</p>
+                    </div>
+                  )}
+                  
+                  {selectedRoleIds.length > 0 && (
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <h5 className="text-sm font-medium text-blue-900 mb-2">Selected Roles:</h5>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedRoleIds.map(roleId => {
+                          const role = availableRoles.find(r => r.id === roleId);
+                          return role ? (
+                            <span
+                              key={roleId}
+                              className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                            >
+                              {role.name}
+                            </span>
+                          ) : null;
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
               {/* Error Display */}
               {errors.submit && (
                 <div className="p-4 bg-red-50 border border-red-200 rounded-md">
@@ -431,12 +632,12 @@ export const NewUser: React.FC<NewUserProps> = ({
                 
                 <button
                   type="submit"
-                  className="flex items-center space-x-2 px-8 py-3 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+                  className="flex items-center space-x-2 px-8 py-3 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
                   disabled={loading}
                 >
                   {loading ? (
                     <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      <Loader2 className="animate-spin h-4 w-4" />
                       <span>Creating...</span>
                     </>
                   ) : (

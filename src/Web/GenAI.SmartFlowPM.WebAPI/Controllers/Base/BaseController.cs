@@ -20,7 +20,7 @@ public abstract class BaseController : ControllerBase
         {
             return Ok(new
             {
-                success = true,
+                isSuccess = true,
                 data = result.Data,
                 message = result.Message
             });
@@ -28,9 +28,10 @@ public abstract class BaseController : ControllerBase
 
         return BadRequest(new
         {
-            success = false,
-            errors = result.Errors,
-            message = result.Errors?.FirstOrDefault()
+            isSuccess = false,
+            data = (T?)default,
+            message = result.Errors?.FirstOrDefault(),
+            errors = result.Errors
         });
     }
 
@@ -40,16 +41,16 @@ public abstract class BaseController : ControllerBase
         {
             return Ok(new
             {
-                success = true,
+                isSuccess = true,
                 message = result.Message
             });
         }
 
         return BadRequest(new
         {
-            success = false,
-            errors = result.Errors,
-            message = result.Errors?.FirstOrDefault()
+            isSuccess = false,
+            message = result.Errors?.FirstOrDefault(),
+            errors = result.Errors
         });
     }
 }
