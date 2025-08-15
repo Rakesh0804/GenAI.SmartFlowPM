@@ -69,6 +69,30 @@ public class GetAllTasksQueryHandler : IRequestHandler<GetAllTasksQuery, Result<
                      $"{t.AssignedToUser.FirstName} {t.AssignedToUser.LastName}".ToLower().Contains(searchTerm))).ToList();
             }
 
+            // Apply status filter if provided
+            if (request.PagedQuery.Status.HasValue)
+            {
+                tasks = tasks.Where(t => (int)t.Status == request.PagedQuery.Status.Value).ToList();
+            }
+
+            // Apply priority filter if provided
+            if (request.PagedQuery.Priority.HasValue)
+            {
+                tasks = tasks.Where(t => (int)t.Priority == request.PagedQuery.Priority.Value).ToList();
+            }
+
+            // Apply project filter if provided
+            if (request.PagedQuery.ProjectId.HasValue)
+            {
+                tasks = tasks.Where(t => t.ProjectId == request.PagedQuery.ProjectId.Value).ToList();
+            }
+
+            // Apply assigned user filter if provided
+            if (request.PagedQuery.AssignedUserId.HasValue)
+            {
+                tasks = tasks.Where(t => t.AssignedToUserId == request.PagedQuery.AssignedUserId.Value).ToList();
+            }
+
             // Apply sorting
             if (!string.IsNullOrWhiteSpace(request.PagedQuery.SortBy))
             {

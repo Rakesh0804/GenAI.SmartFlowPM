@@ -175,6 +175,9 @@ export interface TaskDto {
   actualHours?: number;
   projectId: string;
   projectName: string;
+  assignedToUserId?: string;  // Updated to match API response
+  assignedToUserName?: string; // Updated to match API response
+  // Keep the old properties for backward compatibility
   assignedUserId?: string;
   assignedUserName?: string;
   acronym: string; // Task type identifier (DEV, TEST, DOC, BUG, FEAT)
@@ -192,7 +195,8 @@ export interface CreateTaskDto {
   dueDate?: Date;
   estimatedHours?: number;
   projectId: string;
-  assignedUserId?: string;
+  assignedToUserId?: string; // Updated to match API
+  assignedUserId?: string; // Keep for backward compatibility
   acronym: string; // Required for task categorization
 }
 
@@ -340,18 +344,19 @@ export enum ProjectPriority {
 }
 
 export enum TaskStatus {
-  ToDo = 'ToDo',
-  InProgress = 'InProgress',
-  InReview = 'InReview',
-  Done = 'Done',
-  Blocked = 'Blocked'
+  Todo = 1,
+  InProgress = 2,
+  Review = 3,
+  Testing = 4,
+  Done = 5,
+  Blocked = 6
 }
 
 export enum TaskPriority {
-  Low = 'Low',
-  Medium = 'Medium',
-  High = 'High',
-  Critical = 'Critical'
+  Low = 1,
+  Medium = 2,
+  High = 3,
+  Critical = 4
 }
 
 // Organization types (Admin only)
@@ -360,14 +365,117 @@ export interface OrganizationDto {
   name: string;
   description?: string;
   website?: string;
+  email?: string;
+  phone?: string;
   address?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  zipCode?: string;
+  logoUrl?: string;
+  establishedDate?: string;
+  industry?: string;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface CreateOrganizationDto {
+  name: string;
+  description?: string;
+  website?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  postalCode?: string;
+  logo?: string;
+  establishedDate?: string;
+  employeeCount: number;
+}
+
+export interface UpdateOrganizationDto {
+  name: string;
+  description?: string;
+  website?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  postalCode?: string;
+  logo?: string;
+  establishedDate?: string;
+  employeeCount: number;
+}
+
+export enum BranchType {
+  Headquarters = 1,
+  Regional = 2,
+  Satellite = 3,
+  Remote = 4
+}
+
+export interface BranchDto {
+  id: string;
+  organizationId: string;
+  name: string;
+  code?: string;
+  branchType: BranchType;
+  description?: string;
   phone?: string;
   email?: string;
-  logoUrl?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  postalCode?: string;
+  managerId?: string;
   isActive: boolean;
-  tenantId: string;
   createdAt: Date;
-  updatedAt?: Date;
+  updatedAt: Date;
+}
+
+export interface BranchWithManagerDto extends BranchDto {
+  manager?: UserSummaryDto;
+}
+
+export interface OrganizationWithBranchesDto extends OrganizationDto {
+  branches: BranchWithManagerDto[];
+}
+
+export interface CreateBranchDto {
+  organizationId: string;
+  name: string;
+  code?: string;
+  branchType: BranchType;
+  description?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  postalCode?: string;
+  managerId?: string;
+}
+
+export interface UpdateBranchDto {
+  name: string;
+  code?: string;
+  branchType: BranchType;
+  description?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  postalCode?: string;
+  managerId?: string;
 }
 
 // Role and Claims types
@@ -406,12 +514,62 @@ export interface UpdateClaimDto {
 export interface TenantDto {
   id: string;
   name: string;
-  subdomain: string;
-  connectionString?: string;
-  subscriptionPlan: string;
+  subDomain?: string;
+  description?: string;
+  contactEmail: string;
+  contactPhone?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  postalCode?: string;
+  country?: string;
+  isActive: boolean;
+  subscriptionStartDate?: Date;
+  subscriptionEndDate?: Date;
+  subscriptionPlan?: string;
   maxUsers: number;
   maxProjects: number;
-  isActive: boolean;
+  timeZone?: string;
+  currency?: string;
+  logoUrl?: string;
   createdAt: Date;
-  expiresAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface CreateTenantDto {
+  name: string;
+  subDomain?: string;
+  description?: string;
+  contactEmail: string;
+  contactPhone?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  postalCode?: string;
+  country?: string;
+  subscriptionStartDate?: Date;
+  subscriptionEndDate?: Date;
+  subscriptionPlan?: string;
+  maxUsers?: number;
+  maxProjects?: number;
+  timeZone?: string;
+  currency?: string;
+  logoUrl?: string;
+}
+
+export interface UpdateTenantDto extends CreateTenantDto {
+  id: string;
+  isActive?: boolean;
+}
+
+export interface TenantSummaryDto {
+  id: string;
+  name: string;
+  subDomain?: string;
+  contactEmail: string;
+  isActive: boolean;
+  subscriptionPlan?: string;
+  maxUsers: number;
+  maxProjects: number;
+  createdAt: Date;
 }

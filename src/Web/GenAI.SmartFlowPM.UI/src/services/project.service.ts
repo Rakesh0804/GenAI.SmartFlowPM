@@ -12,7 +12,7 @@ export class ProjectService extends BaseApiService {
   }
 
   async getProjects(page: number = 1, pageSize: number = 10): Promise<ProjectDto[]> {
-    const url = this.buildPaginationUrl('/projects', page, pageSize);
+    const url = `/projects${this.buildQueryParams({ pageNumber: page, pageSize })}`;
     return this.get<ProjectDto[]>(url);
   }
 
@@ -38,23 +38,59 @@ export class ProjectService extends BaseApiService {
 
   // Additional utility methods
   async searchProjects(searchTerm: string, page: number = 1, pageSize: number = 10): Promise<ProjectDto[]> {
-    const url = `/projects/search${this.buildQueryParams({ q: searchTerm, page, pageSize })}`;
+    const url = `/projects${this.buildQueryParams({ 
+      pageNumber: page, 
+      pageSize, 
+      searchTerm 
+    })}`;
     return this.get<ProjectDto[]>(url);
   }
 
+  // Quick search for autocomplete (returns limited results)
+  async searchProjectsQuick(searchTerm: string, limit: number = 20): Promise<ProjectDto[]> {
+    try {
+      const url = `/projects${this.buildQueryParams({ 
+        pageNumber: 1, 
+        pageSize: limit, 
+        searchTerm 
+      })}`;
+      return this.get<ProjectDto[]>(url);
+    } catch (error) {
+      console.warn('Quick search failed, returning empty results');
+      return [];
+    }
+  }
+
+  // Get recent/active projects for initial dropdown load
+  async getRecentProjects(limit: number = 10): Promise<ProjectDto[]> {
+    try {
+      return this.getProjects(1, limit);
+    } catch (error) {
+      console.warn('Could not load projects');
+      return [];
+    }
+  }
+
   async getProjectsByStatus(status: string, page: number = 1, pageSize: number = 10): Promise<ProjectDto[]> {
-    const url = `/projects/by-status${this.buildQueryParams({ status, page, pageSize })}`;
+    const url = `/projects${this.buildQueryParams({ 
+      pageNumber: page, 
+      pageSize, 
+      searchTerm: status // You might need to adjust this based on how the backend handles status filtering
+    })}`;
     return this.get<ProjectDto[]>(url);
   }
 
   async getProjectsByPriority(priority: string, page: number = 1, pageSize: number = 10): Promise<ProjectDto[]> {
-    const url = `/projects/by-priority${this.buildQueryParams({ priority, page, pageSize })}`;
+    const url = `/projects${this.buildQueryParams({ 
+      pageNumber: page, 
+      pageSize, 
+      searchTerm: priority // You might need to adjust this based on how the backend handles priority filtering
+    })}`;
     return this.get<ProjectDto[]>(url);
   }
 
   async getActiveProjects(page: number = 1, pageSize: number = 10): Promise<ProjectDto[]> {
-    const url = `/projects/active${this.buildQueryParams({ page, pageSize })}`;
-    return this.get<ProjectDto[]>(url);
+    return this.getProjects(page, pageSize);
   }
 
   async getProjectMembers(projectId: string): Promise<any[]> {

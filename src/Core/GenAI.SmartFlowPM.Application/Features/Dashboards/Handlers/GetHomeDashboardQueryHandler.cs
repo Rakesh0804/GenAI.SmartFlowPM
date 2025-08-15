@@ -47,6 +47,14 @@ namespace GenAI.SmartFlowPM.Application.Features.Dashboards.Handlers
             var currentUser = request.UserId != Guid.Empty ? users.FirstOrDefault(u => u.Id == request.UserId) : null;
             var userTasks = currentUser != null ? tasks.Where(t => t.AssignedToUserId == request.UserId).ToList() : new List<ProjectTask>();
 
+            // Debug logging for troubleshooting
+            if (request.UserId != Guid.Empty)
+            {
+                Console.WriteLine($"Dashboard Query - Looking for user ID: {request.UserId}");
+                Console.WriteLine($"Dashboard Query - Found user: {currentUser?.FirstName} {currentUser?.LastName}");
+                Console.WriteLine($"Dashboard Query - User tasks count: {userTasks.Count}");
+            }
+
             // User Summary
             var userSummary = currentUser != null ? new UserDashboardSummaryDto
             {

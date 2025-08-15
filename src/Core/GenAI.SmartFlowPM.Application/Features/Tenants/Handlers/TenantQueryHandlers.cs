@@ -69,7 +69,7 @@ public class GetTenantBySubDomainQueryHandler : IRequestHandler<GetTenantBySubDo
     }
 }
 
-public class GetAllTenantsQueryHandler : IRequestHandler<GetAllTenantsQuery, Result<PaginatedResult<TenantSummaryDto>>>
+public class GetAllTenantsQueryHandler : IRequestHandler<GetAllTenantsQuery, Result<PaginatedResult<TenantDto>>>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
@@ -80,7 +80,7 @@ public class GetAllTenantsQueryHandler : IRequestHandler<GetAllTenantsQuery, Res
         _mapper = mapper;
     }
 
-    public async Task<Result<PaginatedResult<TenantSummaryDto>>> Handle(GetAllTenantsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PaginatedResult<TenantDto>>> Handle(GetAllTenantsQuery request, CancellationToken cancellationToken)
     {
         try
         {
@@ -89,9 +89,9 @@ public class GetAllTenantsQueryHandler : IRequestHandler<GetAllTenantsQuery, Res
                 pageSize: request.PageSize,
                 cancellationToken: cancellationToken);
 
-            var tenantDtos = _mapper.Map<IEnumerable<TenantSummaryDto>>(tenants.Items);
+            var tenantDtos = _mapper.Map<IEnumerable<TenantDto>>(tenants.Items);
             
-            var result = new PaginatedResult<TenantSummaryDto>
+            var result = new PaginatedResult<TenantDto>
             {
                 Items = tenantDtos,
                 TotalCount = tenants.TotalCount,
@@ -99,16 +99,16 @@ public class GetAllTenantsQueryHandler : IRequestHandler<GetAllTenantsQuery, Res
                 PageSize = request.PageSize
             };
 
-            return Result<PaginatedResult<TenantSummaryDto>>.Success(result);
+            return Result<PaginatedResult<TenantDto>>.Success(result);
         }
         catch (Exception ex)
         {
-            return Result<PaginatedResult<TenantSummaryDto>>.Failure($"Error retrieving tenants: {ex.Message}");
+            return Result<PaginatedResult<TenantDto>>.Failure($"Error retrieving tenants: {ex.Message}");
         }
     }
 }
 
-public class GetActiveTenantsQueryHandler : IRequestHandler<GetActiveTenantsQuery, Result<IEnumerable<TenantSummaryDto>>>
+public class GetActiveTenantsQueryHandler : IRequestHandler<GetActiveTenantsQuery, Result<IEnumerable<TenantDto>>>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
@@ -119,23 +119,23 @@ public class GetActiveTenantsQueryHandler : IRequestHandler<GetActiveTenantsQuer
         _mapper = mapper;
     }
 
-    public async Task<Result<IEnumerable<TenantSummaryDto>>> Handle(GetActiveTenantsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<IEnumerable<TenantDto>>> Handle(GetActiveTenantsQuery request, CancellationToken cancellationToken)
     {
         try
         {
             var tenants = await _unitOfWork.Tenants.GetActiveTenantsAsync(cancellationToken);
-            var tenantDtos = _mapper.Map<IEnumerable<TenantSummaryDto>>(tenants);
+            var tenantDtos = _mapper.Map<IEnumerable<TenantDto>>(tenants);
             
-            return Result<IEnumerable<TenantSummaryDto>>.Success(tenantDtos);
+            return Result<IEnumerable<TenantDto>>.Success(tenantDtos);
         }
         catch (Exception ex)
         {
-            return Result<IEnumerable<TenantSummaryDto>>.Failure($"Error retrieving active tenants: {ex.Message}");
+            return Result<IEnumerable<TenantDto>>.Failure($"Error retrieving active tenants: {ex.Message}");
         }
     }
 }
 
-public class SearchTenantsQueryHandler : IRequestHandler<SearchTenantsQuery, Result<PaginatedResult<TenantSummaryDto>>>
+public class SearchTenantsQueryHandler : IRequestHandler<SearchTenantsQuery, Result<PaginatedResult<TenantDto>>>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
@@ -146,7 +146,7 @@ public class SearchTenantsQueryHandler : IRequestHandler<SearchTenantsQuery, Res
         _mapper = mapper;
     }
 
-    public async Task<Result<PaginatedResult<TenantSummaryDto>>> Handle(SearchTenantsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PaginatedResult<TenantDto>>> Handle(SearchTenantsQuery request, CancellationToken cancellationToken)
     {
         try
         {
@@ -158,9 +158,9 @@ public class SearchTenantsQueryHandler : IRequestHandler<SearchTenantsQuery, Res
                            t.ContactEmail.Contains(request.SearchTerm),
                 cancellationToken: cancellationToken);
 
-            var tenantDtos = _mapper.Map<IEnumerable<TenantSummaryDto>>(tenants.Items);
+            var tenantDtos = _mapper.Map<IEnumerable<TenantDto>>(tenants.Items);
             
-            var result = new PaginatedResult<TenantSummaryDto>
+            var result = new PaginatedResult<TenantDto>
             {
                 Items = tenantDtos,
                 TotalCount = tenants.TotalCount,
@@ -168,11 +168,11 @@ public class SearchTenantsQueryHandler : IRequestHandler<SearchTenantsQuery, Res
                 PageSize = request.PageSize
             };
 
-            return Result<PaginatedResult<TenantSummaryDto>>.Success(result);
+            return Result<PaginatedResult<TenantDto>>.Success(result);
         }
         catch (Exception ex)
         {
-            return Result<PaginatedResult<TenantSummaryDto>>.Failure($"Error searching tenants: {ex.Message}");
+            return Result<PaginatedResult<TenantDto>>.Failure($"Error searching tenants: {ex.Message}");
         }
     }
 }

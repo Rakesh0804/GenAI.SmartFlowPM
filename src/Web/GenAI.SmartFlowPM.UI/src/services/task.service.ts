@@ -1,5 +1,17 @@
 import { BaseApiService } from '../lib/base-api.service';
-import { TaskDto } from '../types/api.types';
+import { TaskDto, PaginatedResponse, TaskStatus, TaskPriority } from '../types/api.types';
+
+interface TaskFilterParams {
+  page?: number;
+  pageSize?: number;
+  searchTerm?: string;
+  status?: TaskStatus;
+  priority?: TaskPriority;
+  projectId?: string;
+  assignedUserId?: string;
+  sortBy?: string;
+  sortDescending?: boolean;
+}
 
 export class TaskService extends BaseApiService {
   private static instance: TaskService;
@@ -11,9 +23,37 @@ export class TaskService extends BaseApiService {
     return TaskService.instance;
   }
 
-  async getTasks(page: number = 1, pageSize: number = 10): Promise<TaskDto[]> {
-    const url = this.buildPaginationUrl('/tasks', page, pageSize);
-    return this.get<TaskDto[]>(url);
+  async getTasks(page: number = 1, pageSize: number = 10, filters?: TaskFilterParams): Promise<PaginatedResponse<TaskDto>> {
+    const params: Record<string, any> = {
+      pageNumber: page,
+      pageSize: pageSize,
+    };
+
+    // Add filter parameters if provided - using exact property names from TaskFilteredPagedQuery
+    if (filters?.searchTerm) {
+      params.searchTerm = filters.searchTerm;
+    }
+    if (filters?.status !== undefined) {
+      params.status = filters.status;
+    }
+    if (filters?.priority !== undefined) {
+      params.priority = filters.priority;
+    }
+    if (filters?.projectId) {
+      params.projectId = filters.projectId;
+    }
+    if (filters?.assignedUserId) {
+      params.assignedUserId = filters.assignedUserId;
+    }
+    if (filters?.sortBy) {
+      params.sortBy = filters.sortBy;
+    }
+    if (filters?.sortDescending !== undefined) {
+      params.sortDescending = filters.sortDescending;
+    }
+
+    const url = `/tasks${this.buildQueryParams(params)}`;
+    return this.get<PaginatedResponse<TaskDto>>(url);
   }
 
   async getTaskById(id: string): Promise<TaskDto> {
@@ -41,29 +81,25 @@ export class TaskService extends BaseApiService {
   }
 
   // Additional utility methods
-  async searchTasks(searchTerm: string, page: number = 1, pageSize: number = 10): Promise<TaskDto[]> {
-    const url = `/tasks/search${this.buildQueryParams({ q: searchTerm, page, pageSize })}`;
-    return this.get<TaskDto[]>(url);
+  async searchTasks(searchTerm: string, page: number = 1, pageSize: number = 10): Promise<PaginatedResponse<TaskDto>> {
+    return this.getTasks(page, pageSize, { searchTerm });
   }
 
-  async getTasksByStatus(status: string, page: number = 1, pageSize: number = 10): Promise<TaskDto[]> {
-    const url = `/tasks/by-status${this.buildQueryParams({ status, page, pageSize })}`;
-    return this.get<TaskDto[]>(url);
+  async getTasksByStatus(status: TaskStatus, page: number = 1, pageSize: number = 10): Promise<PaginatedResponse<TaskDto>> {
+    return this.getTasks(page, pageSize, { status });
   }
 
-  async getTasksByPriority(priority: string, page: number = 1, pageSize: number = 10): Promise<TaskDto[]> {
-    const url = `/tasks/by-priority${this.buildQueryParams({ priority, page, pageSize })}`;
-    return this.get<TaskDto[]>(url);
+  async getTasksByPriority(priority: TaskPriority, page: number = 1, pageSize: number = 10): Promise<PaginatedResponse<TaskDto>> {
+    return this.getTasks(page, pageSize, { priority });
   }
 
-  async getOverdueTasks(page: number = 1, pageSize: number = 10): Promise<TaskDto[]> {
+  async getTasksByProject(projectId: string, page: number = 1, pageSize: number = 10): Promise<PaginatedResponse<TaskDto>> {
+    return this.getTasks(page, pageSize, { projectId });
+  }
+
+  async getOverdueTasks(page: number = 1, pageSize: number = 10): Promise<PaginatedResponse<TaskDto>> {
     const url = `/tasks/overdue${this.buildQueryParams({ page, pageSize })}`;
-    return this.get<TaskDto[]>(url);
-  }
-
-  async getTasksByProject(projectId: string, page: number = 1, pageSize: number = 10): Promise<TaskDto[]> {
-    const url = `/tasks/by-project/${projectId}${this.buildQueryParams({ page, pageSize })}`;
-    return this.get<TaskDto[]>(url);
+    return this.get<PaginatedResponse<TaskDto>>(url);
   }
 
   async assignTask(id: string, userId: string): Promise<TaskDto> {

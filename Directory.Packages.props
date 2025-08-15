@@ -65,5 +65,25 @@
 
     <!-- Utilities -->
     <PackageVersion Include="Bogus" Version="35.6.1" />
+
+    <!-- Observability and Resilience -->
+    <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="9.0.0" />
+    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.9.0" />
+    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.9.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.9.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.9.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" Version="1.0.0-beta.12" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.9.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Process" Version="0.5.0-beta.6" />
+    
+    <!-- Health Checks -->
+    <PackageVersion Include="Microsoft.AspNetCore.Diagnostics.HealthChecks" Version="2.2.0" />
+    <PackageVersion Include="AspNetCore.HealthChecks.Npgsql" Version="8.0.2" />
+    <PackageVersion Include="AspNetCore.HealthChecks.UI" Version="8.0.2" />
+    <PackageVersion Include="AspNetCore.HealthChecks.UI.Client" Version="8.0.2" />
+    <PackageVersion Include="AspNetCore.HealthChecks.UI.PostgreSQL.Storage" Version="8.0.2" />
+    
+    <!-- Polly Resilience -->
+    <PackageVersion Include="Polly.Extensions.Http" Version="3.0.0" />
   </ItemGroup>
 </Project>

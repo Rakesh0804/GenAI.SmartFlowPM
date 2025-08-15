@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { RoleDto, PaginatedResponse } from '@/types/api.types';
 import { roleService } from '@/services/role.service';
 import { useToast } from '@/contexts/ToastContext';
+import { Pagination } from '@/components/common/Pagination';
+import { useConfirmationModal } from '@/components/common/ConfirmationModal';
 import { 
   Search, 
   Filter, 
@@ -65,7 +67,9 @@ const RoleCard: React.FC<RoleCardProps> = ({ role, onEdit, onView, onDelete, onT
       <div className="bg-gray-50 px-4 py-3 border-b border-gray-200 flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <div className="flex items-center space-x-2">
-            <Shield className="w-4 h-4 text-blue-600" />
+            <div className="p-1 bg-primary-100 rounded-md">
+              <Shield className="w-5 h-5 text-primary-700 font-semibold" />
+            </div>
             <span className="text-sm font-medium text-gray-900 truncate max-w-[120px]">
               {role.name}
             </span>
@@ -76,27 +80,27 @@ const RoleCard: React.FC<RoleCardProps> = ({ role, onEdit, onView, onDelete, onT
         <div className="flex items-center space-x-1">
           <button
             onClick={onView}
-            className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+            className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-all duration-200"
             title="View Role"
           >
-            <Eye className="w-4 h-4" />
+            <Eye className="w-5 h-5" />
           </button>
           <button
             onClick={onEdit}
-            className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+            className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-all duration-200"
             title="Edit Role"
           >
-            <Edit className="w-4 h-4" />
+            <Edit className="w-5 h-5" />
           </button>
           
           {/* More Actions Dropdown */}
           <div className="relative">
             <button
               onClick={() => setShowDropdown(!showDropdown)}
-              className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-all duration-200"
               title="More Actions"
             >
-              <MoreHorizontal className="w-4 h-4" />
+              <MoreHorizontal className="w-5 h-5" />
             </button>
             
             {showDropdown && (
@@ -135,7 +139,7 @@ const RoleCard: React.FC<RoleCardProps> = ({ role, onEdit, onView, onDelete, onT
         {/* Description */}
         <div className="flex items-start space-x-3">
           <div className="flex-shrink-0 mt-0.5">
-            <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
+            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Description</p>
@@ -193,6 +197,7 @@ export const RoleCockpit: React.FC<RoleCockpitProps> = ({
   const [totalPages, setTotalPages] = useState(0);
   const [filterActive, setFilterActive] = useState<boolean | null>(null);
   const { success, error } = useToast();
+  const { showConfirmation, confirmationModal } = useConfirmationModal();
 
   const pageSize = 12; // Optimal for card grid display
 
@@ -254,20 +259,23 @@ export const RoleCockpit: React.FC<RoleCockpitProps> = ({
     };
   
     const handleDeleteRole = async (role: RoleDto) => {
-      if (!confirm(`Are you sure you want to delete the role "${role.name}"? This action cannot be undone.`)) {
-        return;
-      }
-  
-      try {
-        await roleService.deleteRole(role.id);
-        success('Role Deleted', `Role "${role.name}" has been successfully deleted.`);
-        loadRoles();
-      } catch (error: any) {
-        const errorMessage = error?.response?.data?.message || 
-                            error?.message || 
-                            'Failed to delete role. Please try again.';
-        error('Delete Failed', errorMessage);
-      }
+      showConfirmation({
+        title: 'Delete Role',
+        message: `Are you sure you want to delete "${role.name}"? This action cannot be undone.`,
+        confirmText: 'Delete',
+        onConfirm: async () => {
+          try {
+            await roleService.deleteRole(role.id);
+            success('Role Deleted', `Role "${role.name}" has been successfully deleted.`);
+            loadRoles();
+          } catch (error: any) {
+            const errorMessage = error?.response?.data?.message || 
+                                error?.message || 
+                                'Failed to delete role. Please try again.';
+            error('Delete Failed', errorMessage);
+          }
+        }
+      });
     };
   
     const handleToggleStatus = async (role: RoleDto) => {
@@ -329,11 +337,11 @@ export const RoleCockpit: React.FC<RoleCockpitProps> = ({
         <div className="flex items-center justify-between bg-white p-4 border-b border-gray-200">
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Shield className="w-6 h-6 text-blue-600" />
+              <div className="p-3 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl shadow-lg">
+                <Shield className="w-7 h-7 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Role Management</h1>
+                <h1 className="text-2xl font-bold text-gray-900">Role Cockpit</h1>
                 <p className="text-sm text-gray-600">Manage system roles and permissions</p>
               </div>
             </div>
@@ -343,23 +351,23 @@ export const RoleCockpit: React.FC<RoleCockpitProps> = ({
             <button
               onClick={handleExport}
               disabled={loading}
-              className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
             >
-              <Download className="w-4 h-4" />
+              <Download className="w-5 h-5 text-green-600" />
               <span>Export</span>
             </button> 
             
             <button
               onClick={onNewRole}
-              className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+              className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-primary-600 to-primary-700 border border-transparent rounded-md hover:from-primary-700 hover:to-primary-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 shadow-lg transition-all duration-200"
             >
-              <PlusCircle className="w-4 h-4" />
+              <PlusCircle className="w-5 h-5" />
               <span>New Role</span>
             </button>
 
             <button
               onClick={onBackClick}
-              className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-all duration-200"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Back</span>
@@ -373,13 +381,13 @@ export const RoleCockpit: React.FC<RoleCockpitProps> = ({
             {/* Search Box */}
             <div className="flex-1 max-w-md">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-primary-500 w-5 h-5" />
                 <input
                   type="text"
                   placeholder="Search roles..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  className="w-full pl-11 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all duration-200"
                 />
               </div>
             </div>
@@ -394,7 +402,7 @@ export const RoleCockpit: React.FC<RoleCockpitProps> = ({
               <select
                 value={filterActive === null ? '' : filterActive.toString()}
                 onChange={(e) => setFilterActive(e.target.value === '' ? null : e.target.value === 'true')}
-                className="w-32 px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                className="w-32 px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all duration-200"
               >
                 <option value="">All Status</option>
                 <option value="true">Active</option>
@@ -403,7 +411,7 @@ export const RoleCockpit: React.FC<RoleCockpitProps> = ({
 
               <button
                 onClick={clearFilters}
-                className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-all duration-200"
               >
                 Clear Filters
               </button>
@@ -484,64 +492,21 @@ export const RoleCockpit: React.FC<RoleCockpitProps> = ({
             </div>
 
             {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-6 mt-6 border-t border-gray-200">
-                <div className="text-sm text-gray-700">
-                  Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalCount)} of {totalCount} results
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                    disabled={currentPage === 1}
-                    className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Previous
-                  </button>
-                  
-                  {/* Page Numbers */}
-                  {[...Array(totalPages)].map((_, index) => {
-                    const pageNum = index + 1;
-                    if (
-                      pageNum === 1 ||
-                      pageNum === totalPages ||
-                      (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
-                    ) {
-                      return (
-                        <button
-                          key={pageNum}
-                          onClick={() => setCurrentPage(pageNum)}
-                          className={`px-3 py-2 text-sm font-medium border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                            currentPage === pageNum
-                              ? 'text-white bg-blue-600 border-blue-600'
-                              : 'text-gray-500 bg-white border-gray-300 hover:bg-gray-50'
-                          }`}
-                        >
-                          {pageNum}
-                        </button>
-                      );
-                    } else if (
-                      pageNum === currentPage - 2 ||
-                      pageNum === currentPage + 2
-                    ) {
-                      return <span key={pageNum} className="px-2 py-2 text-sm text-gray-500">...</span>;
-                    }
-                    return null;
-                  })}
-                  
-                  <button
-                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                    disabled={currentPage === totalPages}
-                    className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Next
-                  </button>
-                </div>
-              </div>
-            )}
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalCount={totalCount}
+              pageSize={pageSize}
+              itemName="roles"
+              onPageChange={setCurrentPage}
+              loading={loading}
+            />
           </div>
         )}
       </div>
+      
+      {/* Confirmation Modal */}
+      {confirmationModal}
     </div>
   );
 };

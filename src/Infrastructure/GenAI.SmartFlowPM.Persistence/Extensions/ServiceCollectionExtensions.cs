@@ -42,6 +42,7 @@ public static class ServiceCollectionExtensions
 
         // Add services
         services.AddScoped<ICounterService, CounterService>();
+        services.AddScoped<IDatabaseInitializationService, DatabaseInitializationService>();
 
         return services;
     }

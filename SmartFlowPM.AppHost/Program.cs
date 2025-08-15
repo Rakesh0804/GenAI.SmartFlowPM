@@ -3,28 +3,28 @@ using Microsoft.Extensions.Hosting;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-// Add PostgreSQL database with fixed port
-var postgres = builder.AddPostgres("postgres")
-    .WithDataVolume()
-    .WithPgAdmin();
-
-var projectDb = postgres.AddDatabase("SmartFlowPMDB");
-
-// Add the API project (will use https profile from launchSettings.json)
+// Add the API project with comprehensive observability
+// The API will use its own connection string from appsettings.Development.json
 var apiService = builder.AddProject<Projects.GenAI_SmartFlowPM_WebAPI>("api")
-    .WithReference(projectDb);
+    .WithEnvironment("ASPNETCORE_ENVIRONMENT", builder.Environment.EnvironmentName)
+    .WithEnvironment("OTEL_EXPORTER_OTLP_ENDPOINT", "http://localhost:4317")
+    .WithEnvironment("OTEL_SERVICE_NAME", "SmartFlowPM.WebAPI")
+    .WithEnvironment("OTEL_SERVICE_VERSION", "1.0.0");
 
 // Clean up any existing Next.js processes and generate configuration
 CleanupNextjsProcesses();
 GenerateNextjsConfig();
 
-// Add the Next.js frontend with environment port setting
+// Add the Next.js frontend with environment configuration and named HTTP client setup
 var isDevelopment = builder.Environment.EnvironmentName == "Development";
 var frontend = builder.AddNpmApp("frontend", "../src/Web/GenAI.SmartFlowPM.UI", isDevelopment ? "dev" : "start")
     .WithReference(apiService)
     .WithExternalHttpEndpoints()
     .WithEnvironment("NODE_ENV", isDevelopment ? "development" : "production")
-    .WithEnvironment("PORT", "3001");
+    .WithEnvironment("PORT", "3001")
+    .WithEnvironment("NEXT_PUBLIC_API_URL", "https://localhost:7149/api")
+    .WithEnvironment("NEXT_PUBLIC_API_URL_HTTP", "http://localhost:5052/api")
+    .WithEnvironment("NEXT_PUBLIC_ENVIRONMENT", isDevelopment ? "development" : "production");
 
 // Add Docker publishing for production
 if (!isDevelopment)
@@ -48,7 +48,7 @@ static void GenerateNextjsConfig()
             Directory.CreateDirectory(configDir);
         }
 
-        // Use the fixed API URL from launchSettings.json
+        // Use the fixed API URL from launchSettings.json with health check endpoints
         var apiUrl = "https://localhost:7149/api";
         var apiUrlHttp = "http://localhost:5052/api";
 
@@ -56,11 +56,17 @@ static void GenerateNextjsConfig()
         window.APP_CONFIG = {{
             API_URL: '{apiUrl}',
             API_URL_HTTP: '{apiUrlHttp}',
-            ENVIRONMENT: 'development'
+            HEALTH_CHECK_URL: 'https://localhost:7149/health',
+            HEALTH_CHECK_URL_HTTP: 'http://localhost:5052/health',
+            ENVIRONMENT: 'development',
+            RETRY_ATTEMPTS: 3,
+            TIMEOUT_MS: 30000,
+            ENABLE_TRACING: true
         }};";
 
         File.WriteAllText(configPath, configContent);
         Console.WriteLine($"Generated Next.js config with API URL: {apiUrl}");
+        Console.WriteLine($"Health check endpoints configured for monitoring");
     }
     catch (Exception ex)
     {

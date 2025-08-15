@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { ClaimDto, PaginatedResponse } from '@/types/api.types';
 import { claimService } from '@/services/claim.service';
 import { useToast } from '@/contexts/ToastContext';
+import { Pagination } from '@/components/common/Pagination';
+import ConfirmationModal, { useConfirmationModal } from '@/components/common/ConfirmationModal';
 import { 
   Search, 
   Filter, 
@@ -85,8 +87,8 @@ const ClaimCard: React.FC<ClaimCardProps> = ({
       {/* Card Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200">
         <div className="flex items-center space-x-3 min-w-0 flex-1">
-          <div className="flex-none p-2 bg-blue-100 rounded-lg">
-            <Key className="w-5 h-5 text-blue-600" />
+          <div className="flex-none p-1 bg-primary-100 rounded-md">
+            <Key className="w-5 h-5 text-primary-700 font-semibold" />
           </div>
           <div className="min-w-0 flex-1">
             <h3 className="text-lg font-semibold text-gray-900 truncate">{claim.name}</h3>
@@ -102,10 +104,21 @@ const ClaimCard: React.FC<ClaimCardProps> = ({
               e.stopPropagation();
               onView(claim);
             }}
-            className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+            className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-all duration-200"
             title="View Details"
           >
-            <Eye className="w-4 h-4" />
+            <Eye className="w-5 h-5" />
+          </button>
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit(claim);
+            }}
+            className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-all duration-200"
+            title="Edit Claim"
+          >
+            <Edit className="w-5 h-5" />
           </button>
           
           <div className="relative">
@@ -136,17 +149,6 @@ const ClaimCard: React.FC<ClaimCardProps> = ({
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      onEdit(claim);
-                      setShowDropdown(false);
-                    }}
-                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
-                  >
-                    <Edit className="w-4 h-4" />
-                    <span>Edit Claim</span>
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
                       onDelete(claim);
                       setShowDropdown(false);
                     }}
@@ -167,7 +169,7 @@ const ClaimCard: React.FC<ClaimCardProps> = ({
         {/* Description */}
         <div className="flex items-start space-x-3">
           <div className="flex-shrink-0 mt-0.5">
-            <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
+            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Description</p>
@@ -225,6 +227,7 @@ export const ClaimCockpit: React.FC<ClaimCockpitProps> = ({
   const [totalCount, setTotalCount] = useState(0);
   const pageSize = 12; // Show 12 cards at a time
   const { success, error } = useToast();
+  const { showConfirmation, confirmationModal } = useConfirmationModal();
 
   useEffect(() => {
     loadClaims();
@@ -258,20 +261,22 @@ export const ClaimCockpit: React.FC<ClaimCockpitProps> = ({
   };
 
   const handleDeleteClaim = async (claim: ClaimDto) => {
-    if (!confirm(`Are you sure you want to delete the claim "${claim.name}"? This action cannot be undone.`)) {
-      return;
-    }
-
-    try {
-      await claimService.deleteClaim(claim.id);
-      success('Claim Deleted', `Claim "${claim.name}" has been successfully deleted.`);
-      loadClaims();
-    } catch (error: any) {
-      const errorMessage = error?.response?.data?.message || 
-                          error?.message || 
-                          'Failed to delete claim. Please try again.';
-      error('Delete Failed', errorMessage);
-    }
+    showConfirmation({
+      title: 'Delete Claim',
+      message: `Are you sure you want to delete the claim "${claim.name}"? This action cannot be undone.`,
+      onConfirm: async () => {
+        try {
+          await claimService.deleteClaim(claim.id);
+          success('Claim Deleted', `Claim "${claim.name}" has been successfully deleted.`);
+          loadClaims();
+        } catch (error: any) {
+          const errorMessage = error?.response?.data?.message || 
+                              error?.message || 
+                              'Failed to delete claim. Please try again.';
+          error('Delete Failed', errorMessage);
+        }
+      }
+    });
   };
 
   const handleToggleStatus = async (claim: ClaimDto) => {
@@ -353,94 +358,91 @@ export const ClaimCockpit: React.FC<ClaimCockpitProps> = ({
   };
 
   return (
-    <div className="h-full w-full max-w-full flex flex-col overflow-hidden">
-      {/* Header Section */}
-      <div className="flex-none bg-white border-b border-gray-200">
-        <div className="p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4 min-w-0 flex-1">
-              {onBack && (
-                <button
-                  onClick={onBack}
-                  className="flex-none p-2 hover:bg-gray-100 rounded-md transition-colors"
-                >
-                  <ArrowLeft className="w-5 h-5 text-gray-600" />
-                </button>
-              )}
-              <div className="flex items-center space-x-3 min-w-0">
-                <div className="flex-none p-2 bg-blue-100 rounded-lg">
-                  <Key className="w-8 h-8 text-blue-600" />
-                </div>
-                <div className="min-w-0">
-                  <h1 className="text-3xl font-bold text-gray-900">Claims Management</h1>
-                  <p className="text-gray-600">Manage system claims and permissions</p>
-                </div>
+    <div className="h-full w-full flex flex-col">
+      {/* Fixed Header Section */}
+      <div className="flex-none">
+        {/* Header Section */}
+        <div className="flex items-center justify-between bg-white p-4 border-b border-gray-200">
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3">
+              <div className="p-3 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl shadow-lg">
+                <Key className="w-7 h-7 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Claims Cockpit</h1>
+                <p className="text-sm text-gray-600">Manage system claims and permissions</p>
               </div>
             </div>
-
-            <div className="flex items-center space-x-3 flex-none">
-              <button
-                onClick={handleExport}
-                className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                disabled={loading}
-              >
-                <Download className="w-4 h-4" />
-                <span>Export</span>
-              </button>
-              
-              <button
-                onClick={handleAddNew}
-                className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
-                disabled={loading}
-              >
-                <PlusCircle className="w-4 h-4" />
-                <span>Add Claim</span>
-              </button>
-            </div>
           </div>
+          
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={handleExport}
+              disabled={loading}
+              className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+            >
+              <Download className="w-5 h-5 text-green-600" />
+              <span>Export</span>
+            </button> 
+            
+            <button
+              onClick={handleAddNew}
+              className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-primary-600 to-primary-700 border border-transparent rounded-md hover:from-primary-700 hover:to-primary-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 shadow-lg transition-all duration-200"
+            >
+              <PlusCircle className="w-5 h-5" />
+              <span>Add Claim</span>
+            </button>
 
-          {/* Search and Filter Section */}
-          <div className="mt-6 flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
+            <button
+              onClick={onBack}
+              className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-all duration-200"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Back</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Filters and Search Section */}
+        <div className="bg-white p-4 border-b border-gray-200">
+          <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+            {/* Search Box */}
+            <div className="flex-1 max-w-md">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-primary-500 w-5 h-5" />
                 <input
                   type="text"
-                  placeholder="Search claims by name, type, or description..."
+                  placeholder="Search claims..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                  disabled={loading}
+                  className="w-full pl-11 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all duration-200"
                 />
               </div>
             </div>
 
-            <div className="flex items-center space-x-3">
-              <div className="flex items-center space-x-2">
-                <Filter className="w-4 h-4 text-gray-500" />
-                <select
-                  value={filterActive === null ? 'all' : filterActive.toString()}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setFilterActive(value === 'all' ? null : value === 'true');
-                    setCurrentPage(1);
-                  }}
-                  className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                  disabled={loading}
-                >
-                  <option value="all">All Status</option>
-                  <option value="true">Active Only</option>
-                  <option value="false">Inactive Only</option>
-                </select>
+            {/* Filters */}
+            <div className="flex flex-wrap gap-3 items-center">
+              <div className="flex items-center gap-2">
+                <Filter className="text-gray-400 w-4 h-4" />
+                <span className="text-sm font-medium text-gray-700">Filters</span>
               </div>
+              
+              <select
+                value={filterActive === null ? '' : filterActive.toString()}
+                onChange={(e) => setFilterActive(e.target.value === '' ? null : e.target.value === 'true')}
+                className="w-32 px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all duration-200"
+              >
+                <option value="">All Status</option>
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+              </select>
 
               {(searchTerm || filterActive !== null) && (
                 <button
                   onClick={clearFilters}
-                  className="px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md transition-colors"
-                  disabled={loading}
+                  className="px-3 py-2 text-sm text-gray-600 hover:text-gray-800 underline"
                 >
-                  Clear Filters
+                  Clear all
                 </button>
               )}
             </div>
@@ -496,60 +498,23 @@ export const ClaimCockpit: React.FC<ClaimCockpitProps> = ({
                 </div>
 
                 {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="flex items-center justify-between pt-6 border-t border-gray-200">
-                    <div className="text-sm text-gray-700">
-                      Showing <span className="font-medium">{((currentPage - 1) * pageSize) + 1}</span> to{' '}
-                      <span className="font-medium">
-                        {Math.min(currentPage * pageSize, totalCount)}
-                      </span>{' '}
-                      of <span className="font-medium">{totalCount}</span> claims
-                    </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => setCurrentPage(currentPage - 1)}
-                        disabled={currentPage === 1 || loading}
-                        className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        Previous
-                      </button>
-                      
-                      <div className="flex items-center space-x-1">
-                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                          const pageNum = i + 1;
-                          return (
-                            <button
-                              key={pageNum}
-                              onClick={() => setCurrentPage(pageNum)}
-                              className={`px-3 py-2 text-sm font-medium rounded-md ${
-                                currentPage === pageNum
-                                  ? 'bg-primary-600 text-white'
-                                  : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
-                              }`}
-                              disabled={loading}
-                            >
-                              {pageNum}
-                            </button>
-                          );
-                        })}
-                      </div>
-                      
-                      <button
-                        onClick={() => setCurrentPage(currentPage + 1)}
-                        disabled={currentPage === totalPages || loading}
-                        className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        Next
-                      </button>
-                    </div>
-                  </div>
-                )}
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  totalCount={totalCount}
+                  pageSize={pageSize}
+                  itemName="claims"
+                  onPageChange={setCurrentPage}
+                  loading={loading}
+                />
               </>
             )}
           </div>
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      {confirmationModal}
     </div>
   );
 };

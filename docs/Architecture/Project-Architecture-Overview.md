@@ -1,8 +1,16 @@
-# Project Architecture Overview - Multi-Tenant SaaS Application
+# Project Architecture Overview - Enterprise-Grade Multi-Tenant SaaS Application
 
 ## 🏗️ Architecture Highlights
 
-### Multi-Tenant Design ✅ NEW
+### Enterprise Observability & Resilience ✅ NEW - August 15, 2025
+- **Database Initialization**: Automatic database lifecycle management with validation, creation, migration, and comprehensive data seeding
+- **OpenTelemetry Integration**: Complete distributed tracing for HTTP calls, database operations, and custom business logic activities
+- **Resilience Policies**: Enterprise-grade retry, circuit breaker, and timeout patterns with exponential backoff and jitter
+- **Health Check Infrastructure**: Multi-layered monitoring (database, memory, external APIs, self-health) with interactive dashboard
+- **Named HTTP Clients**: Type-safe clients with automatic observability, tenant awareness, and trace context propagation
+- **Production CORS**: Environment-aware cross-origin policies with security headers and credential management
+
+### Multi-Tenant Design ✅ EXISTING
 - **Tenant Isolation**: Shared database with row-level security via TenantId
 - **Data Segregation**: All entities inherit from `TenantBaseEntity` 
 - **Scalable**: Supports multiple organizations in single application instance
@@ -41,58 +49,68 @@ GenAI.SmartFlowPM/
 │   │   │       ├── User.cs                        # ✅ Existing
 │   │   │       ├── Project.cs                     # ✅ Existing
 │   │   │       ├── Task.cs                        # ✅ Existing
-│   │   │       ├── Organization.cs                # ✅ NEW: Organization entity
-│   │   │       ├── Branch.cs                      # ✅ NEW: Branch entity
-│   │   │       ├── OrganizationPolicy.cs          # ✅ NEW: Policy entity
-│   │   │       ├── CompanyHoliday.cs              # ✅ NEW: Holiday entity
-│   │   │       └── OrganizationSetting.cs         # ✅ NEW: Settings entity
+│   │   │       ├── Organization.cs                # ✅ Organization entity
+│   │   │       ├── Branch.cs                      # ✅ Branch entity
+│   │   │       ├── OrganizationPolicy.cs          # ✅ Policy entity
+│   │   │       ├── CompanyHoliday.cs              # ✅ Holiday entity
+│   │   │       └── OrganizationSetting.cs         # ✅ Settings entity
 │   │   └── 📁 GenAI.SmartFlowPM.Application/
 │   │       ├── 📁 DTOs/
 │   │       │   ├── User/                          # ✅ Existing
 │   │       │   ├── Project/                       # ✅ Existing  
 │   │       │   ├── Task/                          # ✅ Existing
-│   │       │   └── Organization/                  # ✅ NEW: All organization DTOs
+│   │       │   └── Organization/                  # ✅ All organization DTOs
 │   │       │       └── OrganizationDtos.cs
 │   │       └── 📁 Features/
 │   │           ├── Users/                         # ✅ Existing
 │   │           ├── Projects/                      # ✅ Existing
 │   │           ├── Tasks/                         # ✅ Existing
-│   │           ├── Organizations/                 # ✅ NEW: Organization CQRS
+│   │           ├── Organizations/                 # ✅ Organization CQRS
 │   │           │   ├── Commands/
 │   │           │   ├── Queries/
 │   │           │   └── Handlers/
-│   │           ├── Branches/                      # ✅ NEW: Branch CQRS
+│   │           ├── Branches/                      # ✅ Branch CQRS
 │   │           │   ├── Commands/
 │   │           │   ├── Queries/
 │   │           │   └── Handlers/
-│   │           ├── Campaigns/                     # ✅ NEW: Campaign CQRS
+│   │           ├── Campaigns/                     # ✅ Campaign CQRS
 │   │           │   ├── Commands/
 │   │           │   ├── Queries/
 │   │           │   └── Handlers/
-│   │           └── Certificates/                  # ✅ NEW: Certificate CQRS
+│   │           └── Certificates/                  # ✅ Certificate CQRS
 │   │               ├── Commands/
 │   │               ├── Queries/
 │   │               └── Handlers/
 │   ├── 📁 Infrastructure/
 │   │   └── 📁 GenAI.SmartFlowPM.Persistence/
+│   │       ├── 📁 Services/
+│   │       │   ├── DatabaseInitializationService.cs  # ✅ NEW: Database lifecycle management
+│   │       │   ├── CounterService.cs              # ✅ Existing task numbering
+│   │       │   └── DataSeeder.cs                  # ✅ Enhanced comprehensive seeding
+│   │       ├── 📁 Extensions/
+│   │       │   ├── ObservabilityExtensions.cs     # ✅ NEW: OpenTelemetry configuration
+│   │       │   ├── ResilienceExtensions.cs        # ✅ NEW: Retry policies and circuit breakers
+│   │       │   ├── HealthCheckExtensions.cs       # ✅ NEW: Comprehensive health monitoring
+│   │       │   ├── CorsExtensions.cs              # ✅ NEW: Production CORS configuration
+│   │       │   └── DatabaseExtensions.cs          # ✅ NEW: Database startup integration
 │   │       ├── 📁 Configurations/
 │   │       │   ├── UserConfiguration.cs           # ✅ Existing
 │   │       │   ├── ProjectConfiguration.cs        # ✅ Existing
 │   │       │   ├── TaskConfiguration.cs           # ✅ Existing
-│   │       │   ├── OrganizationConfiguration.cs   # ✅ NEW: Organization EF config
-│   │       │   ├── BranchConfiguration.cs         # ✅ NEW: Branch EF config
-│   │       │   ├── OrganizationPolicyConfiguration.cs  # ✅ NEW
-│   │       │   ├── CompanyHolidayConfiguration.cs      # ✅ NEW
-│   │       │   └── OrganizationSettingConfiguration.cs # ✅ NEW
+│   │       │   ├── OrganizationConfiguration.cs   # ✅ Organization EF config
+│   │       │   ├── BranchConfiguration.cs         # ✅ Branch EF config
+│   │       │   ├── OrganizationPolicyConfiguration.cs  # ✅ Policy config
+│   │       │   ├── CompanyHolidayConfiguration.cs      # ✅ Holiday config
+│   │       │   └── OrganizationSettingConfiguration.cs # ✅ Settings config
 │   │       ├── 📁 Repositories/
 │   │       │   ├── UserRepository.cs              # ✅ Existing
 │   │       │   ├── ProjectRepository.cs           # ✅ Existing
 │   │       │   ├── TaskRepository.cs              # ✅ Existing
-│   │       │   ├── OrganizationRepository.cs      # ✅ NEW: Organization data access
-│   │       │   └── BranchRepository.cs            # ✅ NEW: Branch data access
+│   │       │   ├── OrganizationRepository.cs      # ✅ Organization data access
+│   │       │   └── BranchRepository.cs            # ✅ Branch data access
 │   │       └── 📁 Migrations/
 │   │           ├── [Previous migrations]          # ✅ Existing
-│   │           └── 20250806_AddOrganizationModule.cs  # ✅ NEW: Applied successfully
+│   │           └── 20250806_AddOrganizationModule.cs  # ✅ Applied successfully
 │   └── 📁 Web/
 │       ├── 📁 GenAI.SmartFlowPM.WebAPI/
 │       │   └── 📁 Controllers/
@@ -119,13 +137,17 @@ GenAI.SmartFlowPM/
 │           │   │   ├── SidebarContext.tsx         # ✅ Global sidebar state
 │           │   │   └── ToastContext.tsx           # ✅ Toast Notification System v2.0
 │           │   ├── 📁 hooks/                      # ✅ Custom React hooks
-│           │   │   └── useAuth.tsx                # ✅ Authentication management
+│           │   │   ├── useAuth.tsx                # ✅ Authentication management
+│           │   │   └── useHealthCheck.ts          # ✅ NEW: Health monitoring with typed callbacks
 │           │   ├── 📁 lib/                        # ✅ Utility functions
+│           │   │   ├── http-client.ts             # ✅ NEW: Type-safe HTTP client with observability
+│           │   │   ├── http-client-config.ts      # ✅ NEW: Centralized HTTP configuration
+│           │   │   └── utils.ts                   # ✅ Utility functions
 │           │   └── 📁 types/                      # ✅ TypeScript definitions
 │           ├── 📁 public/                         # ✅ Static assets
 │           ├── next.config.js                     # ✅ Next.js configuration
 │           ├── tailwind.config.js                 # ✅ Tailwind with purple theme
-│           ├── tsconfig.json                      # ✅ TypeScript configuration
+│           ├── tsconfig.json                      # ✅ TypeScript ES2020 configuration (updated for modern JS)
 │           └── package.json                       # ✅ Dependencies (Next.js 15.4.6, React 19)
 └── 📁 SmartFlowPM.AppHost/                        # ✅ .NET Aspire orchestration
 ```
@@ -133,6 +155,43 @@ GenAI.SmartFlowPM/
 ## 🎯 Module Implementation Status
 
 ### ✅ Completed Modules
+
+#### 0. Enterprise Infrastructure ✅ COMPLETE - August 15, 2025
+- **Database Initialization Service**: Automatic database lifecycle management with validation, creation, and migration
+  - **Database Validation**: Checks for database existence and creates if missing
+  - **Migration Execution**: Runs all pending Entity Framework Core migrations
+  - **Data Seeding**: Comprehensive test data seeding with realistic organizational structure
+  - **Error Handling**: Robust error handling with detailed logging and graceful failure recovery
+- **OpenTelemetry Observability**: Complete distributed tracing and metrics collection
+  - **HTTP Instrumentation**: Automatic tracing of all HTTP requests and responses
+  - **Database Instrumentation**: Entity Framework Core query tracing with performance metrics
+  - **Custom Activities**: Manual activity creation for business logic tracing with trace context
+  - **OTLP Export**: OpenTelemetry Protocol export for enterprise monitoring solutions (Jaeger, Zipkin, etc.)
+  - **Service Identification**: Proper service naming and version tracking in distributed systems
+- **Resilience Policies**: Enterprise-grade fault tolerance with retry, circuit breaker, and timeout patterns
+  - **Named HTTP Clients**: Three pre-configured clients (Default, ExternalAPI, HealthCheck) with tailored resilience
+  - **Standard Resilience Handlers**: Microsoft.Extensions.Http.Resilience integration for production readiness
+  - **Exponential Backoff**: Intelligent retry with jitter to prevent thundering herd problems
+  - **Circuit Breaker**: Automatic failure protection with configurable failure thresholds and recovery timing
+  - **Timeout Management**: Request-level and overall operation timeout configuration
+- **Health Check Infrastructure**: Multi-layered health monitoring with enterprise dashboard
+  - **Database Health**: PostgreSQL connection validation and query execution testing
+  - **Memory Health**: System memory usage monitoring with configurable warning thresholds
+  - **External API Health**: Third-party service dependency monitoring and availability checks
+  - **Self Health Check**: Application-level health validation and component status verification
+  - **Health Check UI**: Interactive dashboard at `/healthchecks-ui` with detailed metrics and historical data
+  - **Multiple Endpoints**: Kubernetes-ready endpoints for liveness (`/health`), readiness (`/health/ready`), and detailed monitoring (`/health/detailed`)
+- **Named HTTP Client System**: Type-safe HTTP clients with automatic observability and multi-tenant support
+  - **SmartFlowHttpClient**: Intelligent HTTP client with automatic retry logic and distributed trace context
+  - **Tenant-Aware Headers**: Automatic tenant ID injection for proper multi-tenant data isolation
+  - **Request Correlation**: Unique request ID generation for end-to-end request tracking
+  - **Response Interceptors**: Automatic response logging, error handling, and performance metrics
+  - **TypeScript Integration**: Fully typed client implementation for frontend consumption with strict type safety
+- **Production CORS**: Environment-aware cross-origin resource sharing configuration
+  - **Security Headers**: Proper CORS header management for cross-origin requests
+  - **Environment Policies**: Different policies for development (permissive) and production (restrictive)
+  - **Credential Support**: Configurable support for credentials in cross-origin requests
+  - **Method & Header Restrictions**: Controlled access to HTTP methods and headers for security
 
 #### 1. User Module ✅ COMPLETE
 - **Domain**: User entity with role-based security
@@ -246,26 +305,32 @@ GenAI.SmartFlowPM/
 ## 🔧 Technical Stack
 
 ### Backend (.NET 9)
-- **Framework**: ASP.NET Core Web API
+- **Framework**: ASP.NET Core Web API with .NET 9
 - **ORM**: Entity Framework Core with PostgreSQL
 - **CQRS**: MediatR for command/query handling
 - **Mapping**: AutoMapper for DTO transformations
 - **Validation**: FluentValidation for input validation
 - **Authentication**: JWT with role-based authorization
-- **Documentation**: Swagger/OpenAPI
+- **Documentation**: Swagger/OpenAPI with comprehensive endpoint documentation
+- **Observability**: OpenTelemetry with HTTP, EF Core, and custom activity instrumentation
+- **Resilience**: Microsoft.Extensions.Http.Resilience with retry, circuit breaker, and timeout policies
+- **Health Checks**: AspNetCore.HealthChecks with database, memory, and external API monitoring
+- **Database Management**: Automatic initialization, migration, and comprehensive data seeding
 
 ### Frontend (Next.js 15.4.6 with React 19 + TypeScript + Tailwind CSS) ✅ COMPLETE
 - **Framework**: Next.js 15.4.6 with React 19 for modern development
-- **Language**: TypeScript 5.9.2 for complete type safety
+- **Language**: TypeScript 5.9.2 for complete type safety with ES2020 target
 - **Styling**: Tailwind CSS with custom purple theme design system
 - **Architecture**: App Router with server and client components
 - **Authentication**: JWT token management with useAuth hook
 - **State Management**: React Context (SidebarContext, ToastContext)
 - **UI Components**: Custom component library with responsive design
 - **Toast System**: Modern notification system v2.0 with smart queue management
+- **HTTP Client**: Type-safe SmartFlowHttpClient with observability, retry logic, and tenant awareness
+- **Health Monitoring**: useHealthCheck hook for real-time application health status
 - **Build System**: Production-optimized with static generation
 - **Port**: 3001 (configured in Aspire orchestration)
-- **Status**: ✅ Production-ready implementation complete
+- **Status**: ✅ Production-ready implementation complete with strict TypeScript compliance
 
 ### Database (PostgreSQL)
 - **Primary Database**: PostgreSQL with Entity Framework Core
@@ -275,10 +340,13 @@ GenAI.SmartFlowPM/
 - **Transactions**: Automatic transaction management
 
 ### DevOps (.NET Aspire)
-- **Orchestration**: .NET Aspire for service coordination
-- **Configuration**: Environment-based configuration
+- **Orchestration**: .NET Aspire for service coordination and discovery
+- **Configuration**: Environment-based configuration management
 - **Logging**: Structured logging with Serilog
-- **Monitoring**: Application insights and health checks
+- **Monitoring**: OpenTelemetry distributed tracing with OTLP export
+- **Health Checks**: Comprehensive health monitoring with interactive dashboard
+- **Database Management**: Containerized PostgreSQL with automatic initialization
+- **Resilience**: Built-in retry policies, circuit breakers, and timeout management
 
 ## 🛡️ Security Implementation
 
@@ -341,6 +409,16 @@ This architecture provides a robust, scalable foundation for enterprise project 
 
 ## 📝 Recent Updates
 
+### August 15, 2025 - Enterprise Observability & Resilience Infrastructure ✅
+- **Complete Observability Stack**: Implemented comprehensive OpenTelemetry instrumentation for HTTP calls, database operations, and custom business logic with OTLP export support
+- **Production Resilience**: Added enterprise-grade retry policies, circuit breakers, and timeout management with exponential backoff and jitter
+- **Health Check Infrastructure**: Multi-layered health monitoring (database, memory, external APIs, self-health) with interactive dashboard at `/healthchecks-ui`
+- **Database Initialization Service**: Automatic database lifecycle management with validation, creation, migration execution, and comprehensive data seeding
+- **Named HTTP Client System**: Type-safe HTTP clients with automatic observability, tenant-aware headers, and distributed trace context propagation
+- **TypeScript Compliance**: Resolved all strict compilation issues with ES2020 target, explicit type annotations, and modern JavaScript support
+- **Production CORS**: Environment-aware cross-origin policies with security headers and credential management
+- **Integration Complete**: All enterprise infrastructure successfully integrated with existing Clean Architecture and CQRS patterns
+
 ### August 12, 2025 - HasReportee Property Enhancement ✅
 - **User Module Enhancement**: Added `HasReportee` boolean property to all User DTOs
 - **DTOs Updated**: UserDto, CreateUserDto, UpdateUserDto, UserSummaryDto now include HasReportee
@@ -353,3 +431,7 @@ This architecture provides a robust, scalable foundation for enterprise project 
 - **Multi-Tenant Architecture**: Complete tenant isolation for all user operations
 - **Organization Module**: Full implementation with organizational hierarchy support
 - **Authentication System**: JWT-based authentication with role-based authorization
+- **Campaign & Certificate Modules**: Complete audit campaign management and professional recognition systems
+- **Frontend Implementation**: Next.js 15 + React 19 + TypeScript + Tailwind CSS with Toast Notification System v2.0
+
+This architecture provides a robust, scalable foundation for enterprise project management with comprehensive observability, resilience, and monitoring capabilities! 🚀

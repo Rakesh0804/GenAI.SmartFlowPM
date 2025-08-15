@@ -62,7 +62,7 @@ const menuItems: MenuItem[] = [
         icon: FolderIcon, 
         href: '/projects',
         subItems: [
-            { id: 'tasks', label: 'Tasks', icon: CheckSquareIcon, href: '/tasks', badge: 12 }
+            { id: 'tasks', label: 'Tasks', icon: CheckSquareIcon, href: '/projects/tasks', badge: 12 }
         ]
     },
     { 
@@ -70,7 +70,8 @@ const menuItems: MenuItem[] = [
         label: 'Manage', 
         icon: SettingsIcon,
         subItems: [
-            { id: 'clients', label: 'Clients', icon: BuildingIcon, href: '/manage/clients' },
+            { id: 'tenants', label: 'Tenants', icon: BuildingIcon, href: '/manage/tenants' },
+            { id: 'organizations', label: 'Organizations', icon: BuildingIcon, href: '/manage/organizations' },
             { id: 'users', label: 'Users', icon: UsersIcon, href: '/manage/users' },
             { id: 'roles', label: 'Roles', icon: ShieldIcon, href: '/manage/roles' },
             { id: 'claims', label: 'Claims', icon: KeyIcon, href: '/manage/claims' }

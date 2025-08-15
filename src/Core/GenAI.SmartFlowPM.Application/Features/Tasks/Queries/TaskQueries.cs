@@ -11,10 +11,25 @@ public class GetTaskByIdQuery : IRequest<Result<TaskDto>>
     public Guid Id { get; set; }
 }
 
+public class TaskFilteredPagedQuery : PagedQuery
+{
+    [JsonPropertyName("status")]
+    public int? Status { get; set; }
+    
+    [JsonPropertyName("priority")]
+    public int? Priority { get; set; }
+    
+    [JsonPropertyName("projectId")]
+    public Guid? ProjectId { get; set; }
+    
+    [JsonPropertyName("assignedUserId")]
+    public Guid? AssignedUserId { get; set; }
+}
+
 public class GetAllTasksQuery : IRequest<Result<PaginatedResult<TaskDto>>>
 {
     [JsonPropertyName("pagedQuery")]
-    public PagedQuery PagedQuery { get; set; } = new();
+    public TaskFilteredPagedQuery PagedQuery { get; set; } = new();
 }
 
 public class GetTasksByProjectIdQuery : IRequest<Result<IEnumerable<TaskDto>>>

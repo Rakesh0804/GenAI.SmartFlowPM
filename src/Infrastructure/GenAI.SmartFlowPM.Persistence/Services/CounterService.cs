@@ -15,21 +15,21 @@ public class CounterService : ICounterService
         _context = context;
     }
 
-    public async Task<string> GenerateTaskNumberAsync(string acronym)
+    public async Task<string> GenerateTaskNumberAsync(string acronym, Guid tenantId)
     {
         var counterName = $"Task_{acronym}";
-        var nextValue = await GetNextCounterValueAsync(counterName);
+        var nextValue = await GetNextCounterValueAsync(counterName, tenantId);
         
         // Format: ACRONYM-000001 (minimum 6 digits with trailing zeros)
         return $"{acronym}-{nextValue:D6}";
     }
 
-    public async Task<int> GetNextCounterValueAsync(string counterName)
+    public async Task<int> GetNextCounterValueAsync(string counterName, Guid tenantId)
     {
         // Use lock to ensure thread safety
         lock (_lockObject)
         {
-            var counter = _context.Counters.FirstOrDefault(c => c.Name == counterName);
+            var counter = _context.Counters.FirstOrDefault(c => c.Name == counterName && c.TenantId == tenantId);
             
             if (counter == null)
             {
@@ -40,6 +40,7 @@ public class CounterService : ICounterService
                     Name = counterName,
                     CurrentValue = 1,
                     Description = $"Counter for {counterName}",
+                    TenantId = tenantId,
                     CreatedAt = DateTime.UtcNow,
                     CreatedBy = "System"
                 };
@@ -58,9 +59,9 @@ public class CounterService : ICounterService
         }
     }
 
-    public async Task ResetCounterAsync(string counterName)
+    public async Task ResetCounterAsync(string counterName, Guid tenantId)
     {
-        var counter = await _context.Counters.FirstOrDefaultAsync(c => c.Name == counterName);
+        var counter = await _context.Counters.FirstOrDefaultAsync(c => c.Name == counterName && c.TenantId == tenantId);
         if (counter != null)
         {
             counter.CurrentValue = 0;

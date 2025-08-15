@@ -13,7 +13,7 @@ export class UserService extends BaseApiService {
 
   async getUsers(page: number = 1, pageSize: number = 10): Promise<UserDto[]> {
     try {
-      const url = this.buildPaginationUrl('/users', page, pageSize);
+      const url = `/users${this.buildQueryParams({ pageNumber: page, pageSize })}`;
       
       const response = await this.get<PaginatedResponse<UserDto>>(url);
       
@@ -48,7 +48,7 @@ export class UserService extends BaseApiService {
 
   async getUsersPaginated(page: number = 1, pageSize: number = 10): Promise<PaginatedResponse<UserDto>> {
     try {
-      const url = this.buildPaginationUrl('/users', page, pageSize);
+      const url = `/users${this.buildQueryParams({ pageNumber: page, pageSize })}`;
       return await this.get<PaginatedResponse<UserDto>>(url);
     } catch (error) {
       throw error;
@@ -77,9 +77,66 @@ export class UserService extends BaseApiService {
 
   // Additional utility methods
   async searchUsers(searchTerm: string, page: number = 1, pageSize: number = 10): Promise<UserDto[]> {
-    const url = `/users/search${this.buildQueryParams({ q: searchTerm, page, pageSize })}`;
-    const response = await this.get<PaginatedResponse<UserDto>>(url);
-    return response.items; // Extract the items array from paginated response
+    try {
+      // Use the users endpoint with searchTerm parameter
+      const url = `/users${this.buildQueryParams({ 
+        pageNumber: page, 
+        pageSize, 
+        searchTerm 
+      })}`;
+      const response = await this.get<PaginatedResponse<UserDto>>(url);
+      return response.items || []; // Extract the items array from paginated response
+    } catch (error) {
+      console.warn('Search failed, returning empty results');
+      return [];
+    }
+  }
+
+  // Quick search for autocomplete (returns limited results)
+  async searchUsersQuick(searchTerm: string, limit: number = 20): Promise<UserDto[]> {
+    try {
+      // Use the users endpoint with searchTerm parameter
+      const url = `/users${this.buildQueryParams({ 
+        pageNumber: 1, 
+        pageSize: limit, 
+        searchTerm 
+      })}`;
+      const response = await this.get<PaginatedResponse<UserDto>>(url);
+      
+      // Handle different response formats
+      if (response && typeof response === 'object') {
+        // If it's a paginated response with 'items' property
+        if ('items' in response && Array.isArray(response.items)) {
+          return response.items;
+        }
+        
+        // If it's a paginated response with 'data' property
+        if ('data' in response && Array.isArray(response.data)) {
+          return response.data;
+        }
+        
+        // If it's a direct array response
+        if (Array.isArray(response)) {
+          return response;
+        }
+      }
+      
+      return [];
+    } catch (error) {
+      console.warn('Quick search failed, returning empty results');
+      return [];
+    }
+  }
+
+  // Get active users for initial dropdown load
+  async getActiveUsers(limit: number = 10): Promise<UserDto[]> {
+    try {
+      // Just use the regular users endpoint with a small limit
+      return this.getUsers(1, limit);
+    } catch (error) {
+      console.warn('Could not load users');
+      return [];
+    }
   }
 
   async getUsersByRole(role: string, page: number = 1, pageSize: number = 10): Promise<UserDto[]> {

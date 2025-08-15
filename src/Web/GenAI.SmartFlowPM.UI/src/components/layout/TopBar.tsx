@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
 import { BellIcon, SearchIcon } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';

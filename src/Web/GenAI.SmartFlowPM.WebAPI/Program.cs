@@ -13,6 +13,8 @@ using GenAI.SmartFlowPM.Persistence.Context;
 using GenAI.SmartFlowPM.Infrastructure.Services;
 using GenAI.SmartFlowPM.Persistence.Seeders;
 using GenAI.SmartFlowPM.Domain.Interfaces;
+using GenAI.SmartFlowPM.WebAPI.Extensions;
+using GenAI.SmartFlowPM.WebAPI.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +30,12 @@ builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices();
 builder.Services.AddPersistenceServices(builder.Configuration);
+
+// Add Observability (OpenTelemetry, Tracing, Metrics)
+builder.Services.AddObservability(builder.Configuration);
+
+// Add Resilience Policies and Named HTTP Clients
+builder.Services.AddResiliencePolicies(builder.Configuration);
 
 // Add JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
@@ -77,27 +85,8 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
-// Add CORS
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAngular", policy =>
-    {
-        if (builder.Environment.IsDevelopment())
-        {
-            policy.SetIsOriginAllowed(origin => new Uri(origin).Host == "localhost")
-                  .AllowAnyMethod()
-                  .AllowAnyHeader()
-                  .AllowCredentials();
-        }
-        else
-        {
-            policy.WithOrigins("http://localhost:4200")
-                  .AllowAnyMethod()
-                  .AllowAnyHeader()
-                  .AllowCredentials();
-        }
-    });
-});
+// Add CORS with comprehensive policies
+builder.Services.AddSmartFlowCors(builder.Configuration, builder.Environment);
 
 // Add Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
@@ -136,6 +125,9 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+// Add Comprehensive Health Checks
+builder.Services.AddComprehensiveHealthChecks(builder.Configuration);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
@@ -155,35 +147,17 @@ if (!app.Environment.IsDevelopment())
     app.UseHttpsRedirection();
 }
 
-app.UseCors("AllowAngular");
+app.UseSmartFlowCors(app.Environment);
 
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Map comprehensive health check endpoints
+app.MapComprehensiveHealthChecks();
+
 app.MapControllers();
 
-// Seed data in development
-if (app.Environment.IsDevelopment())
-{
-    try
-    {
-        using var scope = app.Services.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var passwordService = scope.ServiceProvider.GetRequiredService<GenAI.SmartFlowPM.Domain.Interfaces.Services.IPasswordHashingService>();
-        var counterService = scope.ServiceProvider.GetRequiredService<GenAI.SmartFlowPM.Domain.Interfaces.Services.ICounterService>();
-
-        // await context.Database.EnsureCreatedAsync();
-
-        var seeder = new DataSeeder(context, passwordService, counterService);
-        await seeder.SeedAsync(forceReseed: false); // Enable seeding for testing
-
-        Console.WriteLine("Data seeding completed successfully.");
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Error during data seeding: {ex.Message}");
-        Console.WriteLine($"Stack trace: {ex.StackTrace}");
-    }
-}
+// Initialize database (check, create, migrate, seed)
+await app.InitializeDatabaseAsync();
 
 app.Run();

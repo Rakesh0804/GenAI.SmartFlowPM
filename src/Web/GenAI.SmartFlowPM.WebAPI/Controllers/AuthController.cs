@@ -40,7 +40,8 @@ public class AuthController : BaseController
         // by removing the token from storage
         return Ok(new
         {
-            success = true,
+            isSuccess = true,
+            data = (object?)null,
             message = "Logged out successfully"
         });
     }

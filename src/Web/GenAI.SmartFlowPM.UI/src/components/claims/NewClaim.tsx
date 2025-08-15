@@ -106,48 +106,58 @@ export const NewClaim: React.FC<NewClaimProps> = ({ onBack, onClaimCreated }) =>
 
   return (
     <div className="h-full w-full flex flex-col">
-      {/* Header */}
-      <div className="flex-none bg-white border-b border-gray-200">
-        <div className="p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              {onBack && (
-                <button
-                  onClick={onBack}
-                  className="p-2 hover:bg-gray-100 rounded-md transition-colors"
-                  disabled={loading}
-                >
-                  <ArrowLeft className="w-5 h-5 text-gray-600" />
-                </button>
-              )}
-              <div className="flex items-center space-x-3">
-                <div className="p-3 bg-blue-100 rounded-lg">
-                  <Key className="w-6 h-6 text-blue-600" />
-                </div>
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-900">Create New Claim</h1>
-                  <p className="text-gray-600">Add a new claim to the system</p>
-                </div>
+      {/* Fixed Header Section */}
+      <div className="flex-none">
+        {/* Header Section */}
+        <div className="flex items-center justify-between bg-white p-4 border-b border-gray-200">
+          <div className="flex items-center space-x-4">
+            {onBack && (
+              <button
+                onClick={onBack}
+                className="p-2 hover:bg-gray-100 rounded-md transition-colors"
+                disabled={loading}
+              >
+                <ArrowLeft className="w-5 h-5 text-gray-600" />
+              </button>
+            )}
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <Key className="w-6 h-6 text-blue-600" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Create New Claim</h1>
+                <p className="text-sm text-gray-600">Add a new claim to the system</p>
               </div>
             </div>
+          </div>
+          
+          <div className="flex items-center space-x-3">
+            <button
+              type="button"
+              onClick={onBack}
+              className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              disabled={loading}
+            >
+              <X className="w-4 h-4" />
+              <span>Cancel</span>
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Form Content */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="p-6">
-          <div className="max-w-2xl mx-auto">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Basic Information Section */}
-              <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
-                <div className="px-6 py-4 border-b border-gray-200">
-                  <h2 className="text-lg font-semibold text-gray-900">Basic Information</h2>
-                </div>
-                <div className="p-6 space-y-6">
-                  {/* Claim Name */}
-                  <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+      {/* Content Area - Full width, no extra padding */}
+      <div className="flex-1 overflow-hidden">
+        <div className="h-full overflow-y-auto">
+          {/* Form Section */}
+          <div className="w-full bg-white">
+            <form onSubmit={handleSubmit} className="p-8 space-y-8">
+              {/* Basic Information */}
+              <div className="space-y-6">
+                <h3 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-3">Basic Information</h3>
+                
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700">
                       Claim Name <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
@@ -157,24 +167,24 @@ export const NewClaim: React.FC<NewClaimProps> = ({ onBack, onClaimCreated }) =>
                         id="name"
                         value={formData.name}
                         onChange={(e) => handleInputChange('name', e.target.value)}
-                        className={`w-full pl-10 pr-4 py-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                          errors.name ? 'border-red-300' : 'border-gray-300'
+                        className={`w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none ${
+                          errors.name ? 'border-red-300' : ''
                         }`}
-                        placeholder="Enter claim name (e.g., users.read, admin.access)"
+                        placeholder="Enter claim name"
                         disabled={loading}
+                        required
                       />
                     </div>
                     {errors.name && (
-                      <p className="mt-1 text-sm text-red-600">{errors.name}</p>
+                      <p className="text-sm text-red-600">{errors.name}</p>
                     )}
-                    <p className="mt-1 text-sm text-gray-500">
+                    <p className="text-sm text-gray-500">
                       {formData.name.length}/100 characters
                     </p>
                   </div>
 
-                  {/* Claim Type */}
-                  <div>
-                    <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-2">
+                  <div className="space-y-2">
+                    <label htmlFor="type" className="block text-sm font-medium text-gray-700">
                       Claim Type <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
@@ -182,14 +192,15 @@ export const NewClaim: React.FC<NewClaimProps> = ({ onBack, onClaimCreated }) =>
                       <input
                         type="text"
                         id="type"
-                        list="claim-types"
                         value={formData.type}
                         onChange={(e) => handleInputChange('type', e.target.value)}
-                        className={`w-full pl-10 pr-4 py-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                          errors.type ? 'border-red-300' : 'border-gray-300'
+                        list="claim-types"
+                        className={`w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none ${
+                          errors.type ? 'border-red-300' : ''
                         }`}
-                        placeholder="Select or enter claim type"
+                        placeholder="Enter claim type"
                         disabled={loading}
+                        required
                       />
                       <datalist id="claim-types">
                         {claimTypes.map((type) => (
@@ -198,79 +209,72 @@ export const NewClaim: React.FC<NewClaimProps> = ({ onBack, onClaimCreated }) =>
                       </datalist>
                     </div>
                     {errors.type && (
-                      <p className="mt-1 text-sm text-red-600">{errors.type}</p>
+                      <p className="text-sm text-red-600">{errors.type}</p>
                     )}
-                  </div>
-
-                  {/* Description */}
-                  <div>
-                    <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-                      Description
-                    </label>
-                    <div className="relative">
-                      <FileText className="absolute left-3 top-3 text-gray-400 w-4 h-4" />
-                      <textarea
-                        id="description"
-                        rows={4}
-                        value={formData.description || ''}
-                        onChange={(e) => handleInputChange('description', e.target.value)}
-                        className={`w-full pl-10 pr-4 py-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none ${
-                          errors.description ? 'border-red-300' : 'border-gray-300'
-                        }`}
-                        placeholder="Optional description for the claim"
-                        disabled={loading}
-                      />
-                    </div>
-                    {errors.description && (
-                      <p className="mt-1 text-sm text-red-600">{errors.description}</p>
-                    )}
-                    <p className="mt-1 text-sm text-gray-500">
-                      {(formData.description || '').length}/500 characters
+                    <p className="text-sm text-gray-500">
+                      Common types: {claimTypes.join(', ')}
                     </p>
                   </div>
                 </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                    Description
+                  </label>
+                  <div className="relative">
+                    <FileText className="absolute left-3 top-3 text-gray-400 w-4 h-4" />
+                    <textarea
+                      id="description"
+                      value={formData.description || ''}
+                      onChange={(e) => handleInputChange('description', e.target.value)}
+                      rows={4}
+                      className={`w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none ${
+                        errors.description ? 'border-red-300' : ''
+                      }`}
+                      placeholder="Enter claim description (optional)"
+                      disabled={loading}
+                    />
+                  </div>
+                  {errors.description && (
+                    <p className="text-sm text-red-600">{errors.description}</p>
+                  )}
+                  <p className="text-sm text-gray-500">
+                    {(formData.description || '').length}/500 characters
+                  </p>
+                </div>
               </div>
 
-              {/* Status Section */}
-              <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
-                <div className="px-6 py-4 border-b border-gray-200">
-                  <h2 className="text-lg font-semibold text-gray-900">Status</h2>
-                </div>
-                <div className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <Key className="w-5 h-5 mr-2 text-blue-600" />
-                      <div>
-                        <h3 className="text-sm font-medium text-gray-900">Claim Status</h3>
-                        <p className="text-sm text-gray-500">
-                          {formData.isActive ? 'This claim will be active immediately' : 'This claim will be created as inactive'}
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleInputChange('isActive', !formData.isActive)}
-                      className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                        formData.isActive ? 'bg-blue-600' : 'bg-gray-200'
-                      }`}
+              {/* Status Information */}
+              <div className="space-y-6">
+                <h3 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-3">Status</h3>
+                
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
+                    <input
+                      type="checkbox"
+                      id="isActive"
+                      checked={formData.isActive}
+                      onChange={(e) => handleInputChange('isActive', e.target.checked)}
+                      className="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
                       disabled={loading}
-                    >
-                      <span
-                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                          formData.isActive ? 'translate-x-5' : 'translate-x-0'
-                        }`}
-                      />
-                    </button>
+                    />
+                    <label htmlFor="isActive" className="flex items-center text-sm font-medium text-gray-700">
+                      <Key className="w-5 h-5 mr-2 text-blue-600" />
+                      Active Claim
+                    </label>
                   </div>
+                  <p className="text-sm text-gray-500 ml-8">
+                    Active claims can be assigned to users and used for authorization
+                  </p>
                 </div>
               </div>
 
               {/* Form Actions */}
-              <div className="flex items-center justify-end space-x-4 pt-6">
+              <div className="flex justify-end space-x-4 pt-8 border-t border-gray-200">
                 <button
                   type="button"
                   onClick={onBack}
-                  className="flex items-center space-x-2 px-6 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  className="flex items-center space-x-2 px-8 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                   disabled={loading}
                 >
                   <X className="w-4 h-4" />

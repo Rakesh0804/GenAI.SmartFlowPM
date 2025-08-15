@@ -12,17 +12,20 @@ namespace GenAI.SmartFlowPM.Application.Features.Tasks.Handlers;
 public class CreateTaskCommandHandler : IRequestHandler<CreateTaskCommand, Result<TaskDto>>
 {
     private readonly IProjectTaskRepository _taskRepository;
+    private readonly IProjectRepository _projectRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly ICounterService _counterService;
 
     public CreateTaskCommandHandler(
-        IProjectTaskRepository taskRepository, 
+        IProjectTaskRepository taskRepository,
+        IProjectRepository projectRepository,
         IUnitOfWork unitOfWork, 
         IMapper mapper,
         ICounterService counterService)
     {
         _taskRepository = taskRepository;
+        _projectRepository = projectRepository;
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _counterService = counterService;
@@ -36,8 +39,15 @@ public class CreateTaskCommandHandler : IRequestHandler<CreateTaskCommand, Resul
             task.Id = Guid.NewGuid();
             task.CreatedAt = DateTime.UtcNow;
             
-            // Generate unique task number using the acronym
-            task.TaskNumber = await _counterService.GenerateTaskNumberAsync(task.Acronym);
+            // Get the project to obtain the TenantId
+            var project = await _projectRepository.GetByIdAsync(task.ProjectId, cancellationToken);
+            if (project == null)
+            {
+                return Result<TaskDto>.Failure("Project not found");
+            }
+            
+            // Generate unique task number using the acronym and tenant ID
+            task.TaskNumber = await _counterService.GenerateTaskNumberAsync(task.Acronym, project.TenantId);
 
             await _taskRepository.AddAsync(task, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);

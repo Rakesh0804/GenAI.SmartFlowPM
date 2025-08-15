@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { UserDto, PaginatedResponse } from '@/types/api.types';
 import { userService } from '@/services/user.service';
 import { useToast } from '@/contexts/ToastContext';
+import ConfirmationModal, { useConfirmationModal } from '@/components/common/ConfirmationModal';
 import { 
   Search, 
   Filter, 
@@ -28,6 +29,7 @@ import {
   Crown,
   UserCheck
 } from 'lucide-react';
+import { Pagination } from '@/components/common/Pagination';
 
 interface UserCockpitProps {
   onNewUser?: () => void;
@@ -70,14 +72,16 @@ const UserCard: React.FC<UserCardProps> = ({ user, onEdit, onView, onDelete, onT
       <div className="bg-gray-50 px-4 py-3 border-b border-gray-200 flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <div className="flex items-center space-x-2">
-            <User className="w-4 h-4 text-blue-600" />
+            <div className="p-1 bg-primary-100 rounded-md">
+              <User className="w-5 h-5 text-primary-700 font-semibold" />
+            </div>
             <span className="text-sm font-medium text-gray-900 truncate max-w-[120px]">
               {user.firstName} {user.lastName}
             </span>
           </div>
           {user.hasReportee && (
-            <div title="Manager">
-              <Crown className="w-4 h-4 text-yellow-500" />
+            <div title="Manager" className="p-1 bg-yellow-100 rounded-md">
+              <Crown className="w-5 h-5 text-yellow-600" />
             </div>
           )}
         </div>
@@ -86,17 +90,17 @@ const UserCard: React.FC<UserCardProps> = ({ user, onEdit, onView, onDelete, onT
         <div className="flex items-center space-x-1">
           <button
             onClick={onView}
-            className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+            className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-all duration-200"
             title="View User"
           >
-            <Eye className="w-4 h-4" />
+            <Eye className="w-5 h-5" />
           </button>
           <button
             onClick={onEdit}
-            className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+            className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-all duration-200"
             title="Edit User"
           >
-            <Edit className="w-4 h-4" />
+            <Edit className="w-5 h-5" />
           </button>
           <div className="relative">
             <button
@@ -253,6 +257,7 @@ export const UserCockpit: React.FC<UserCockpitProps> = ({
   const [totalCount, setTotalCount] = useState(0);
   const pageSize = 12; // Show 12 cards at a time
   const { error: showError, success: showSuccess } = useToast();
+  const { showConfirmation, confirmationModal } = useConfirmationModal();
 
   useEffect(() => {
     loadUsers();
@@ -334,21 +339,23 @@ export const UserCockpit: React.FC<UserCockpitProps> = ({
     }
   };
 
-  const handleDeleteUser = async (userId: string) => {
-    if (!confirm('Are you sure you want to delete this user?')) {
-      return;
-    }
-
-    try {
-      await userService.deleteUser(userId);
-      showSuccess('User Deleted', 'User has been successfully deleted.');
-      loadUsers();
-    } catch (error: any) {
-      const errorMessage = error?.response?.data?.message || 
-                          error?.message || 
-                          'Failed to delete user. Please try again.';
-      showError('Delete Failed', errorMessage);
-    }
+  const handleDeleteUser = async (user: UserDto) => {
+    showConfirmation({
+      title: 'Delete User',
+      message: `Are you sure you want to delete the user "${user.firstName} ${user.lastName}"? This action cannot be undone.`,
+      onConfirm: async () => {
+        try {
+          await userService.deleteUser(user.id);
+          showSuccess('User Deleted', 'User has been successfully deleted.');
+          loadUsers();
+        } catch (error: any) {
+          const errorMessage = error?.response?.data?.message || 
+                              error?.message || 
+                              'Failed to delete user. Please try again.';
+          showError('Delete Failed', errorMessage);
+        }
+      }
+    });
   };
 
   const handleToggleStatus = async (user: UserDto) => {
@@ -415,8 +422,8 @@ export const UserCockpit: React.FC<UserCockpitProps> = ({
         <div className="flex items-center justify-between bg-white p-4 border-b border-gray-200">
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Users className="w-6 h-6 text-blue-600" />
+              <div className="p-3 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl shadow-lg">
+                <Users className="w-7 h-7 text-white" />
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">User Cockpit</h1>
@@ -429,7 +436,7 @@ export const UserCockpit: React.FC<UserCockpitProps> = ({
             <button
               onClick={handleExport}
               disabled={loading}
-              className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
             >
               <Download className="w-4 h-4" />
               <span>Export</span>
@@ -445,7 +452,7 @@ export const UserCockpit: React.FC<UserCockpitProps> = ({
 
             <button
               onClick={onBackClick}
-              className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-all duration-200"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Back</span>
@@ -459,13 +466,13 @@ export const UserCockpit: React.FC<UserCockpitProps> = ({
             {/* Search Box */}
             <div className="flex-1 max-w-md">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-primary-500 w-5 h-5" />
                 <input
                   type="text"
                   placeholder="Search users..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  className="w-full pl-11 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all duration-200"
                 />
               </div>
             </div>
@@ -480,7 +487,7 @@ export const UserCockpit: React.FC<UserCockpitProps> = ({
               <select
                 value={filterActive === null ? '' : filterActive.toString()}
                 onChange={(e) => setFilterActive(e.target.value === '' ? null : e.target.value === 'true')}
-                className="w-32 px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                className="w-32 px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all duration-200"
               >
                 <option value="">All Status</option>
                 <option value="true">Active</option>
@@ -490,7 +497,7 @@ export const UserCockpit: React.FC<UserCockpitProps> = ({
               <select
                 value={filterManager === null ? '' : filterManager.toString()}
                 onChange={(e) => setFilterManager(e.target.value === '' ? null : e.target.value === 'true')}
-                className="px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                className="px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all duration-200"
               >
                 <option value="">All Users</option>
                 <option value="true">Managers</option>
@@ -499,7 +506,7 @@ export const UserCockpit: React.FC<UserCockpitProps> = ({
 
               <button
                 onClick={clearFilters}
-                className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-all duration-200"
               >
                 Clear Filters
               </button>
@@ -549,7 +556,7 @@ export const UserCockpit: React.FC<UserCockpitProps> = ({
                   user={user} 
                   onView={() => onViewUser?.(user)}
                   onEdit={() => onEditUser?.(user)}
-                  onDelete={() => handleDeleteUser(user.id)}
+                  onDelete={() => handleDeleteUser(user)}
                   onToggleStatus={() => handleToggleStatus(user)}
                 />
               ))}
@@ -557,34 +564,20 @@ export const UserCockpit: React.FC<UserCockpitProps> = ({
           )}
         </div>
         
-        {/* Fixed Pagination - Always show if there are users */}
-        {totalCount > 0 && (
-          <div className="absolute bottom-4 left-4 right-4 z-20 bg-white p-3 rounded-lg border border-gray-200 shadow-lg">
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-gray-700">
-                Page {currentPage} of {Math.max(totalPages, 1)} ({totalCount} total users)
-              </div>
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                  disabled={currentPage <= 1}
-                  className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white"
-                >
-                  Previous
-                </button>
-                <button
-                  onClick={() => setCurrentPage(Math.min(Math.max(totalPages, 1), currentPage + 1))}
-                  disabled={currentPage >= totalPages || totalPages <= 1}
-                  className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white"
-                >
-                  Next
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Pagination */}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalCount={totalCount}
+          pageSize={pageSize}
+          itemName="users"
+          onPageChange={setCurrentPage}
+          loading={loading}
+        />
       </div>
 
+      {/* Confirmation Modal */}
+      {confirmationModal}
     </div>
   );
 };

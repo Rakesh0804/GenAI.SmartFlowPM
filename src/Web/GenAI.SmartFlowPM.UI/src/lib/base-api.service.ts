@@ -144,11 +144,31 @@ export class TokenManager {
       return false;
     }
   }
+
+  static isTokenExpiringSoon(bufferMinutes: number = 5): boolean {
+    const token = this.getToken();
+    if (!token) return true;
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const currentTime = Math.floor(Date.now() / 1000);
+      const bufferSeconds = bufferMinutes * 60;
+      return payload.exp <= (currentTime + bufferSeconds);
+    } catch (error) {
+      console.error('Invalid token format:', error);
+      return true;
+    }
+  }
 }
 
 // Base API Service class
 export class BaseApiService {
   protected api: AxiosInstance;
+  private isRefreshing = false;
+  private failedQueue: Array<{
+    resolve: (value?: any) => void;
+    reject: (error?: any) => void;
+  }> = [];
 
   constructor(baseURL?: string) {
     const apiUrl = baseURL || process.env.NEXT_PUBLIC_API_URL || 'https://localhost:7149/api';
@@ -164,14 +184,105 @@ export class BaseApiService {
     this.setupInterceptors();
   }
 
+  private processQueue(error: any, token: string | null = null) {
+    this.failedQueue.forEach(({ resolve, reject }) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(token);
+      }
+    });
+    
+    this.failedQueue = [];
+  }
+
+  private async refreshAuthToken(): Promise<string> {
+    const refreshToken = TokenManager.getRefreshToken();
+    
+    if (!refreshToken) {
+      throw new Error('No refresh token available');
+    }
+
+    try {
+      console.log('Attempting to refresh token...');
+      
+      // Create a separate axios instance for refresh to avoid interceptor loop
+      const refreshAxios = axios.create({
+        baseURL: this.api.defaults.baseURL,
+        timeout: 10000,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const response = await refreshAxios.post('/auth/refresh', {
+        refreshToken,
+      });
+
+      console.log('Refresh response:', response.data);
+
+      // Handle the API response format properly
+      if (response.data?.isSuccess && response.data?.data) {
+        const { token, refreshToken: newRefreshToken } = response.data.data;
+        
+        if (token) {
+          TokenManager.setToken(token);
+          
+          // Update refresh token if provided
+          if (newRefreshToken) {
+            TokenManager.setRefreshToken(newRefreshToken);
+          }
+          
+          console.log('Token refreshed successfully');
+          return token;
+        } else {
+          throw new Error('No token received from refresh endpoint');
+        }
+      } else {
+        throw new Error('Invalid refresh response format');
+      }
+    } catch (error: any) {
+      console.error('Token refresh failed:', error);
+      throw error;
+    }
+  }
+
   private setupInterceptors(): void {
     // Request interceptor to add auth token and tenant ID
     this.api.interceptors.request.use(
-      (config) => {
+      async (config) => {
         const token = TokenManager.getToken();
         const tenantId = TokenManager.getTenantId();
 
-        if (token) {
+        // Check if token is expiring soon and proactively refresh it
+        if (token && TokenManager.isTokenExpiringSoon(5) && !config.url?.includes('/auth/refresh')) {
+          if (!this.isRefreshing) {
+            this.isRefreshing = true;
+            
+            try {
+              const newToken = await this.refreshAuthToken();
+              config.headers.Authorization = `Bearer ${newToken}`;
+              this.processQueue(null, newToken);
+            } catch (error) {
+              this.processQueue(error, null);
+              TokenManager.clearTokens();
+              if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+                window.location.href = '/login';
+              }
+              return Promise.reject(error);
+            } finally {
+              this.isRefreshing = false;
+            }
+          } else {
+            // If already refreshing, queue this request
+            return new Promise((resolve, reject) => {
+              this.failedQueue.push({ resolve, reject });
+            }).then((newToken) => {
+              config.headers.Authorization = `Bearer ${newToken}`;
+              return config;
+            });
+          }
+        } else if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
 
@@ -195,43 +306,64 @@ export class BaseApiService {
         if (error.response?.status === 401 && original && !original._retry) {
           original._retry = true;
 
+          // If we're already refreshing, queue this request
+          if (this.isRefreshing) {
+            return new Promise((resolve, reject) => {
+              this.failedQueue.push({ 
+                resolve: (token: string) => {
+                  original.headers.Authorization = `Bearer ${token}`;
+                  resolve(this.api(original));
+                },
+                reject: (err: any) => {
+                  reject(err);
+                }
+              });
+            });
+          }
+
           const refreshToken = TokenManager.getRefreshToken();
           
           if (refreshToken && !original.url?.includes('/auth/refresh')) {
+            this.isRefreshing = true;
+            
             try {
-              // Create a separate axios instance for refresh to avoid interceptor loop
-              const refreshAxios = axios.create({
-                baseURL: this.api.defaults.baseURL,
-                timeout: 10000,
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-              });
-
-              const response = await refreshAxios.post('/auth/refresh', {
-                refreshToken,
-              });
-
-              // Handle the API response format properly
-              if (response.data?.isSuccess && response.data?.data?.token) {
-                const newToken = response.data.data.token;
-                TokenManager.setToken(newToken);
-                return this.api(original);
-              } else {
-                throw new Error('No token received from refresh endpoint');
-              }
+              const newToken = await this.refreshAuthToken();
+              
+              // Update the failed request with new token
+              original.headers.Authorization = `Bearer ${newToken}`;
+              
+              // Process any queued requests
+              this.processQueue(null, newToken);
+              
+              // Retry the original request
+              return this.api(original);
             } catch (refreshError: any) {
+              console.error('Token refresh failed:', refreshError);
+              
+              // Process queue with error
+              this.processQueue(refreshError, null);
+              
+              // Clear tokens and redirect to login
               TokenManager.clearTokens();
-              if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+              if (typeof window !== 'undefined' && 
+                  !window.location.pathname.includes('/login') &&
+                  !original.url?.includes('/auth/me')) {
+                console.log('Redirecting to login due to refresh failure');
                 window.location.href = '/login';
               }
+              
               return Promise.reject(refreshError);
+            } finally {
+              this.isRefreshing = false;
             }
           } else {
+            // No refresh token available or refresh endpoint call failed
+            console.log('No refresh token available, clearing tokens');
             TokenManager.clearTokens();
             if (typeof window !== 'undefined' && 
                 !window.location.pathname.includes('/login') && 
                 !original.url?.includes('/auth/me')) {
+              console.log('Redirecting to login due to missing refresh token');
               window.location.href = '/login';
             }
           }
@@ -245,7 +377,8 @@ export class BaseApiService {
   // Generic API response handler
   protected handleResponse<T>(response: AxiosResponse<ApiResponse<T>>): T {
     if (response.data.isSuccess) {
-      return response.data.data;
+      // For responses where data might be null/undefined (like logout), return null as T
+      return response.data.data ?? null as T;
     } else {
       throw new Error(response.data.message || 'An error occurred');
     }

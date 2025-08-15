@@ -34,10 +34,10 @@ public class TasksController : BaseController
     }
 
     /// <summary>
-    /// Get all tasks with pagination
+    /// Get all tasks with pagination and optional filtering
     /// </summary>
     [HttpGet]
-    public async Task<IActionResult> GetTasks([FromQuery] PagedQuery pagedQuery)
+    public async Task<IActionResult> GetTasks([FromQuery] TaskFilteredPagedQuery pagedQuery)
     {
         var query = new GetAllTasksQuery { PagedQuery = pagedQuery };
         var result = await _mediator.Send(query);

@@ -15,6 +15,7 @@ import {
   CheckSquare,
   Shield,
   Building,
+  Building2,
   UserCheck,
   Clock,
   FileText,
@@ -72,7 +73,7 @@ import { dashboardService } from '../../services/dashboard.service';
 import { HomeDashboardDto, PendingTaskDto, RecentActivityDto, AnnouncementDto, UpcomingHolidayDto } from '../../types/api.types';
 
 function DashboardContent() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [dashboard, setDashboard] = useState<HomeDashboardDto | null>(null);
@@ -143,6 +144,32 @@ function DashboardContent() {
     latestAnnouncements
   } = dashboard;
   const COLORS = ['#3B82F6', '#F59E0B', '#10B981', '#EF4444', '#8B5CF6'];
+
+  // Navigation handlers
+  const handleViewAllTasks = () => {
+    // Navigate to TaskCockpit with filters for current user's pending tasks
+    router.push('/projects/tasks?status=Todo&assignedTo=' + user?.id);
+  };
+
+  const handleAddProject = () => {
+    // Navigate to Projects page - we'll need to create this or navigate to existing one
+    router.push('/projects');
+  };
+
+  const handleAddTask = () => {
+    // Navigate to New Task page through the tasks management page
+    router.push('/projects/tasks?action=create');
+  };
+
+  const handleApplyLeave = () => {
+    // Navigate to Leave Application page
+    router.push('/leaves/new');
+  };
+
+  const handleCalendar = () => {
+    // Navigate to Calendar page
+    router.push('/calendar');
+  };
 
   return (
     <div className="space-y-6">
@@ -219,7 +246,7 @@ function DashboardContent() {
               </div>
               <div className="ml-4">
                 <h3 className="text-lg font-semibold text-gray-900">My Dashboard Summary</h3>
-                <p className="text-gray-600">Welcome back, {userSummary.userName}!</p>
+                <p className="text-gray-600">Welcome back, {user?.firstName} {user?.lastName}!</p>
               </div>
             </div>
           </div>
@@ -548,7 +575,10 @@ function DashboardContent() {
           </div>
           
           <div className="mt-4 pt-4 border-t border-gray-200">
-            <button className="text-orange-600 text-sm hover:text-orange-700 transition-colors">
+            <button 
+              onClick={handleViewAllTasks}
+              className="text-orange-600 text-sm hover:text-orange-700 transition-colors"
+            >
               View All Tasks →
             </button>
           </div>
@@ -569,7 +599,10 @@ function DashboardContent() {
           </div>
           
           <div className="grid grid-cols-2 gap-3">
-            <button className="flex flex-col items-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 rounded-lg transition-all duration-200 border border-blue-200">
+            <button 
+              onClick={handleAddProject}
+              className="flex flex-col items-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 rounded-lg transition-all duration-200 border border-blue-200"
+            >
               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center mb-2">
                 <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -578,7 +611,10 @@ function DashboardContent() {
               <span className="text-sm font-medium text-blue-900">Add Project</span>
             </button>
             
-            <button className="flex flex-col items-center p-4 bg-gradient-to-br from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 rounded-lg transition-all duration-200 border border-green-200">
+            <button 
+              onClick={handleAddTask}
+              className="flex flex-col items-center p-4 bg-gradient-to-br from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 rounded-lg transition-all duration-200 border border-green-200"
+            >
               <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center mb-2">
                 <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -587,14 +623,20 @@ function DashboardContent() {
               <span className="text-sm font-medium text-green-900">Add Task</span>
             </button>
             
-            <button className="flex flex-col items-center p-4 bg-gradient-to-br from-yellow-50 to-yellow-100 hover:from-yellow-100 hover:to-yellow-200 rounded-lg transition-all duration-200 border border-yellow-200">
+            <button 
+              onClick={handleApplyLeave}
+              className="flex flex-col items-center p-4 bg-gradient-to-br from-yellow-50 to-yellow-100 hover:from-yellow-100 hover:to-yellow-200 rounded-lg transition-all duration-200 border border-yellow-200"
+            >
               <div className="w-8 h-8 bg-yellow-600 rounded-lg flex items-center justify-center mb-2">
                 <Plane className="w-4 h-4 text-white" />
               </div>
               <span className="text-sm font-medium text-yellow-900">Apply Leave</span>
             </button>
             
-            <button className="flex flex-col items-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 rounded-lg transition-all duration-200 border border-purple-200">
+            <button 
+              onClick={handleCalendar}
+              className="flex flex-col items-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 rounded-lg transition-all duration-200 border border-purple-200"
+            >
               <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center mb-2">
                 <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -832,15 +874,33 @@ function DashboardContent() {
               <div className="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center">
                 <Building className="h-5 w-5 text-white" />
               </div>
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                Backend Only
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                Complete
               </span>
             </div>
             <h4 className="font-semibold text-gray-900 mb-2">Organization Management</h4>
             <p className="text-sm text-gray-600 mb-3">Complete organizational structure with branch management, policies, holidays, and settings (Admin only).</p>
             <div className="flex items-center text-xs text-gray-500">
-              <Clock className="h-3 w-3 mr-1" />
-              Frontend Implementation Pending
+              <CheckSquare className="h-3 w-3 mr-1" />
+              Backend & Frontend Complete
+            </div>
+          </div>
+
+          {/* Tenant Management Module */}
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200 hover:shadow-md transition-all">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                <Building2 className="h-5 w-5 text-white" />
+              </div>
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                Complete
+              </span>
+            </div>
+            <h4 className="font-semibold text-gray-900 mb-2">Tenant Management</h4>
+            <p className="text-sm text-gray-600 mb-3">Multi-tenant client management with subscription plans, limits, and complete data isolation.</p>
+            <div className="flex items-center text-xs text-gray-500">
+              <CheckSquare className="h-3 w-3 mr-1" />
+              Backend & Frontend Complete
             </div>
           </div>
 
@@ -913,6 +973,78 @@ function DashboardContent() {
             <div className="flex items-center text-xs text-gray-500">
               <Clock className="h-3 w-3 mr-1" />
               Development Planned
+            </div>
+          </div>
+
+          {/* Compensation/Remuneration Module */}
+          <div className="bg-gradient-to-br from-amber-50 to-amber-100 p-4 rounded-lg border border-amber-200 hover:shadow-md transition-all">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 bg-amber-600 rounded-lg flex items-center justify-center">
+                <CreditCard className="h-5 w-5 text-white" />
+              </div>
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                Backend Only
+              </span>
+            </div>
+            <h4 className="font-semibold text-gray-900 mb-2">Compensation Management</h4>
+            <p className="text-sm text-gray-600 mb-3">Complete compensation and remuneration management with salary structures, bonuses, and payroll integration.</p>
+            <div className="flex items-center text-xs text-gray-500">
+              <Clock className="h-3 w-3 mr-1" />
+              Frontend Implementation Pending
+            </div>
+          </div>
+
+          {/* Travel Management Module */}
+          <div className="bg-gradient-to-br from-sky-50 to-sky-100 p-4 rounded-lg border border-sky-200 hover:shadow-md transition-all">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 bg-sky-600 rounded-lg flex items-center justify-center">
+                <Plane className="h-5 w-5 text-white" />
+              </div>
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                Backend Only
+              </span>
+            </div>
+            <h4 className="font-semibold text-gray-900 mb-2">Travel Management</h4>
+            <p className="text-sm text-gray-600 mb-3">Comprehensive travel booking and expense management with approval workflows and reimbursement tracking.</p>
+            <div className="flex items-center text-xs text-gray-500">
+              <Clock className="h-3 w-3 mr-1" />
+              Frontend Implementation Pending
+            </div>
+          </div>
+
+          {/* Campaign Management Module */}
+          <div className="bg-gradient-to-br from-pink-50 to-pink-100 p-4 rounded-lg border border-pink-200 hover:shadow-md transition-all">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 bg-pink-600 rounded-lg flex items-center justify-center">
+                <Megaphone className="h-5 w-5 text-white" />
+              </div>
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                Backend Only
+              </span>
+            </div>
+            <h4 className="font-semibold text-gray-900 mb-2">Campaign Management</h4>
+            <p className="text-sm text-gray-600 mb-3">Marketing campaign planning and execution with target audience management and performance tracking.</p>
+            <div className="flex items-center text-xs text-gray-500">
+              <Clock className="h-3 w-3 mr-1" />
+              Frontend Implementation Pending
+            </div>
+          </div>
+
+          {/* Certificate Management Module */}
+          <div className="bg-gradient-to-br from-violet-50 to-violet-100 p-4 rounded-lg border border-violet-200 hover:shadow-md transition-all">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 bg-violet-600 rounded-lg flex items-center justify-center">
+                <FileText className="h-5 w-5 text-white" />
+              </div>
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                Backend Only
+              </span>
+            </div>
+            <h4 className="font-semibold text-gray-900 mb-2">Certificate Management</h4>
+            <p className="text-sm text-gray-600 mb-3">Digital certificate issuance and management with verification system and automated expiry notifications.</p>
+            <div className="flex items-center text-xs text-gray-500">
+              <Clock className="h-3 w-3 mr-1" />
+              Frontend Implementation Pending
             </div>
           </div>
 
