@@ -28,6 +28,10 @@ public class UnitOfWork : IUnitOfWork
         CampaignEvaluations = new CampaignEvaluationRepository(_context);
         Certificates = new CertificateRepository(_context);
         CertificateTemplates = new CertificateTemplateRepository(_context);
+        TimeCategories = new TimeCategoryRepository(_context);
+        TimeEntries = new TimeEntryRepository(_context);
+        Timesheets = new TimesheetRepository(_context);
+        ActiveTrackingSessions = new ActiveTrackingSessionRepository(_context);
     }
 
     public ITenantRepository Tenants { get; }
@@ -44,6 +48,10 @@ public class UnitOfWork : IUnitOfWork
     public ICampaignEvaluationRepository CampaignEvaluations { get; }
     public ICertificateRepository Certificates { get; }
     public ICertificateTemplateRepository CertificateTemplates { get; }
+    public ITimeCategoryRepository TimeCategories { get; }
+    public ITimeEntryRepository TimeEntries { get; }
+    public ITimesheetRepository Timesheets { get; }
+    public IActiveTrackingSessionRepository ActiveTrackingSessions { get; }
 
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {

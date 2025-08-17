@@ -72,12 +72,7 @@ public class ClaimsController : BaseController
         
         if (result.IsSuccess)
         {
-            return CreatedAtAction(nameof(GetClaim), new { id = result.Data!.Id }, new
-            {
-                success = true,
-                data = result.Data,
-                message = result.Message
-            });
+            return CreatedAtAction(nameof(GetClaim), new { id = result.Data!.Id }, result);
         }
         
         return HandleResult(result);

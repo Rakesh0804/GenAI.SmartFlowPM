@@ -56,32 +56,44 @@ const getToastColors = (type: ToastType) => {
     switch (type) {
         case 'success':
             return {
-                bg: 'bg-white border-l-4 border-l-emerald-500 shadow-lg shadow-emerald-100/50',
-                icon: 'text-emerald-600',
-                title: 'text-gray-800',
-                close: 'text-gray-400 hover:text-gray-600'
+                bg: 'bg-emerald-50 border border-emerald-200 shadow-lg shadow-emerald-100/50',
+                iconBox: 'bg-emerald-500',
+                icon: 'text-white',
+                title: 'text-emerald-800',
+                message: 'text-emerald-700',
+                close: 'text-emerald-400 hover:text-emerald-600',
+                divider: 'border-emerald-200'
             };
         case 'error':
             return {
-                bg: 'bg-white border-l-4 border-l-red-500 shadow-lg shadow-red-100/50',
-                icon: 'text-red-600',
-                title: 'text-gray-800',
-                close: 'text-gray-400 hover:text-gray-600'
+                bg: 'bg-red-50 border border-red-200 shadow-lg shadow-red-100/50',
+                iconBox: 'bg-red-500',
+                icon: 'text-white',
+                title: 'text-red-800',
+                message: 'text-red-700',
+                close: 'text-red-400 hover:text-red-600',
+                divider: 'border-red-200'
             };
         case 'warning':
             return {
-                bg: 'bg-white border-l-4 border-l-amber-500 shadow-lg shadow-amber-100/50',
-                icon: 'text-amber-600',
-                title: 'text-gray-800',
-                close: 'text-gray-400 hover:text-gray-600'
+                bg: 'bg-amber-50 border border-amber-200 shadow-lg shadow-amber-100/50',
+                iconBox: 'bg-amber-500',
+                icon: 'text-white',
+                title: 'text-amber-800',
+                message: 'text-amber-700',
+                close: 'text-amber-400 hover:text-amber-600',
+                divider: 'border-amber-200'
             };
         case 'info':
         default:
             return {
-                bg: 'bg-white border-l-4 border-l-blue-500 shadow-lg shadow-blue-100/50',
-                icon: 'text-primary-600',
-                title: 'text-gray-800',
-                close: 'text-gray-400 hover:text-gray-600'
+                bg: 'bg-blue-50 border border-blue-200 shadow-lg shadow-blue-100/50',
+                iconBox: 'bg-blue-500',
+                icon: 'text-white',
+                title: 'text-blue-800',
+                message: 'text-blue-700',
+                close: 'text-blue-400 hover:text-blue-600',
+                divider: 'border-blue-200'
             };
     }
 };
@@ -120,13 +132,13 @@ const ToastItem: React.FC<ToastItemProps> = ({ toast, onRemove }) => {
         }, 200);
     }, [toast.id, onRemove]);
 
-    // Combine title and message into single line for sleek design
-    const displayText = toast.message ? `${toast.title}: ${toast.message}` : toast.title;
+    // Don't combine title and message - show them separately for better clarity
+    const hasMessage = toast.message && toast.message.trim() !== '';
 
     return (
         <div
             className={`
-        relative w-full max-w-md rounded-lg backdrop-blur-sm transition-all duration-200 ease-out
+        relative w-full max-w-md rounded-lg backdrop-blur-sm transition-all duration-200 ease-out overflow-hidden
         ${colors.bg}
         ${isVisible && !isExiting
                     ? 'opacity-100 translate-x-0 scale-100'
@@ -137,28 +149,43 @@ const ToastItem: React.FC<ToastItemProps> = ({ toast, onRemove }) => {
             role="alert"
             aria-live="polite"
         >
-            <div className="flex items-center px-4 py-3">
-                <div className="flex-shrink-0">
+            <div className="flex items-stretch min-h-[60px]">
+                {/* Square Icon Box */}
+                <div className={`flex-shrink-0 w-12 ${colors.iconBox} flex items-center justify-center`}>
                     <Icon className={`h-5 w-5 ${colors.icon} font-bold stroke-2`} aria-hidden="true" />
                 </div>
-                <div className="ml-3 flex-1 min-w-0">
-                    <p className={`text-sm font-medium ${colors.title} truncate`}>
-                        {displayText}
-                    </p>
-                </div>
-                <div className="ml-3 flex-shrink-0">
-                    <button
-                        type="button"
-                        className={`
-              inline-flex rounded-full p-1 transition-all duration-150 ease-out
-              ${colors.close}
-              hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300
-            `}
-                        onClick={handleRemove}
-                        aria-label="Dismiss notification"
-                    >
-                        <X className="h-4 w-4" aria-hidden="true" />
-                    </button>
+                
+                {/* Divider Line */}
+                <div className={`w-px ${colors.divider} border-l`}></div>
+                
+                {/* Content Area */}
+                <div className="flex-1 min-w-0 px-4 py-3">
+                    <div className="flex items-start justify-between">
+                        <div className="flex-1 min-w-0">
+                            <p className={`text-sm font-semibold ${colors.title} leading-tight`}>
+                                {toast.title}
+                            </p>
+                            {hasMessage && (
+                                <p className={`text-sm ${colors.message} mt-1 leading-tight`}>
+                                    {toast.message}
+                                </p>
+                            )}
+                        </div>
+                        <div className="ml-3 flex-shrink-0">
+                            <button
+                                type="button"
+                                className={`
+                  inline-flex rounded-full p-1 transition-all duration-150 ease-out
+                  ${colors.close}
+                  hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/30
+                `}
+                                onClick={handleRemove}
+                                aria-label="Dismiss notification"
+                            >
+                                <X className="h-4 w-4" aria-hidden="true" />
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

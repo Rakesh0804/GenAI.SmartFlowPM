@@ -107,12 +107,7 @@ public class CertificatesController : BaseController
 
         if (result.IsSuccess)
         {
-            return CreatedAtAction(nameof(GetCertificate), new { id = result.Data.Id }, new
-            {
-                success = true,
-                data = result.Data,
-                message = result.Message
-            });
+            return CreatedAtAction(nameof(GetCertificate), new { id = result.Data!.Id }, result);
         }
 
         return HandleResult(result);
@@ -207,7 +202,14 @@ public class CertificatesController : BaseController
                 _ => "application/octet-stream"
             };
 
-            return File(result.Data, contentType, $"certificate.{format.ToLower()}");
+            if (result.Data != null)
+            {
+                return File(result.Data, contentType, $"certificate.{format.ToLower()}");
+            }
+            else
+            {
+                return BadRequest(new { success = false, message = "Certificate data is null" });
+            }
         }
 
         return HandleResult(result);
@@ -289,12 +291,7 @@ public class CertificatesController : BaseController
 
         if (result.IsSuccess)
         {
-            return CreatedAtAction(nameof(GetCertificateTemplate), new { id = result.Data.Id }, new
-            {
-                success = true,
-                data = result.Data,
-                message = result.Message
-            });
+            return CreatedAtAction(nameof(GetCertificateTemplate), new { id = result.Data!.Id }, result);
         }
 
         return HandleResult(result);

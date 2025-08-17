@@ -3,8 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useSidebar } from '../../contexts/SidebarContext';
-import { useAuth } from '../../hooks/useAuth';
-import { enhancedTokenManager } from '../../lib/cookieManager';
 import {
     HomeIcon,
     FolderIcon,
@@ -18,15 +16,12 @@ import {
     DollarSignIcon,
     BarChart3Icon,
     MessageSquareIcon,
-    BellIcon,
     SettingsIcon,
-    LogOutIcon,
     ChevronLeftIcon,
     ChevronRightIcon,
     ChevronDownIcon,
     ChevronUpIcon,
     LucideIcon,
-    UserIcon,
     ShieldIcon,
     KeyIcon,
     BuildingIcon,
@@ -292,11 +287,6 @@ export const Sidebar: React.FC = () => {
                     );
                 })}
             </nav>
-
-            {/* User Profile Section - Replaces Bottom Navigation */}
-            <div className="border-t border-orange-200/50 px-2 py-4">
-                <UserProfileSection isCollapsed={isCollapsed} />
-            </div>
         </div>
         
         {/* Floating Expand Button - Only visible when collapsed */}
@@ -310,133 +300,5 @@ export const Sidebar: React.FC = () => {
             </button>
         )}
         </>
-    );
-};
-
-// User Profile Section Component
-const UserProfileSection: React.FC<{ isCollapsed: boolean }> = ({ isCollapsed }) => {
-    const { user, logout } = useAuth();
-    const [showProfileMenu, setShowProfileMenu] = useState(false);
-    const router = isClient ? useRouter() : null;
-
-    const getUserDisplayName = () => {
-        if (!user) return 'Guest User';
-        return user.firstName && user.lastName 
-            ? `${user.firstName} ${user.lastName}`
-            : user.email || 'Unknown User';
-    };
-
-    const getUserInitials = () => {
-        if (!user) return 'GU';
-        if (user.firstName && user.lastName) {
-            return `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`;
-        }
-        if (user.email) {
-            return user.email.substring(0, 2).toUpperCase();
-        }
-        return 'SA';
-    };
-
-    const getUserRole = () => {
-        if (!user) return 'Guest';
-        
-        // Try to get role from token
-        try {
-            const token = enhancedTokenManager.getToken();
-            if (token) {
-                const payload = JSON.parse(atob(token.split('.')[1]));
-                const role = payload.role || payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
-                if (role) return role;
-            }
-        } catch (error) {
-            console.warn('Could not parse role from token:', error);
-        }
-        
-        // Fallback to default
-        return 'User';
-    };
-
-    const handleLogout = () => {
-        logout();
-        setShowProfileMenu(false);
-    };
-
-    return (
-        <div className="relative">
-            {/* User Info Display - Styled like other menu items */}
-            <button
-                onClick={() => setShowProfileMenu(!showProfileMenu)}
-                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ease-in-out group ${
-                    isCollapsed ? 'justify-center' : ''
-                } ${
-                    showProfileMenu 
-                        ? 'bg-primary-500 text-white' 
-                        : 'text-secondary-700 hover:text-secondary-900 hover:bg-primary-50'
-                }`}
-                title={isCollapsed ? getUserDisplayName() : undefined}
-            >
-                <div className={`w-5 h-5 rounded-full flex items-center justify-center ring-1 flex-shrink-0 transition-all duration-200 ${
-                    showProfileMenu 
-                        ? 'bg-white/20 ring-white/30' 
-                        : 'bg-primary-100 ring-primary-200'
-                }`}>
-                    <span className={`font-medium text-xs transition-all duration-200 ${
-                        showProfileMenu ? 'text-white' : 'text-primary-700'
-                    }`}>
-                        {getUserInitials()}
-                    </span>
-                </div>
-                
-                {/* Only show text when expanded */}
-                {!isCollapsed && (
-                    <div className={`flex-1 text-left transition-all duration-300 ease-in-out overflow-hidden ml-3`}>
-                        <div className={`text-sm font-medium truncate ${showProfileMenu ? 'text-white' : 'text-secondary-800'}`}>
-                            {getUserDisplayName()}
-                        </div>
-                        <div className={`text-xs truncate ${showProfileMenu ? 'text-white/90' : 'text-secondary-600'}`}>
-                            {getUserRole()}
-                        </div>
-                    </div>
-                )}
-            </button>
-
-            {/* Profile Menu Dropdown - Only show when expanded and menu is open */}
-            {showProfileMenu && !isCollapsed && (
-                <div className="absolute bottom-full left-0 right-0 mb-2 bg-white rounded-lg shadow-lg py-2 z-50 border border-gray-200">
-                    <div className="px-4 py-2 border-b border-gray-200">
-                        <div className="text-sm font-medium text-gray-900 truncate">
-                            {getUserDisplayName()}
-                        </div>
-                        <div className="text-xs text-gray-600 truncate">
-                            {user?.email || 'No email'}
-                        </div>
-                    </div>
-                    
-                    <button
-                        onClick={() => {
-                            setShowProfileMenu(false);
-                            // Navigate to profile page
-                            if (router) {
-                                router.push('/profile');
-                            }
-                        }}
-                        className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150"
-                    >
-                        <UserIcon size={16} className="mr-3 flex-shrink-0" />
-                        Profile Settings
-                    </button>
-                    
-                    <div className="border-t border-gray-200 my-1"></div>
-                    
-                    <button
-                        onClick={handleLogout}
-                        className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150"
-                    >
-                        <LogOutIcon size={16} className="mr-3 flex-shrink-0" />
-                        Sign Out
-                    </button>
-                </div>
-            )}
-        </div>
     );
 };

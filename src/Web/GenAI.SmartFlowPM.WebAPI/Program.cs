@@ -22,6 +22,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container
 builder.Services.AddControllers();
 
+// Add HttpContextAccessor for tenant context service
+builder.Services.AddHttpContextAccessor();
+
 // Add FluentValidation
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddFluentValidationClientsideAdapters();

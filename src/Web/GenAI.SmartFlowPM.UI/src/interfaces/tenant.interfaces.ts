@@ -1,3 +1,4 @@
+// Tenant module interfaces
 export interface TenantDto {
   id: string;
   name: string;
@@ -60,55 +61,3 @@ export interface TenantSummaryDto {
   maxProjects: number;
   createdAt: Date;
 }
-
-export interface TenantFormData {
-  name: string;
-  subDomain: string;
-  description: string;
-  contactEmail: string;
-  contactPhone: string;
-  address: string;
-  city: string;
-  state: string;
-  postalCode: string;
-  country: string;
-  subscriptionStartDate: string;
-  subscriptionEndDate: string;
-  subscriptionPlan: string;
-  maxUsers: number;
-  maxProjects: number;
-  timeZone: string;
-  currency: string;
-  logoUrl: string;
-}
-
-export const SUBSCRIPTION_PLANS = [
-  'Basic',
-  'Standard',
-  'Premium',
-  'Enterprise'
-] as const;
-
-export const TIMEZONES = [
-  'UTC',
-  'EST',
-  'CST',
-  'MST',
-  'PST',
-  'GMT',
-  'CET'
-] as const;
-
-export const CURRENCIES = [
-  'USD',
-  'EUR',
-  'GBP',
-  'CAD',
-  'AUD',
-  'JPY',
-  'INR'
-] as const;
-
-export type SubscriptionPlan = typeof SUBSCRIPTION_PLANS[number];
-export type TimeZone = typeof TIMEZONES[number];
-export type Currency = typeof CURRENCIES[number];

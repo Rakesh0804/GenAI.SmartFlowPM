@@ -24,7 +24,7 @@ public class CounterService : ICounterService
         return $"{acronym}-{nextValue:D6}";
     }
 
-    public async Task<int> GetNextCounterValueAsync(string counterName, Guid tenantId)
+    public Task<int> GetNextCounterValueAsync(string counterName, Guid tenantId)
     {
         // Use lock to ensure thread safety
         lock (_lockObject)
@@ -55,7 +55,7 @@ public class CounterService : ICounterService
             }
 
             _context.SaveChanges();
-            return counter.CurrentValue;
+            return Task.FromResult(counter.CurrentValue);
         }
     }
 

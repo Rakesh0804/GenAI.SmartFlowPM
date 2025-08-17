@@ -16,6 +16,12 @@ public interface IUnitOfWork : IDisposable
     ICampaignEvaluationRepository CampaignEvaluations { get; }
     ICertificateRepository Certificates { get; }
     ICertificateTemplateRepository CertificateTemplates { get; }
+    
+    // TimeTracker repositories
+    ITimeCategoryRepository TimeCategories { get; }
+    ITimeEntryRepository TimeEntries { get; }
+    ITimesheetRepository Timesheets { get; }
+    IActiveTrackingSessionRepository ActiveTrackingSessions { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     Task BeginTransactionAsync(CancellationToken cancellationToken = default);

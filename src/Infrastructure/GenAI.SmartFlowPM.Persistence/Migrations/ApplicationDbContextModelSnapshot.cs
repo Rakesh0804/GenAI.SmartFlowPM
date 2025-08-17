@@ -22,6 +22,101 @@ namespace GenAI.SmartFlowPM.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("GenAI.SmartFlowPM.Domain.Entities.ActiveTrackingSession", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("LastActivityTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("PausedTime")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid?>("ProjectId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid?>("TaskId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TimeCategoryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsActive")
+                        .HasDatabaseName("IX_ActiveTrackingSessions_IsActive");
+
+                    b.HasIndex("ProjectId")
+                        .HasDatabaseName("IX_ActiveTrackingSessions_ProjectId");
+
+                    b.HasIndex("StartTime")
+                        .HasDatabaseName("IX_ActiveTrackingSessions_StartTime");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("IX_ActiveTrackingSessions_Status");
+
+                    b.HasIndex("TaskId")
+                        .HasDatabaseName("IX_ActiveTrackingSessions_TaskId");
+
+                    b.HasIndex("TenantId")
+                        .HasDatabaseName("IX_ActiveTrackingSessions_TenantId");
+
+                    b.HasIndex("TimeCategoryId")
+                        .HasDatabaseName("IX_ActiveTrackingSessions_TimeCategoryId");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("IX_ActiveTrackingSessions_UserId");
+
+                    b.HasIndex("UserId", "IsActive")
+                        .IsUnique()
+                        .HasDatabaseName("IX_ActiveTrackingSessions_UserId_IsActive")
+                        .HasFilter("\"IsActive\" = true");
+
+                    b.ToTable("ActiveTrackingSessions", (string)null);
+                });
+
             modelBuilder.Entity("GenAI.SmartFlowPM.Domain.Entities.Branch", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1585,6 +1680,281 @@ namespace GenAI.SmartFlowPM.Persistence.Migrations
                     b.ToTable("Tenants", (string)null);
                 });
 
+            modelBuilder.Entity("GenAI.SmartFlowPM.Domain.Entities.TimeCategory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Color")
+                        .HasMaxLength(7)
+                        .HasColumnType("character varying(7)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<int>("DefaultBillableStatus")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsActive")
+                        .HasDatabaseName("IX_TimeCategories_IsActive");
+
+                    b.HasIndex("TenantId")
+                        .HasDatabaseName("IX_TimeCategories_TenantId");
+
+                    b.HasIndex("Name", "TenantId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_TimeCategories_Name_TenantId");
+
+                    b.ToTable("TimeCategories", (string)null);
+                });
+
+            modelBuilder.Entity("GenAI.SmartFlowPM.Domain.Entities.TimeEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("BillableStatus")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int>("Duration")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("EndTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("EntryType")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal?>("HourlyRate")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsManualEntry")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid?>("ProjectId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("TaskId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TimeCategoryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("TimesheetId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BillableStatus")
+                        .HasDatabaseName("IX_TimeEntries_BillableStatus");
+
+                    b.HasIndex("EntryType")
+                        .HasDatabaseName("IX_TimeEntries_EntryType");
+
+                    b.HasIndex("ProjectId")
+                        .HasDatabaseName("IX_TimeEntries_ProjectId");
+
+                    b.HasIndex("StartTime")
+                        .HasDatabaseName("IX_TimeEntries_StartTime");
+
+                    b.HasIndex("TaskId")
+                        .HasDatabaseName("IX_TimeEntries_TaskId");
+
+                    b.HasIndex("TenantId")
+                        .HasDatabaseName("IX_TimeEntries_TenantId");
+
+                    b.HasIndex("TimeCategoryId")
+                        .HasDatabaseName("IX_TimeEntries_TimeCategoryId");
+
+                    b.HasIndex("TimesheetId")
+                        .HasDatabaseName("IX_TimeEntries_TimesheetId");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("IX_TimeEntries_UserId");
+
+                    b.ToTable("TimeEntries", (string)null);
+                });
+
+            modelBuilder.Entity("GenAI.SmartFlowPM.Domain.Entities.Timesheet", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ApprovalNotes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<DateTime?>("ApprovedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ApprovedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("BillableHours")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("RejectedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("RejectedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("SubmittedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("SubmittedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("TotalHours")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApprovedAt")
+                        .HasDatabaseName("IX_Timesheets_ApprovedAt");
+
+                    b.HasIndex("ApprovedBy");
+
+                    b.HasIndex("EndDate")
+                        .HasDatabaseName("IX_Timesheets_EndDate");
+
+                    b.HasIndex("RejectedBy");
+
+                    b.HasIndex("StartDate")
+                        .HasDatabaseName("IX_Timesheets_StartDate");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("IX_Timesheets_Status");
+
+                    b.HasIndex("SubmittedAt")
+                        .HasDatabaseName("IX_Timesheets_SubmittedAt");
+
+                    b.HasIndex("SubmittedBy");
+
+                    b.HasIndex("TenantId")
+                        .HasDatabaseName("IX_Timesheets_TenantId");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("IX_Timesheets_UserId");
+
+                    b.HasIndex("UserId", "StartDate", "EndDate")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Timesheets_UserId_DateRange");
+
+                    b.ToTable("Timesheets", (string)null);
+                });
+
             modelBuilder.Entity("GenAI.SmartFlowPM.Domain.Entities.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1652,8 +2022,8 @@ namespace GenAI.SmartFlowPM.Persistence.Migrations
 
                     b.Property<string>("UserName")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
 
                     b.HasKey("Id");
 
@@ -1841,6 +2211,47 @@ namespace GenAI.SmartFlowPM.Persistence.Migrations
                         .HasDatabaseName("IX_UserRoles_UserId_RoleId");
 
                     b.ToTable("UserRoles", (string)null);
+                });
+
+            modelBuilder.Entity("GenAI.SmartFlowPM.Domain.Entities.ActiveTrackingSession", b =>
+                {
+                    b.HasOne("GenAI.SmartFlowPM.Domain.Entities.Project", "Project")
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("GenAI.SmartFlowPM.Domain.Entities.ProjectTask", "Task")
+                        .WithMany()
+                        .HasForeignKey("TaskId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("GenAI.SmartFlowPM.Domain.Entities.Tenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GenAI.SmartFlowPM.Domain.Entities.TimeCategory", "TimeCategory")
+                        .WithMany("ActiveTrackingSessions")
+                        .HasForeignKey("TimeCategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GenAI.SmartFlowPM.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Project");
+
+                    b.Navigation("Task");
+
+                    b.Navigation("Tenant");
+
+                    b.Navigation("TimeCategory");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("GenAI.SmartFlowPM.Domain.Entities.Branch", b =>
@@ -2222,6 +2633,105 @@ namespace GenAI.SmartFlowPM.Persistence.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("GenAI.SmartFlowPM.Domain.Entities.TimeCategory", b =>
+                {
+                    b.HasOne("GenAI.SmartFlowPM.Domain.Entities.Tenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("GenAI.SmartFlowPM.Domain.Entities.TimeEntry", b =>
+                {
+                    b.HasOne("GenAI.SmartFlowPM.Domain.Entities.Project", "Project")
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("GenAI.SmartFlowPM.Domain.Entities.ProjectTask", "Task")
+                        .WithMany()
+                        .HasForeignKey("TaskId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("GenAI.SmartFlowPM.Domain.Entities.Tenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GenAI.SmartFlowPM.Domain.Entities.TimeCategory", "TimeCategory")
+                        .WithMany("TimeEntries")
+                        .HasForeignKey("TimeCategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GenAI.SmartFlowPM.Domain.Entities.Timesheet", "Timesheet")
+                        .WithMany("TimeEntries")
+                        .HasForeignKey("TimesheetId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("GenAI.SmartFlowPM.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Project");
+
+                    b.Navigation("Task");
+
+                    b.Navigation("Tenant");
+
+                    b.Navigation("TimeCategory");
+
+                    b.Navigation("Timesheet");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("GenAI.SmartFlowPM.Domain.Entities.Timesheet", b =>
+                {
+                    b.HasOne("GenAI.SmartFlowPM.Domain.Entities.User", "ApprovedByUser")
+                        .WithMany()
+                        .HasForeignKey("ApprovedBy")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("GenAI.SmartFlowPM.Domain.Entities.User", "RejectedByUser")
+                        .WithMany()
+                        .HasForeignKey("RejectedBy")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("GenAI.SmartFlowPM.Domain.Entities.User", "SubmittedByUser")
+                        .WithMany()
+                        .HasForeignKey("SubmittedBy")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("GenAI.SmartFlowPM.Domain.Entities.Tenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GenAI.SmartFlowPM.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ApprovedByUser");
+
+                    b.Navigation("RejectedByUser");
+
+                    b.Navigation("SubmittedByUser");
+
+                    b.Navigation("Tenant");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("GenAI.SmartFlowPM.Domain.Entities.User", b =>
                 {
                     b.HasOne("GenAI.SmartFlowPM.Domain.Entities.User", "Manager")
@@ -2395,6 +2905,18 @@ namespace GenAI.SmartFlowPM.Persistence.Migrations
                     b.Navigation("Roles");
 
                     b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("GenAI.SmartFlowPM.Domain.Entities.TimeCategory", b =>
+                {
+                    b.Navigation("ActiveTrackingSessions");
+
+                    b.Navigation("TimeEntries");
+                });
+
+            modelBuilder.Entity("GenAI.SmartFlowPM.Domain.Entities.Timesheet", b =>
+                {
+                    b.Navigation("TimeEntries");
                 });
 
             modelBuilder.Entity("GenAI.SmartFlowPM.Domain.Entities.User", b =>

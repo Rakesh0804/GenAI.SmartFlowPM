@@ -46,17 +46,6 @@ public class UsersController : BaseController
     {
         var command = new CreateUserCommand { CreateUserDto = createUserDto };
         var result = await _mediator.Send(command);
-        
-        if (result.IsSuccess)
-        {
-            return CreatedAtAction(nameof(GetUser), new { id = result.Data!.Id }, new
-            {
-                success = true,
-                data = result.Data,
-                message = result.Message
-            });
-        }
-        
         return HandleResult(result);
     }
 

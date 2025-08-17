@@ -57,6 +57,12 @@ public class ComprehensiveDataSeeder
         await SeedEntityIfEmpty<Team>("Teams", SeedTeamsAsync);
         await SeedTeamMembersIfNeeded();
 
+        // TimeTracker entities
+        await SeedEntityIfEmpty<TimeCategory>("Time Categories", SeedTimeCategoriesAsync);
+        await SeedEntityIfEmpty<Timesheet>("Timesheets", SeedTimesheetsAsync);
+        await SeedEntityIfEmpty<TimeEntry>("Time Entries", SeedTimeEntriesAsync);
+        await SeedEntityIfEmpty<ActiveTrackingSession>("Active Tracking Sessions", SeedActiveTrackingSessionsAsync);
+
         Console.WriteLine("Comprehensive data seeding completed successfully!");
     }
 
@@ -1155,6 +1161,290 @@ public class ComprehensiveDataSeeder
         catch (Exception ex)
         {
             Console.WriteLine($"Error seeding team members: {ex.Message}");
+            throw;
+        }
+    }
+
+    #endregion
+
+    #region TimeTracker Seeding
+
+    private async Task SeedTimeCategoriesAsync()
+    {
+        try
+        {
+            var faker = new Faker();
+            var categories = new List<TimeCategory>
+            {
+                new TimeCategory
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Development",
+                    Description = "Software development activities",
+                    Color = "#3B82F6",
+                    DefaultBillableStatus = BillableStatus.Billable,
+                    IsActive = true,
+                    TenantId = _defaultTenantId,
+                    CreatedBy = "System",
+                    CreatedAt = DateTime.UtcNow
+                },
+                new TimeCategory
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Testing",
+                    Description = "Quality assurance and testing activities",
+                    Color = "#10B981",
+                    DefaultBillableStatus = BillableStatus.Billable,
+                    IsActive = true,
+                    TenantId = _defaultTenantId,
+                    CreatedBy = "System",
+                    CreatedAt = DateTime.UtcNow
+                },
+                new TimeCategory
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Meeting",
+                    Description = "Team meetings and client calls",
+                    Color = "#F59E0B",
+                    DefaultBillableStatus = BillableStatus.NonBillable,
+                    IsActive = true,
+                    TenantId = _defaultTenantId,
+                    CreatedBy = "System",
+                    CreatedAt = DateTime.UtcNow
+                },
+                new TimeCategory
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Research",
+                    Description = "Research and learning activities",
+                    Color = "#8B5CF6",
+                    DefaultBillableStatus = BillableStatus.Billable,
+                    IsActive = true,
+                    TenantId = _defaultTenantId,
+                    CreatedBy = "System",
+                    CreatedAt = DateTime.UtcNow
+                },
+                new TimeCategory
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Documentation",
+                    Description = "Writing documentation and specs",
+                    Color = "#EF4444",
+                    DefaultBillableStatus = BillableStatus.Billable,
+                    IsActive = true,
+                    TenantId = _defaultTenantId,
+                    CreatedBy = "System",
+                    CreatedAt = DateTime.UtcNow
+                },
+                new TimeCategory
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Break",
+                    Description = "Lunch and coffee breaks",
+                    Color = "#6B7280",
+                    DefaultBillableStatus = BillableStatus.NonBillable,
+                    IsActive = true,
+                    TenantId = _defaultTenantId,
+                    CreatedBy = "System",
+                    CreatedAt = DateTime.UtcNow
+                }
+            };
+
+            await _context.TimeCategories.AddRangeAsync(categories);
+            Console.WriteLine($"Successfully seeded {categories.Count} time categories");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error seeding time categories: {ex.Message}");
+            throw;
+        }
+    }
+
+    private async Task SeedTimesheetsAsync()
+    {
+        try
+        {
+            var users = await _context.Users.ToListAsync();
+            var faker = new Faker();
+            var timesheets = new List<Timesheet>();
+
+            foreach (var user in users.Take(5)) // Create timesheets for first 5 users
+            {
+                // Create timesheets for the last 8 weeks
+                for (int week = 0; week < 8; week++)
+                {
+                    var startOfWeek = DateTime.UtcNow.Date.AddDays(-(int)DateTime.UtcNow.DayOfWeek).AddDays(-7 * week);
+                    var endOfWeek = startOfWeek.AddDays(6);
+
+                    var timesheet = new Timesheet
+                    {
+                        Id = Guid.NewGuid(),
+                        UserId = user.Id,
+                        StartDate = startOfWeek,
+                        EndDate = endOfWeek,
+                        Status = week < 2 ? TimesheetStatus.Draft : faker.PickRandom<TimesheetStatus>(),
+                        TotalHours = 0, // Will be calculated when time entries are added
+                        BillableHours = 0,
+                        SubmittedAt = week >= 2 ? faker.Date.Between(endOfWeek, endOfWeek.AddDays(3)) : null,
+                        SubmittedBy = week >= 2 ? user.Id : null,
+                        ApprovedAt = week >= 4 ? faker.Date.Between(endOfWeek.AddDays(1), endOfWeek.AddDays(5)) : null,
+                        ApprovedBy = week >= 4 ? users.First(u => u.Id != user.Id).Id : null,
+                        ApprovalNotes = faker.Random.Bool(0.3f) ? faker.Lorem.Sentence() : null,
+                        TenantId = user.TenantId,
+                        CreatedBy = user.Id.ToString(),
+                        CreatedAt = startOfWeek.AddDays(-1)
+                    };
+
+                    timesheets.Add(timesheet);
+                }
+            }
+
+            await _context.Timesheets.AddRangeAsync(timesheets);
+            Console.WriteLine($"Successfully seeded {timesheets.Count} timesheets");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error seeding timesheets: {ex.Message}");
+            throw;
+        }
+    }
+
+    private async Task SeedTimeEntriesAsync()
+    {
+        try
+        {
+            var timesheets = await _context.Timesheets.Include(t => t.User).ToListAsync();
+            var projects = await _context.Projects.ToListAsync();
+            var projectTasks = await _context.ProjectTasks.ToListAsync();
+            var categories = await _context.TimeCategories.ToListAsync();
+            var faker = new Faker();
+            var timeEntries = new List<TimeEntry>();
+
+            foreach (var timesheet in timesheets.Where(t => t.Status != TimesheetStatus.Draft))
+            {
+                var userProjects = projects.Where(p => p.TenantId == timesheet.TenantId).ToList();
+                var workingDays = 5; // Monday to Friday
+                
+                for (int day = 0; day < workingDays; day++)
+                {
+                    var date = timesheet.StartDate.AddDays(day);
+                    var entriesForDay = faker.Random.Int(2, 4); // 2-4 entries per day
+
+                    for (int entry = 0; entry < entriesForDay; entry++)
+                    {
+                        var project = faker.PickRandom(userProjects);
+                        var tasksForProject = projectTasks.Where(t => t.ProjectId == project.Id).ToList();
+                        var task = tasksForProject.Any() ? faker.PickRandom(tasksForProject) : null;
+                        var category = faker.PickRandom(categories);
+                        
+                        var startTime = faker.Date.Between(
+                            date.AddHours(8), 
+                            date.AddHours(16)
+                        );
+                        var duration = faker.Random.Int(30, 240); // 30 minutes to 4 hours
+                        var endTime = startTime.AddMinutes(duration);
+
+                        var timeEntry = new TimeEntry
+                        {
+                            Id = Guid.NewGuid(),
+                            TimesheetId = timesheet.Id,
+                            UserId = timesheet.UserId,
+                            ProjectId = project.Id,
+                            TaskId = task?.Id,
+                            TimeCategoryId = category.Id,
+                            StartTime = startTime,
+                            EndTime = endTime,
+                            Duration = duration,
+                            Description = faker.Lorem.Sentence(),
+                            EntryType = faker.PickRandom<TimeEntryType>(),
+                            BillableStatus = category.DefaultBillableStatus,
+                            HourlyRate = faker.Random.Decimal(50, 150),
+                            IsManualEntry = faker.Random.Bool(0.7f),
+                            TenantId = timesheet.TenantId,
+                            CreatedBy = timesheet.UserId.ToString(),
+                            CreatedAt = date.AddMinutes(duration + 10)
+                        };
+
+                        timeEntries.Add(timeEntry);
+                    }
+                }
+            }
+
+            await _context.TimeEntries.AddRangeAsync(timeEntries);
+
+            // Update timesheet totals
+            var timesheetTotals = timeEntries
+                .GroupBy(te => te.TimesheetId)
+                .Select(g => new { 
+                    TimesheetId = g.Key, 
+                    TotalHours = g.Sum(te => te.Duration) / 60.0m,
+                    BillableHours = g.Where(te => te.BillableStatus == BillableStatus.Billable).Sum(te => te.Duration) / 60.0m
+                })
+                .ToList();
+
+            foreach (var total in timesheetTotals)
+            {
+                var timesheet = timesheets.First(t => t.Id == total.TimesheetId);
+                timesheet.TotalHours = total.TotalHours;
+                timesheet.BillableHours = total.BillableHours;
+            }
+
+            Console.WriteLine($"Successfully seeded {timeEntries.Count} time entries");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error seeding time entries: {ex.Message}");
+            throw;
+        }
+    }
+
+    private async Task SeedActiveTrackingSessionsAsync()
+    {
+        try
+        {
+            var users = await _context.Users.ToListAsync();
+            var projects = await _context.Projects.ToListAsync();
+            var categories = await _context.TimeCategories.ToListAsync();
+            var faker = new Faker();
+            var activeSessions = new List<ActiveTrackingSession>();
+
+            // Create 1-2 active sessions for demonstration
+            var activeUsers = users.Take(2).ToList();
+
+            foreach (var user in activeUsers)
+            {
+                var userProjects = projects.Where(p => p.TenantId == user.TenantId).ToList();
+                if (!userProjects.Any()) continue;
+
+                var project = faker.PickRandom(userProjects);
+                var category = faker.PickRandom(categories);
+                
+                var startTime = DateTime.UtcNow.AddMinutes(-faker.Random.Int(15, 120)); // Started 15 min to 2 hours ago
+                
+                var session = new ActiveTrackingSession
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = user.Id,
+                    ProjectId = project.Id,
+                    TimeCategoryId = category.Id,
+                    StartTime = startTime,
+                    LastActivityTime = DateTime.UtcNow.AddMinutes(-faker.Random.Int(1, 10)), // Last activity 1-10 min ago
+                    Description = faker.Lorem.Sentence(),
+                    Status = TrackingStatus.Running,
+                    TenantId = user.TenantId,
+                    CreatedBy = user.Id.ToString(),
+                    CreatedAt = startTime
+                };
+
+                activeSessions.Add(session);
+            }
+
+            await _context.ActiveTrackingSessions.AddRangeAsync(activeSessions);
+            Console.WriteLine($"Successfully seeded {activeSessions.Count} active tracking sessions");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error seeding active tracking sessions: {ex.Message}");
             throw;
         }
     }

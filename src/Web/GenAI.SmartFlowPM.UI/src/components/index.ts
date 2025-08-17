@@ -6,3 +6,6 @@ export { RoleCockpit } from './roles/RoleCockpit';
 export { NewRole } from './roles/NewRole';
 export { EditRole } from './roles/EditRole';
 
+// TimeTracker Components
+export { TimeTrackerDashboard } from './timetracker';
+

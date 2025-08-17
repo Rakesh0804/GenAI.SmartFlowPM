@@ -76,12 +76,7 @@ public class BranchesController : BaseController
 
         if (result.IsSuccess)
         {
-            return CreatedAtAction(nameof(GetBranch), new { id = result.Data!.Id }, new
-            {
-                success = true,
-                data = result.Data,
-                message = result.Message
-            });
+            return CreatedAtAction(nameof(GetBranch), new { id = result.Data!.Id }, result);
         }
         
         return HandleResult(result);

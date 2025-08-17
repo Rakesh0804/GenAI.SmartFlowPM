@@ -8,6 +8,7 @@ using GenAI.SmartFlowPM.Application.DTOs.Tenant;
 using GenAI.SmartFlowPM.Application.DTOs.Campaign;
 using GenAI.SmartFlowPM.Application.DTOs.Certificate;
 using GenAI.SmartFlowPM.Application.DTOs.Team;
+using GenAI.SmartFlowPM.Application.DTOs.TimeTracker;
 using GenAI.SmartFlowPM.Domain.Entities;
 
 namespace GenAI.SmartFlowPM.Application.Common.Mappings;
@@ -165,6 +166,105 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.TeamId, opt => opt.Ignore())
             .ForMember(dest => dest.UserId, opt => opt.Ignore())
             .ForMember(dest => dest.JoinedDate, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore());
+
+        // TimeTracker mappings
+        // Time Category mappings
+        CreateMap<TimeCategory, TimeCategoryDto>();
+        CreateMap<CreateTimeCategoryDto, TimeCategory>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true));
+
+        CreateMap<UpdateTimeCategoryDto, TimeCategory>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore());
+
+        // Time Entry mappings
+        CreateMap<TimeEntry, TimeEntryDto>()
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => 
+                src.User != null ? $"{src.User.FirstName} {src.User.LastName}" : string.Empty))
+            .ForMember(dest => dest.ProjectName, opt => opt.MapFrom(src => src.Project != null ? src.Project.Name : null))
+            .ForMember(dest => dest.TaskName, opt => opt.MapFrom(src => src.Task != null ? src.Task.Title : null))
+            .ForMember(dest => dest.TimeCategoryName, opt => opt.MapFrom(src => src.TimeCategory.Name))
+            .ForMember(dest => dest.TimeCategoryColor, opt => opt.MapFrom(src => src.TimeCategory.Color));
+
+        CreateMap<CreateTimeEntryDto, TimeEntry>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.UserId, opt => opt.Ignore()) // Will be set from current user
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.Duration, opt => opt.MapFrom(src => 
+                src.Duration ?? (src.EndTime.HasValue ? 
+                (int)(src.EndTime.Value - src.StartTime).TotalMinutes : 0)))
+            .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true));
+
+        CreateMap<UpdateTimeEntryDto, TimeEntry>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.UserId, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.Duration, opt => opt.MapFrom(src => 
+                src.Duration ?? (src.EndTime.HasValue ? 
+                (int)(src.EndTime.Value - src.StartTime).TotalMinutes : 0)));
+
+        // Timesheet mappings
+        CreateMap<Timesheet, TimesheetDto>()
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => 
+                src.User != null ? $"{src.User.FirstName} {src.User.LastName}" : string.Empty))
+            .ForMember(dest => dest.SubmittedByName, opt => opt.MapFrom(src => 
+                src.SubmittedByUser != null ? $"{src.SubmittedByUser.FirstName} {src.SubmittedByUser.LastName}" : null))
+            .ForMember(dest => dest.ApprovedByName, opt => opt.MapFrom(src => 
+                src.ApprovedByUser != null ? $"{src.ApprovedByUser.FirstName} {src.ApprovedByUser.LastName}" : null))
+            .ForMember(dest => dest.RejectedByName, opt => opt.MapFrom(src => 
+                src.RejectedByUser != null ? $"{src.RejectedByUser.FirstName} {src.RejectedByUser.LastName}" : null))
+            .ForMember(dest => dest.TimeEntries, opt => opt.MapFrom(src => src.TimeEntries));
+
+        CreateMap<CreateTimesheetDto, Timesheet>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => Domain.Enums.TimesheetStatus.Draft));
+
+        CreateMap<UpdateTimesheetDto, Timesheet>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.UserId, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore());
+
+        // Active Tracking Session mappings
+        CreateMap<ActiveTrackingSession, ActiveTrackingSessionDto>()
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => 
+                src.User != null ? $"{src.User.FirstName} {src.User.LastName}" : string.Empty))
+            .ForMember(dest => dest.ProjectName, opt => opt.MapFrom(src => src.Project != null ? src.Project.Name : null))
+            .ForMember(dest => dest.TaskName, opt => opt.MapFrom(src => src.Task != null ? src.Task.Title : null))
+            .ForMember(dest => dest.TimeCategoryName, opt => opt.MapFrom(src => src.TimeCategory.Name))
+            .ForMember(dest => dest.TimeCategoryColor, opt => opt.MapFrom(src => src.TimeCategory.Color))
+            .ForMember(dest => dest.ElapsedMinutes, opt => opt.MapFrom(src => 
+                src.Status == Domain.Enums.TrackingStatus.Running ? 
+                (int)(DateTime.UtcNow - src.StartTime).TotalMinutes - src.PausedTime : 0));
+
+        CreateMap<StartTrackingDto, ActiveTrackingSession>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.UserId, opt => opt.Ignore()) // Will be set from current user
+            .ForMember(dest => dest.StartTime, opt => opt.MapFrom(src => DateTime.UtcNow))
+            .ForMember(dest => dest.LastActivityTime, opt => opt.MapFrom(src => DateTime.UtcNow))
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => Domain.Enums.TrackingStatus.Running))
+            .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true))
+            .ForMember(dest => dest.PausedTime, opt => opt.MapFrom(src => 0))
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore());
+
+        CreateMap<UpdateTrackingDto, ActiveTrackingSession>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.UserId, opt => opt.Ignore())
+            .ForMember(dest => dest.StartTime, opt => opt.Ignore())
+            .ForMember(dest => dest.PausedTime, opt => opt.Ignore())
+            .ForMember(dest => dest.Status, opt => opt.Ignore())
+            .ForMember(dest => dest.IsActive, opt => opt.Ignore())
             .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
             .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore());
     }

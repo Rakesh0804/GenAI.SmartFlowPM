@@ -32,6 +32,12 @@ public class ApplicationDbContext : DbContext
     public DbSet<CertificateTemplate> CertificateTemplates { get; set; }
     public DbSet<Team> Teams { get; set; }
     public DbSet<TeamMember> TeamMembers { get; set; }
+    
+    // TimeTracker entities
+    public DbSet<TimeCategory> TimeCategories { get; set; }
+    public DbSet<TimeEntry> TimeEntries { get; set; }
+    public DbSet<Timesheet> Timesheets { get; set; }
+    public DbSet<ActiveTrackingSession> ActiveTrackingSessions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -63,6 +69,12 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<CertificateTemplate>().HasQueryFilter(e => !e.IsDeleted);
         modelBuilder.Entity<Team>().HasQueryFilter(e => !e.IsDeleted);
         modelBuilder.Entity<TeamMember>().HasQueryFilter(e => !e.IsDeleted);
+        
+        // TimeTracker query filters
+        modelBuilder.Entity<TimeCategory>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<TimeEntry>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<Timesheet>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<ActiveTrackingSession>().HasQueryFilter(e => !e.IsDeleted);
     }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

@@ -23,7 +23,7 @@ class RoleService extends BaseApiService {
    * Get all roles (no pagination) for dropdowns
    */
   async getAllRoles(): Promise<RoleDto[]> {
-    const result = await this.get<PaginatedResponse<RoleDto>>('/Role?pageSize=1000');
+    const result = await this.get<PaginatedResponse<RoleDto>>('/Role?pageSize=100');
     return result.items;
   }
 

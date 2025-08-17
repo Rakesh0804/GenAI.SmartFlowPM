@@ -190,3 +190,37 @@ public interface ITeamMemberRepository : IGenericRepository<TeamMember>
     Task<TeamMember?> GetByTeamAndUserAsync(Guid teamId, Guid userId, CancellationToken cancellationToken = default);
     Task<IEnumerable<TeamMember>> GetActiveTeamMembersAsync(Guid teamId, CancellationToken cancellationToken = default);
 }
+
+// TimeTracker repository interfaces
+public interface ITimeCategoryRepository : IGenericRepository<TimeCategory>
+{
+    Task<TimeCategory?> GetByNameAsync(string name, Guid tenantId, CancellationToken cancellationToken = default);
+    Task<bool> IsNameExistsAsync(string name, Guid tenantId, Guid? excludeCategoryId = null, CancellationToken cancellationToken = default);
+    Task<IEnumerable<TimeCategory>> GetActiveAsync(Guid tenantId, CancellationToken cancellationToken = default);
+}
+
+public interface ITimeEntryRepository : IGenericRepository<TimeEntry>
+{
+    Task<IEnumerable<TimeEntry>> GetByUserIdAsync(Guid userId, Guid tenantId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<TimeEntry>> GetByProjectIdAsync(Guid projectId, Guid tenantId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<TimeEntry>> GetByTaskIdAsync(Guid taskId, Guid tenantId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<TimeEntry>> GetByDateRangeAsync(Guid userId, DateTime startDate, DateTime endDate, Guid tenantId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<TimeEntry>> GetByTimesheetIdAsync(Guid timesheetId, Guid tenantId, CancellationToken cancellationToken = default);
+    Task<decimal> GetTotalHoursByUserAsync(Guid userId, DateTime startDate, DateTime endDate, Guid tenantId, CancellationToken cancellationToken = default);
+    Task<decimal> GetBillableHoursByUserAsync(Guid userId, DateTime startDate, DateTime endDate, Guid tenantId, CancellationToken cancellationToken = default);
+}
+
+public interface ITimesheetRepository : IGenericRepository<Timesheet>
+{
+    Task<IEnumerable<Timesheet>> GetByUserIdAsync(Guid userId, Guid tenantId, CancellationToken cancellationToken = default);
+    Task<Timesheet?> GetByUserAndDateRangeAsync(Guid userId, DateTime startDate, DateTime endDate, Guid tenantId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<Timesheet>> GetPendingApprovalsAsync(Guid tenantId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<Timesheet>> GetByStatusAsync(TimesheetStatus status, Guid tenantId, CancellationToken cancellationToken = default);
+}
+
+public interface IActiveTrackingSessionRepository : IGenericRepository<ActiveTrackingSession>
+{
+    Task<ActiveTrackingSession?> GetActiveByUserIdAsync(Guid userId, Guid tenantId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<ActiveTrackingSession>> GetByUserIdAsync(Guid userId, Guid tenantId, CancellationToken cancellationToken = default);
+    Task StopAllActiveSessionsAsync(Guid userId, Guid tenantId, CancellationToken cancellationToken = default);
+}

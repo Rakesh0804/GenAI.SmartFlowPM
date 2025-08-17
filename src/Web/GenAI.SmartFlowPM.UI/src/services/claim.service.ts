@@ -21,7 +21,7 @@ class ClaimService extends BaseApiService {
 
   // Get all claims without pagination
   async getAllClaims(): Promise<ClaimDto[]> {
-    const response = await this.get<PaginatedResponse<ClaimDto>>(`${this.baseEndpoint}?page=1&pageSize=1000`);
+    const response = await this.get<PaginatedResponse<ClaimDto>>(`${this.baseEndpoint}?pageNumber=1&pageSize=100`);
     return response.items || [];
   }
 

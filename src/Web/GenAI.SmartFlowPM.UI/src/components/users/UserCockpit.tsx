@@ -281,7 +281,7 @@ export const UserCockpit: React.FC<UserCockpitProps> = ({
       if (searchTerm) {
         // If searching, get all users and filter client-side for now
         // In a real app, you'd want server-side search
-        const allUsers = await userService.getUsers(1, 1000);
+        const allUsers = await userService.getUsers(1, 100);
         const filteredUsers = allUsers.filter(user => 
           user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
           user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -376,7 +376,7 @@ export const UserCockpit: React.FC<UserCockpitProps> = ({
   const handleExport = async () => {
     try {
       // Get all users for export
-      const allUsers = await userService.getUsers(1, 1000);
+      const allUsers = await userService.getUsers(1, 100);
       
       const csvContent = [
         ['Name', 'Email', 'Username', 'Phone', 'Status', 'Manager', 'Created At'].join(','),

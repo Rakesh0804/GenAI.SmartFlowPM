@@ -145,7 +145,7 @@ public class AuthController : BaseController
 
             return Ok(new
             {
-                success = true,
+                isSuccess = true,
                 data = new RefreshTokenResponse
                 {
                     Token = newToken,
@@ -171,7 +171,7 @@ public class AuthController : BaseController
         // For now, it's a placeholder
         return Ok(new
         {
-            success = true,
+            isSuccess = true,
             message = "Token validation endpoint"
         });
     }

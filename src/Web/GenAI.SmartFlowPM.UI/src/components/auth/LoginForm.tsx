@@ -75,7 +75,20 @@ export default function LoginForm() {
       await login(formData, rememberMe);
       success('Login Successful!', 'Welcome to SmartFlowPM System');
     } catch (err: any) {
-      const errorMessage = err.message || 'Login failed. Please try again.';
+      // Extract proper error message from API response
+      let errorMessage = 'Login failed. Please try again.';
+      
+      if (err?.response?.data) {
+        const responseData = err.response.data;
+        if (responseData.message) {
+          errorMessage = responseData.message;
+        } else if (Array.isArray(responseData.errors) && responseData.errors.length > 0) {
+          errorMessage = responseData.errors.join(', ');
+        }
+      } else if (err?.message && !err.message.includes('status code') && !err.message.includes('Request failed')) {
+        errorMessage = err.message;
+      }
+      
       setError(errorMessage);
       showError('Authentication Failed', errorMessage, true);
     } finally {

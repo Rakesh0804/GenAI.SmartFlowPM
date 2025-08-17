@@ -14,48 +14,67 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, Resul
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly IPasswordHashingService _passwordHashingService;
+    private readonly ITenantContextService _tenantContextService;
 
     public CreateUserCommandHandler(
         IUnitOfWork unitOfWork,
         IMapper mapper,
-        IPasswordHashingService passwordHashingService)
+        IPasswordHashingService passwordHashingService,
+        ITenantContextService tenantContextService)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _passwordHashingService = passwordHashingService;
+        _tenantContextService = tenantContextService;
     }
 
     public async Task<Result<UserDto>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
-        // Check if email already exists
-        if (await _unitOfWork.Users.IsEmailExistsAsync(request.CreateUserDto.Email, cancellationToken: cancellationToken))
+        try
         {
-            return Result<UserDto>.Failure("Email already exists");
-        }
+            // Get tenant ID from current context
+            var tenantId = _tenantContextService.GetCurrentTenantId();
 
-        // Check if username already exists
-        if (await _unitOfWork.Users.IsUserNameExistsAsync(request.CreateUserDto.UserName, cancellationToken: cancellationToken))
-        {
-            return Result<UserDto>.Failure("Username already exists");
-        }
-
-        // Check if manager exists
-        if (request.CreateUserDto.ManagerId.HasValue)
-        {
-            if (!await _unitOfWork.Users.ExistsAsync(request.CreateUserDto.ManagerId.Value, cancellationToken))
+            // Check if email already exists
+            if (await _unitOfWork.Users.IsEmailExistsAsync(request.CreateUserDto.Email, cancellationToken: cancellationToken))
             {
-                return Result<UserDto>.Failure("Manager not found");
+                return Result<UserDto>.Failure("Email already exists");
             }
+
+            // Check if username already exists
+            if (await _unitOfWork.Users.IsUserNameExistsAsync(request.CreateUserDto.UserName, cancellationToken: cancellationToken))
+            {
+                return Result<UserDto>.Failure("Username already exists");
+            }
+
+            // Check if manager exists
+            if (request.CreateUserDto.ManagerId.HasValue)
+            {
+                if (!await _unitOfWork.Users.ExistsAsync(request.CreateUserDto.ManagerId.Value, cancellationToken))
+                {
+                    return Result<UserDto>.Failure("Manager not found");
+                }
+            }
+
+            var user = _mapper.Map<User>(request.CreateUserDto);
+            user.PasswordHash = _passwordHashingService.HashPassword(request.CreateUserDto.Password);
+            user.TenantId = tenantId; // Set tenant ID from context
+            user.CreatedBy = _tenantContextService.GetCurrentUserId() ?? "System";
+
+            await _unitOfWork.Users.AddAsync(user, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            var userDto = _mapper.Map<UserDto>(user);
+            return Result<UserDto>.Success(userDto, "User created successfully");
         }
-
-        var user = _mapper.Map<User>(request.CreateUserDto);
-        user.PasswordHash = _passwordHashingService.HashPassword(request.CreateUserDto.Password);
-
-        await _unitOfWork.Users.AddAsync(user, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-        var userDto = _mapper.Map<UserDto>(user);
-        return Result<UserDto>.Success(userDto, "User created successfully");
+        catch (UnauthorizedAccessException ex)
+        {
+            return Result<UserDto>.Failure($"Authorization error: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            return Result<UserDto>.Failure($"Error creating user: {ex.Message}");
+        }
     }
 }
 

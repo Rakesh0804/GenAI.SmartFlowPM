@@ -2,6 +2,7 @@ using FluentValidation;
 using GenAI.SmartFlowPM.Application.DTOs.Task;
 using GenAI.SmartFlowPM.Application.Features.Tasks.Commands;
 using GenAI.SmartFlowPM.Domain.Common.Constants;
+using GenAI.SmartFlowPM.Application.Common.Constants;
 
 namespace GenAI.SmartFlowPM.Application.Validators.Task;
 
@@ -16,7 +17,9 @@ public class CreateTaskDtoValidator : AbstractValidator<CreateTaskDto>
             .NotEmpty()
             .WithMessage("Task title is required")
             .MaximumLength(200)
-            .WithMessage("Task title must not exceed 200 characters");
+            .WithMessage("Task title must not exceed 200 characters")
+            .Matches(ValidationPatterns.TASK_TITLE)
+            .WithMessage(ValidationMessages.TASK_TITLE_INVALID);
 
         RuleFor(x => x.Description)
             .MaximumLength(1000)

@@ -219,7 +219,6 @@ export class BaseApiService {
         refreshToken,
       });
 
-      console.log('Refresh response:', response.data);
 
       // Handle the API response format properly
       if (response.data?.isSuccess && response.data?.data) {
@@ -380,8 +379,61 @@ export class BaseApiService {
       // For responses where data might be null/undefined (like logout), return null as T
       return response.data.data ?? null as T;
     } else {
-      throw new Error(response.data.message || 'An error occurred');
+      const error = new Error(response.data.message || 'An error occurred') as any;
+      error.errors = response.data.errors;
+      error.isApiError = true;
+      throw error;
     }
+  }
+
+  // Helper method to extract error messages from API error
+  public static extractErrorMessage(error: any): string {
+    if (error?.isApiError) {
+      // If it's an API error with validation errors, format them
+      if (error.errors && Array.isArray(error.errors) && error.errors.length > 0) {
+        return error.errors.join(', ');
+      }
+      // Otherwise use the main message
+      return error.message || 'An error occurred';
+    }
+    
+    // Handle Axios errors
+    if (error?.response?.data) {
+      const responseData = error.response.data;
+      
+      // Check for API response format
+      if (responseData.errors && Array.isArray(responseData.errors) && responseData.errors.length > 0) {
+        return responseData.errors.join(', ');
+      }
+      
+      if (responseData.message) {
+        return responseData.message;
+      }
+      
+      // Handle FluentValidation errors format
+      if (responseData.title && responseData.title.includes('validation')) {
+        const validationErrors: string[] = [];
+        
+        if (responseData.errors) {
+          // Extract validation errors from ModelState format
+          Object.keys(responseData.errors).forEach(key => {
+            const fieldErrors = responseData.errors[key];
+            if (Array.isArray(fieldErrors)) {
+              fieldErrors.forEach((err: string) => validationErrors.push(err));
+            }
+          });
+        }
+        
+        if (validationErrors.length > 0) {
+          return validationErrors.join(', ');
+        }
+        
+        return responseData.title || 'Validation error occurred';
+      }
+    }
+    
+    // Default error message
+    return error?.message || 'An unexpected error occurred';
   }
 
   // Generic CRUD operations

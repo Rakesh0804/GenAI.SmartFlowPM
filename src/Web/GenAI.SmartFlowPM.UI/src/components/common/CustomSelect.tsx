@@ -137,6 +137,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
         type="button"
         onClick={() => {
           if (!disabled) {
+            const newOpenState = !isOpen;
             if (!isOpen && selectRef.current) {
               const rect = selectRef.current.getBoundingClientRect();
               setDropdownPosition({
@@ -145,17 +146,17 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
                 width: rect.width
               });
             }
-            setIsOpen(!isOpen);
+            setIsOpen(newOpenState);
           }
         }}
         onKeyDown={handleKeyDown}
         disabled={disabled}
         className={`
           w-full px-3 py-2 text-sm text-left bg-white border border-gray-300 rounded-md 
-          focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none 
+          focus:ring-2 focus:ring-brand-primary focus:border-brand-primary outline-none 
           transition-all duration-200 flex items-center justify-between
           ${disabled ? 'opacity-50 cursor-not-allowed bg-gray-50' : 'hover:border-gray-400 cursor-pointer'}
-          ${isOpen ? 'ring-2 ring-primary-500 border-primary-500' : ''}
+          ${isOpen ? 'ring-2 ring-brand-primary border-brand-primary' : ''}
         `}
       >
         <span className={selectedOption ? 'text-gray-900' : 'text-gray-500'}>
@@ -168,15 +169,10 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
         />
       </button>
 
-      {/* Dropdown using createPortal */}
-      {isOpen && !disabled && typeof window !== 'undefined' && createPortal(
+      {/* Dropdown - temporarily inline for debugging */}
+      {isOpen && !disabled && (
         <div 
-          className="absolute z-[9999] bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto"
-          style={{
-            top: dropdownPosition.top,
-            left: dropdownPosition.left,
-            width: dropdownPosition.width
-          }}
+          className="absolute z-[99999] bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto top-full left-0 w-full"
         >
           {options.map((option, index) => (
             <button
@@ -187,18 +183,17 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
               className={`
                 block w-full px-3 py-2 text-sm text-left transition-colors duration-150
                 ${value === option.value 
-                  ? 'bg-primary-500 text-white' 
+                  ? 'bg-brand-primary text-white' 
                   : highlightedIndex === index 
-                    ? 'bg-primary-50 text-primary-900' 
-                    : 'text-gray-900 hover:bg-primary-50 hover:text-primary-900'
+                    ? 'bg-orange-50 text-brand-primary' 
+                    : 'text-gray-900 hover:bg-orange-50 hover:text-brand-primary'
                 }
               `}
             >
               {option.label}
             </button>
           ))}
-        </div>,
-        document.body
+        </div>
       )}
     </div>
   );

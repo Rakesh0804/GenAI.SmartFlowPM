@@ -90,12 +90,7 @@ public class CampaignsController : BaseController
 
         if (result.IsSuccess)
         {
-            return CreatedAtAction(nameof(GetCampaign), new { id = result.Data.Id }, new
-            {
-                success = true,
-                data = result.Data,
-                message = result.Message
-            });
+            return CreatedAtAction(nameof(GetCampaign), new { id = result.Data!.Id }, result);
         }
 
         return HandleResult(result);
@@ -201,12 +196,7 @@ public class CampaignsController : BaseController
 
         if (result.IsSuccess)
         {
-            return CreatedAtAction(nameof(GetCampaignGroup), new { id = result.Data.Id }, new
-            {
-                success = true,
-                data = result.Data,
-                message = result.Message
-            });
+            return CreatedAtAction(nameof(GetCampaignGroup), new { id = result.Data!.Id }, result);
         }
 
         return HandleResult(result);

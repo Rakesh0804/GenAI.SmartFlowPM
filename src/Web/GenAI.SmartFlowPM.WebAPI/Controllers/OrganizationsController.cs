@@ -101,12 +101,7 @@ public class OrganizationsController : BaseController
         
         if (result.IsSuccess)
         {
-            return CreatedAtAction(nameof(GetOrganization), new { id = result.Data!.Id }, new
-            {
-                success = true,
-                data = result.Data,
-                message = result.Message
-            });
+            return CreatedAtAction(nameof(GetOrganization), new { id = result.Data!.Id }, result);
         }
         
         return HandleResult(result);

@@ -21,6 +21,59 @@ import {
 export const useApiWithToast = () => {
     const { success, error: showError, warning, info } = useToast();
 
+    // Helper function to extract error messages from API response
+    const extractErrorMessage = useCallback((error: any): string => {
+        // Handle API errors converted by BaseApiService
+        if (error?.isApiError && error.message) {
+            return error.message;
+        }
+
+        // Handle errors with message property directly (but not generic axios messages)
+        if (error?.message && !error.message.includes('status code') && !error.message.includes('Request failed')) {
+            return error.message;
+        }
+        
+        if (error.response?.data) {
+            const responseData = error.response.data;
+            
+            // Handle standard API response format: { isSuccess, data, message, errors }
+            if (responseData.message) {
+                return responseData.message;
+            }
+            
+            // Handle array of errors in the errors property
+            if (Array.isArray(responseData.errors) && responseData.errors.length > 0) {
+                return responseData.errors.join(', ');
+            }
+            
+            // Handle FluentValidation errors format (ModelState)
+            if (responseData.errors && typeof responseData.errors === 'object') {
+                const validationErrors: string[] = [];
+                
+                // Check if it's a ModelState errors object
+                Object.keys(responseData.errors).forEach(key => {
+                    const fieldErrors = responseData.errors[key];
+                    if (Array.isArray(fieldErrors)) {
+                        fieldErrors.forEach((err: string) => validationErrors.push(err));
+                    } else if (typeof fieldErrors === 'string') {
+                        validationErrors.push(fieldErrors);
+                    }
+                });
+                
+                if (validationErrors.length > 0) {
+                    return validationErrors.join(', ');
+                }
+            }
+            
+            // Check for other common message properties
+            return responseData.title || 
+                   responseData.detail ||
+                   'An error occurred';
+        }
+        
+        return error.message || 'An unexpected error occurred';
+    }, []);
+
     // Helper function to handle API errors
     const handleApiError = useCallback((error: any, operation: string) => {
         console.error(`${operation} failed:`, error);
@@ -28,16 +81,11 @@ export const useApiWithToast = () => {
         if (error.response) {
             // Server responded with error status
             const status = error.response.status;
-            // Try multiple places to find the error message
-            const message = error.response.data?.message || 
-                           error.response.data?.title || 
-                           error.response.data?.detail ||
-                           error.response.data?.errors?.[0] ||
-                           error.message;
+            const message = extractErrorMessage(error);
 
             switch (status) {
                 case 400:
-                    showError('Bad Request', `Invalid ${operation.toLowerCase()} data: ${message}`);
+                    showError('Validation Error', message);
                     break;
                 case 401:
                     if (operation.toLowerCase() === 'login') {
@@ -73,7 +121,7 @@ export const useApiWithToast = () => {
         }
 
         throw error;
-    }, [showError, warning]);
+    }, [showError, warning, extractErrorMessage]);
 
     // Authentication operations
     const loginWithToast = useCallback(async (credentials: LoginRequest) => {

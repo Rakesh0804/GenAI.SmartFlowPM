@@ -234,7 +234,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         router.push('/dashboard');
       }
     } catch (error: any) {
-      throw new Error(error.message || 'Login failed');
+      // Don't wrap the error - preserve the original error structure
+      // so that the LoginForm can properly extract the error message
+      throw error;
     } finally {
       setIsLoading(false);
     }

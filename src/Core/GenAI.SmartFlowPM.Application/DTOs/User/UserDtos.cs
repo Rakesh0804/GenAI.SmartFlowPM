@@ -67,7 +67,7 @@ public class CreateUserDto
     public string Email { get; set; } = string.Empty;
 
     [Required]
-    [MaxLength(20)]
+    [MaxLength(255)]
     public string UserName { get; set; } = string.Empty;
 
     [Required]

@@ -47,14 +47,14 @@ The Time Tracker Module provides comprehensive time tracking capabilities for pr
 - [ ] Active tracking controller for real-time tracking
 - [ ] API documentation with Swagger
 
-### 6. Frontend (Angular)
+### 6. Frontend (React Next JS)
 - [ ] Time tracker dashboard with active tracking (TimeTrackerComponent)
 - [ ] Timesheet management with approval workflow (TimesheetComponent)
 - [ ] Time entry forms with project/task selection (TimeEntryFormComponent)
 - [ ] Time reports and analytics (TimeReportsComponent)
 - [ ] Timer widget for active time tracking (TimerWidgetComponent)
 - [ ] Time calendar view for visual time management (TimeCalendarComponent)
-- [ ] Professional Material Design implementation
+- [ ] Professional Tailwind Design with lucid-react implementation
 
 ## API Endpoints (ToDo) 📡
 - [ ] GET /api/timetracker/entries - Get time entries with filters
@@ -81,7 +81,7 @@ The Time Tracker Module provides comprehensive time tracking capabilities for pr
 
 ## Frontend Components (ToDo) 🎨
 
-### TimeTrackerComponent
+### TimeTrackerDashboard
 - **Purpose**: Main time tracking dashboard with active timer
 - **Features**:
   - Live timer with start/stop/pause functionality
@@ -91,9 +91,9 @@ The Time Tracker Module provides comprehensive time tracking capabilities for pr
   - Quick actions for common tasks
   - Timer widget with floating controls
   - Productivity insights and goals
-- **Location**: `src/app/time-tracker/time-tracker/`
+- **Location**: `src/components/timetracker/TimeTrackerDashboard.tsx`
 
-### TimesheetComponent
+### TimesheetCockpit
 - **Purpose**: Timesheet management and approval workflow
 - **Features**:
   - Weekly/monthly timesheet views
@@ -103,9 +103,9 @@ The Time Tracker Module provides comprehensive time tracking capabilities for pr
   - Timesheet history and status tracking
   - Export functionality (PDF, Excel)
   - Comments and approval notes
-- **Location**: `src/app/time-tracker/timesheet/`
+- **Location**: `src/components/timetracker/TimesheetCockpit.tsx`
 
-### TimeEntryFormComponent
+### TimeEntryForm
 - **Purpose**: Create and edit individual time entries
 - **Features**:
   - Time entry creation form
@@ -116,9 +116,9 @@ The Time Tracker Module provides comprehensive time tracking capabilities for pr
   - Billable status selection
   - Time category assignment
   - Dialog and standalone modes
-- **Location**: `src/app/time-tracker/time-entry-form/`
+- **Location**: `src/components/timetracker/TimeEntryForm.tsx`
 
-### TimeReportsComponent
+### TimeReports
 - **Purpose**: Time tracking analytics and reporting
 - **Features**:
   - User productivity reports
@@ -128,9 +128,9 @@ The Time Tracker Module provides comprehensive time tracking capabilities for pr
   - Time trends and patterns
   - Export and sharing capabilities
   - Custom date range selection
-- **Location**: `src/app/time-tracker/time-reports/`
+- **Location**: `src/components/timetracker/TimeReports.tsx`
 
-### TimerWidgetComponent
+### TimerWidget
 - **Purpose**: Floating timer widget for active tracking
 - **Features**:
   - Minimalist timer display
@@ -138,11 +138,10 @@ The Time Tracker Module provides comprehensive time tracking capabilities for pr
   - Current task/project display
   - Drag-and-drop positioning
   - Keyboard shortcuts
-  - System tray integration
   - Auto-save functionality
-- **Location**: `src/app/time-tracker/timer-widget/`
+- **Location**: `src/components/timetracker/TimerWidget.tsx`
 
-### TimeCalendarComponent
+### TimeCalendar
 - **Purpose**: Calendar view of time entries
 - **Features**:
   - Monthly/weekly calendar view
@@ -152,7 +151,31 @@ The Time Tracker Module provides comprehensive time tracking capabilities for pr
   - Color-coded project/task categories
   - Quick time entry creation
   - Integration with main calendar
-- **Location**: `src/app/time-tracker/time-calendar/`
+- **Location**: `src/components/timetracker/TimeCalendar.tsx`
+
+### TimeTracker (Main Page)
+- **Purpose**: Main time tracker page component
+- **Features**:
+  - Route handling and navigation
+  - Layout management
+  - Component orchestration
+  - State management
+- **Location**: `src/app/timetracker/page.tsx`
+
+## Service Layer (ToDo) 🔧
+- [ ] TimeTrackerService for API integration
+- [ ] TimesheetService for timesheet operations
+- [ ] TimeReportService for analytics
+- [ ] ActiveTrackingService for real-time tracking
+- [ ] Location: `src/services/timetracker.service.ts`
+
+## Types & Interfaces (ToDo) 📝
+- [ ] TimeEntry interfaces
+- [ ] Timesheet interfaces  
+- [ ] TimeCategory interfaces
+- [ ] ActiveTracking interfaces
+- [ ] TimeReport interfaces
+- [ ] Location: `src/types/interfaces/timetracker.interfaces.ts`
 
 ## Database Schema (ToDo) 🗄️
 

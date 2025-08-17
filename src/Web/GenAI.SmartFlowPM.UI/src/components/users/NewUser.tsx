@@ -5,6 +5,7 @@ import { CreateUserDto, RoleDto, UserDto } from '@/types/api.types';
 import { userService } from '@/services/user.service';
 import { roleService } from '@/services/role.service';
 import { useToast } from '@/contexts/ToastContext';
+import { useApiWithToast } from '@/hooks/useApiWithToast';
 import { 
   User, 
   Mail, 
@@ -33,6 +34,7 @@ export const NewUser: React.FC<NewUserProps> = ({
   onBack
 }) => {
   const { success, error } = useToast();
+  const { createUserWithToast } = useApiWithToast();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -50,7 +52,7 @@ export const NewUser: React.FC<NewUserProps> = ({
     phoneNumber: '',
     password: '',
     confirmPassword: '',
-    managerId: '',
+    managerId: undefined,
     hasReportee: false,
     roleIds: []
   });
@@ -66,18 +68,41 @@ export const NewUser: React.FC<NewUserProps> = ({
     try {
       const roles = await roleService.getAllRoles();
       setAvailableRoles(roles);
-    } catch (error) {
-      console.error('Error loading roles:', error);
-      // You might want to show a toast notification here
+    } catch (err: any) {
+      console.error('Error loading roles:', err);
+      
+      // Extract proper error message
+      let errorMessage = 'Failed to load roles';
+      if (err?.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err?.response?.data?.errors && Array.isArray(err.response.data.errors)) {
+        errorMessage = err.response.data.errors.join(', ');
+      } else if (err?.message && !err.message.includes('status code')) {
+        errorMessage = err.message;
+      }
+      
+      error('Error Loading Roles', errorMessage);
     }
   };
 
   const loadAvailableUsers = async () => {
     try {
-      const users = await userService.getUsers(1, 1000); // Get all users for manager selection
+      const users = await userService.getUsers(1, 100); // Reduced from 1000 to 100 (backend limit)
       setAvailableUsers(users);
-    } catch (error) {
-      console.error('Error loading users:', error);
+    } catch (err: any) {
+      console.error('Error loading users:', err);
+      
+      // Extract proper error message
+      let errorMessage = 'Failed to load users';
+      if (err?.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err?.response?.data?.errors && Array.isArray(err.response.data.errors)) {
+        errorMessage = err.response.data.errors.join(', ');
+      } else if (err?.message && !err.message.includes('status code')) {
+        errorMessage = err.message;
+      }
+      
+      error('Error Loading Users', errorMessage);
     }
   };
 
@@ -187,19 +212,20 @@ export const NewUser: React.FC<NewUserProps> = ({
     setLoading(true);
     try {
       const { confirmPassword, ...userData } = formData;
-      await userService.createUser(userData);
-      success('User created successfully!');
+      // Clean up optional fields - remove empty strings and convert to undefined/null
+      const cleanedUserData = {
+        ...userData,
+        phoneNumber: userData.phoneNumber?.trim() || undefined,
+        managerId: userData.managerId || undefined
+      };
+      
+      await createUserWithToast(cleanedUserData);
       
       if (onUserCreated) {
         onUserCreated();
       }
     } catch (err) {
-      console.error('Error creating user:', err);
-      error('Failed to create user. Please try again.');
-      setErrors(prev => ({
-        ...prev,
-        submit: 'Failed to create user. Please try again.'
-      }));
+      // Error handling is already done in createUserWithToast
     } finally {
       setLoading(false);
     }
@@ -396,7 +422,7 @@ export const NewUser: React.FC<NewUserProps> = ({
                           onClick={() => {
                             setManagerSearchTerm('');
                             setSelectedManager(null);
-                            setFormData(prev => ({ ...prev, managerId: '' }));
+                            setFormData(prev => ({ ...prev, managerId: undefined }));
                             setShowManagerDropdown(false);
                           }}
                           className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 w-4 h-4"

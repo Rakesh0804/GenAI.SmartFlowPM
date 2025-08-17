@@ -301,14 +301,716 @@ GenAI.SmartFlowPM/
 7. **Real-time Notifications**: WebSocket integration for live updates
 8. **Mobile App**: React Native or Progressive Web App implementation
 
-## 🏗️ Architecture Patterns Applied
+## 🏗️ Backend Architecture Patterns - ACTUAL IMPLEMENTATION
 
-### Backend Patterns
-- **Clean Architecture**: Clear separation of Domain, Application, Infrastructure, Presentation
-- **CQRS**: Command Query Responsibility Segregation with MediatR
-- **Repository Pattern**: Data access abstraction with domain-specific methods
-- **Result Pattern**: Consistent error handling across all operations
-- **BaseController Pattern**: Uniform API response structure
+### Clean Architecture Layers Implementation
+
+The system follows a strict 4-layer Clean Architecture pattern with proper dependency inversion:
+
+```
+src/Core/                                  # INNER LAYERS (Business Logic)
+├── GenAI.SmartFlowPM.Domain/             # Domain Layer (Entities, Enums, Interfaces)
+│   ├── Entities/                         # Domain entities with business rules
+│   │   ├── User.cs                       # Core business entities
+│   │   ├── Project.cs                    # All inherit from TenantBaseEntity
+│   │   ├── Task.cs                       # for multi-tenant isolation
+│   │   ├── Organization.cs               
+│   │   ├── TimeEntry.cs                  # TimeTracker entities
+│   │   └── [All domain entities]         
+│   ├── Enums/                           # Domain enumerations
+│   │   ├── TimesheetStatus.cs           # Business state definitions
+│   │   ├── TimeEntryType.cs             
+│   │   └── [Domain enums]               
+│   ├── Interfaces/                      # Repository contracts
+│   │   ├── IUnitOfWork.cs              # Main aggregation interface
+│   │   ├── IGenericRepository.cs        # Base repository contract
+│   │   └── IRepositories.cs            # All specific repository interfaces
+│   └── Common/                          # Shared domain concepts
+│       ├── BaseEntity.cs               # Base entity with audit fields
+│       ├── TenantBaseEntity.cs         # Multi-tenant base with TenantId
+│       └── Interfaces.cs               # Domain service interfaces
+
+├── GenAI.SmartFlowPM.Application/        # Application Layer (Use Cases, DTOs)
+│   ├── Features/                        # Feature-based CQRS organization
+│   │   ├── Users/                       # User module implementation
+│   │   │   ├── Commands/                # User command definitions
+│   │   │   │   ├── CreateUserCommand.cs
+│   │   │   │   ├── UpdateUserCommand.cs
+│   │   │   │   └── DeleteUserCommand.cs
+│   │   │   ├── Queries/                 # User query definitions
+│   │   │   │   ├── GetUserByIdQuery.cs
+│   │   │   │   └── GetAllUsersQuery.cs
+│   │   │   └── Handlers/                # MediatR request handlers
+│   │   │       ├── UserCommandHandlers.cs  # All command handlers
+│   │   │       └── UserQueryHandlers.cs    # All query handlers
+│   │   ├── TimeTracker/                 # TimeTracker module (COMPLETED)
+│   │   │   ├── Commands/
+│   │   │   ├── Queries/
+│   │   │   └── Handlers/
+│   │   │       ├── TimeTrackerCommandHandlers.cs
+│   │   │       ├── TimesheetCommandHandlers.cs
+│   │   │       └── TimeTrackerQueryHandlers.cs
+│   │   └── [Other modules follow same pattern]
+│   ├── DTOs/                           # Data Transfer Objects
+│   │   ├── User/                       # Module-specific DTOs
+│   │   │   ├── CreateUserDto.cs
+│   │   │   ├── UpdateUserDto.cs
+│   │   │   └── UserDto.cs
+│   │   └── [Other module DTOs]
+│   ├── Common/                         # Shared application concerns
+│   │   └── Models/
+│   │       ├── Result.cs              # Result<T> pattern implementation
+│   │       └── PaginatedResult.cs      # Pagination wrapper
+│   └── Mappings/                       # AutoMapper profiles
+│       └── MappingProfile.cs          # Entity-DTO mappings
+
+src/Infrastructure/                        # OUTER LAYERS (Technical Details)
+├── GenAI.SmartFlowPM.Persistence/        # Data Access Implementation
+│   ├── Context/
+│   │   └── ApplicationDbContext.cs       # EF Core DbContext with all DbSets
+│   ├── Repositories/                     # Repository pattern implementation
+│   │   ├── GenericRepository.cs          # Base repository with common operations
+│   │   ├── UserRepository.cs             # User-specific repository methods
+│   │   ├── TimeTrackerRepositories.cs    # TimeTracker repositories (COMPLETED)
+│   │   └── [Entity-specific repositories]
+│   ├── UnitOfWork/                      # Transaction management
+│   │   └── UnitOfWork.cs               # Aggregates all repositories
+│   ├── Configurations/                  # EF Core entity configurations
+│   │   ├── UserConfiguration.cs         # Fluent API configurations
+│   │   ├── TimeTrackerConfigurations.cs # TimeTracker entity configs
+│   │   └── [Entity configurations]
+│   └── Migrations/                      # Database schema evolution
+│       └── [EF Core migrations]
+└── GenAI.SmartFlowPM.Infrastructure/     # External services integration
+
+src/Web/GenAI.SmartFlowPM.WebAPI/         # Presentation Layer (API)
+├── Controllers/                          # REST API endpoints
+│   ├── Base/
+│   │   └── BaseController.cs            # Base controller with HandleResult
+│   ├── UsersController.cs               # User API endpoints
+│   ├── TimeTrackerController.cs         # TimeTracker API (TO BE IMPLEMENTED)
+│   └── [Module controllers]
+└── Program.cs                           # Application startup and DI
+```
+
+### Repository Pattern Implementation (VERIFIED ACTUAL CODE)
+
+#### 1. Base Generic Repository Interface
+```csharp
+// ACTUAL interface from IGenericRepository.cs
+public interface IGenericRepository<T> where T : BaseEntity
+{
+    Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken = default);
+    Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default);
+    Task<T> AddAsync(T entity, CancellationToken cancellationToken = default);
+    Task<IEnumerable<T>> AddRangeAsync(IEnumerable<T> entities, CancellationToken cancellationToken = default);
+    Task<T> UpdateAsync(T entity, CancellationToken cancellationToken = default);
+    Task DeleteAsync(T entity, CancellationToken cancellationToken = default);
+    Task DeleteByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null, CancellationToken cancellationToken = default);
+    Task<(IEnumerable<T> Items, int TotalCount)> GetPagedAsync(
+        int pageNumber, 
+        int pageSize, 
+        Expression<Func<T, bool>>? predicate = null,
+        Expression<Func<T, object>>? orderBy = null,
+        bool ascending = true,
+        CancellationToken cancellationToken = default);
+}
+```
+
+#### 2. Generic Repository Implementation
+```csharp
+// ACTUAL implementation from GenericRepository.cs
+public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
+{
+    protected readonly ApplicationDbContext _context;
+    protected readonly DbSet<T> _dbSet;
+
+    public GenericRepository(ApplicationDbContext context)
+    {
+        _context = context;
+        _dbSet = context.Set<T>();
+    }
+
+    public virtual async Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return await _dbSet.FindAsync(new object[] { id }, cancellationToken);
+    }
+
+    public virtual async Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        return await _dbSet.ToListAsync(cancellationToken);
+    }
+
+    // Soft delete implementation - CRITICAL PATTERN
+    public Task DeleteAsync(T entity, CancellationToken cancellationToken = default)
+    {
+        entity.IsDeleted = true;
+        entity.DeletedAt = DateTime.UtcNow;
+        _dbSet.Update(entity);
+        return Task.CompletedTask;
+    }
+
+    // Pagination with filtering and sorting - ACTUAL IMPLEMENTATION
+    public async Task<(IEnumerable<T> Items, int TotalCount)> GetPagedAsync(
+        int pageNumber, 
+        int pageSize, 
+        Expression<Func<T, bool>>? predicate = null,
+        Expression<Func<T, object>>? orderBy = null,
+        bool ascending = true,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _dbSet.AsQueryable();
+
+        if (predicate != null)
+            query = query.Where(predicate);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        if (orderBy != null)
+        {
+            query = ascending ? query.OrderBy(orderBy) : query.OrderByDescending(orderBy);
+        }
+
+        var items = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
+    }
+}
+```
+
+#### 3. Domain-Specific Repository Interface Pattern
+```csharp
+// ACTUAL interface from IRepositories.cs - User example
+public interface IUserRepository : IGenericRepository<User>
+{
+    Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default);
+    Task<User?> GetByUserNameAsync(string userName, CancellationToken cancellationToken = default);
+    Task<bool> IsEmailExistsAsync(string email, Guid? excludeUserId = null, CancellationToken cancellationToken = default);
+    Task<bool> IsUserNameExistsAsync(string userName, Guid? excludeUserId = null, CancellationToken cancellationToken = default);
+    Task<IEnumerable<User>> GetUsersByManagerIdAsync(Guid managerId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<User>> GetUsersByManagerIdWithRolesAsync(Guid managerId, CancellationToken cancellationToken = default);
+    Task<User?> GetUserWithRolesAsync(Guid userId, CancellationToken cancellationToken = default);
+    Task<User?> GetUserWithClaimsAsync(Guid userId, CancellationToken cancellationToken = default);
+    Task<(IEnumerable<User> Items, int TotalCount)> GetPagedUsersWithRolesAsync(
+        int pageNumber,
+        int pageSize,
+        Expression<Func<User, bool>>? predicate = null,
+        Expression<Func<User, object>>? orderBy = null,
+        bool ascending = true,
+        CancellationToken cancellationToken = default);
+}
+
+// ACTUAL TimeTracker example - RECENTLY IMPLEMENTED
+public interface ITimeEntryRepository : IGenericRepository<TimeEntry>
+{
+    Task<IEnumerable<TimeEntry>> GetByUserIdAsync(Guid userId, Guid tenantId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<TimeEntry>> GetByProjectIdAsync(Guid projectId, Guid tenantId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<TimeEntry>> GetByDateRangeAsync(DateTime startDate, DateTime endDate, Guid tenantId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<TimeEntry>> GetByTimesheetIdAsync(Guid timesheetId, CancellationToken cancellationToken = default);
+}
+```
+
+#### 4. Repository Implementation with Navigation Properties
+```csharp
+// ACTUAL implementation from UserRepository.cs
+public class UserRepository : GenericRepository<User>, IUserRepository
+{
+    public UserRepository(ApplicationDbContext context) : base(context)
+    {
+    }
+
+    public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
+    {
+        return await _dbSet
+            .FirstOrDefaultAsync(x => x.Email == email && !x.IsDeleted, cancellationToken);
+    }
+
+    // CRITICAL: Include navigation properties for complex queries
+    public async Task<User?> GetUserWithRolesAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        return await _dbSet
+            .Include(x => x.UserRoles)
+            .ThenInclude(x => x.Role)
+            .Include(x => x.Manager)
+            .FirstOrDefaultAsync(x => x.Id == userId, cancellationToken);
+    }
+
+    // ACTUAL pagination implementation with includes
+    public async Task<(IEnumerable<User> Items, int TotalCount)> GetPagedUsersWithRolesAsync(
+        int pageNumber,
+        int pageSize,
+        Expression<Func<User, bool>>? predicate = null,
+        Expression<Func<User, object>>? orderBy = null,
+        bool ascending = true,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _dbSet
+            .Include(x => x.UserRoles)
+            .ThenInclude(x => x.Role)
+            .Include(x => x.Manager)
+            .AsQueryable();
+
+        if (predicate != null)
+            query = query.Where(predicate);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        if (orderBy != null)
+        {
+            query = ascending ? query.OrderBy(orderBy) : query.OrderByDescending(orderBy);
+        }
+
+        var items = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
+    }
+}
+```
+
+### UnitOfWork Pattern Implementation (VERIFIED ACTUAL CODE)
+
+#### 1. UnitOfWork Interface - Repository Aggregation
+```csharp
+// ACTUAL interface from IUnitOfWork.cs
+public interface IUnitOfWork : IDisposable
+{
+    // Core repositories
+    ITenantRepository Tenants { get; }
+    IUserRepository Users { get; }
+    IRoleRepository Roles { get; }
+    IClaimRepository Claims { get; }
+    IUserRoleRepository UserRoles { get; }
+    IUserClaimRepository UserClaims { get; }
+    IProjectRepository Projects { get; }
+    IUserProjectRepository UserProjects { get; }
+    IProjectTaskRepository ProjectTasks { get; }
+    
+    // Organization module repositories
+    IOrganizationRepository Organizations { get; }
+    IBranchRepository Branches { get; }
+    IOrganizationPolicyRepository OrganizationPolicies { get; }
+    ICompanyHolidayRepository CompanyHolidays { get; }
+    IOrganizationSettingRepository OrganizationSettings { get; }
+    
+    // Campaign & Certificate modules
+    ICampaignRepository Campaigns { get; }
+    ICampaignGroupRepository CampaignGroups { get; }
+    ICampaignEvaluationRepository CampaignEvaluations { get; }
+    ICertificateRepository Certificates { get; }
+    ICertificateTemplateRepository CertificateTemplates { get; }
+    
+    // Team module repositories
+    ITeamRepository Teams { get; }
+    ITeamMemberRepository TeamMembers { get; }
+    
+    // TimeTracker repositories - RECENTLY ADDED
+    ITimeCategoryRepository TimeCategories { get; }
+    ITimeEntryRepository TimeEntries { get; }
+    ITimesheetRepository Timesheets { get; }
+    IActiveTrackingSessionRepository ActiveTrackingSessions { get; }
+
+    // Transaction management
+    Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+    Task BeginTransactionAsync(CancellationToken cancellationToken = default);
+    Task CommitTransactionAsync(CancellationToken cancellationToken = default);
+    Task RollbackTransactionAsync(CancellationToken cancellationToken = default);
+}
+```
+
+#### 2. UnitOfWork Implementation - Single DbContext
+```csharp
+// ACTUAL implementation from UnitOfWork.cs
+public class UnitOfWork : IUnitOfWork
+{
+    private readonly ApplicationDbContext _context;
+    private IDbContextTransaction? _transaction;
+
+    public UnitOfWork(ApplicationDbContext context)
+    {
+        _context = context;
+
+        // Initialize ALL repositories with the SAME context instance
+        Tenants = new TenantRepository(_context);
+        Users = new UserRepository(_context);
+        Roles = new RoleRepository(_context);
+        Claims = new ClaimRepository(_context);
+        UserRoles = new UserRoleRepository(_context);
+        UserClaims = new UserClaimRepository(_context);
+        Projects = new ProjectRepository(_context);
+        UserProjects = new UserProjectRepository(_context);
+        ProjectTasks = new ProjectTaskRepository(_context);
+        Organizations = new OrganizationRepository(_context);
+        Branches = new BranchRepository(_context);
+        OrganizationPolicies = new OrganizationPolicyRepository(_context);
+        CompanyHolidays = new CompanyHolidayRepository(_context);
+        OrganizationSettings = new OrganizationSettingRepository(_context);
+        Campaigns = new CampaignRepository(_context);
+        CampaignGroups = new CampaignGroupRepository(_context);
+        CampaignEvaluations = new CampaignEvaluationRepository(_context);
+        Certificates = new CertificateRepository(_context);
+        CertificateTemplates = new CertificateTemplateRepository(_context);
+        Teams = new TeamRepository(_context);
+        TeamMembers = new TeamMemberRepository(_context);
+        
+        // TimeTracker repositories - RECENTLY IMPLEMENTED
+        TimeCategories = new TimeCategoryRepository(_context);
+        TimeEntries = new TimeEntryRepository(_context);
+        Timesheets = new TimesheetRepository(_context);
+        ActiveTrackingSessions = new ActiveTrackingSessionRepository(_context);
+    }
+
+    // Repository properties - ALL repositories exposed
+    public ITenantRepository Tenants { get; }
+    public IUserRepository Users { get; }
+    public IRoleRepository Roles { get; }
+    // ... all repositories
+    public ITimeCategoryRepository TimeCategories { get; }
+    public ITimeEntryRepository TimeEntries { get; }
+    public ITimesheetRepository Timesheets { get; }
+    public IActiveTrackingSessionRepository ActiveTrackingSessions { get; }
+
+    // Single SaveChanges for all operations
+    public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    // Transaction management implementation
+    public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
+    {
+        _transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+    }
+
+    public async Task CommitTransactionAsync(CancellationToken cancellationToken = default)
+    {
+        if (_transaction != null)
+        {
+            await _transaction.CommitAsync(cancellationToken);
+            await _transaction.DisposeAsync();
+            _transaction = null;
+        }
+    }
+
+    public async Task RollbackTransactionAsync(CancellationToken cancellationToken = default)
+    {
+        if (_transaction != null)
+        {
+            await _transaction.RollbackAsync(cancellationToken);
+            await _transaction.DisposeAsync();
+            _transaction = null;
+        }
+    }
+
+    public void Dispose()
+    {
+        _transaction?.Dispose();
+        _context.Dispose();
+    }
+}
+```
+
+### CQRS with MediatR Implementation (VERIFIED ACTUAL CODE)
+
+#### 1. Command Pattern Implementation
+```csharp
+// ACTUAL command from Users module
+public class CreateUserCommand : IRequest<Result<UserDto>>
+{
+    public CreateUserDto CreateUserDto { get; set; } = default!;
+}
+
+// ACTUAL command handler implementation
+public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, Result<UserDto>>
+{
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IMapper _mapper;
+
+    public CreateUserCommandHandler(IUnitOfWork unitOfWork, IMapper mapper)
+    {
+        _unitOfWork = unitOfWork;
+        _mapper = mapper;
+    }
+
+    public async Task<Result<UserDto>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
+    {
+        // Business validation using repository methods
+        if (await _unitOfWork.Users.IsEmailExistsAsync(request.CreateUserDto.Email, cancellationToken: cancellationToken))
+        {
+            return Result<UserDto>.Failure("Email already exists");
+        }
+
+        if (await _unitOfWork.Users.IsUserNameExistsAsync(request.CreateUserDto.UserName, cancellationToken: cancellationToken))
+        {
+            return Result<UserDto>.Failure("Username already exists");
+        }
+
+        // Map DTO to entity
+        var user = _mapper.Map<User>(request.CreateUserDto);
+
+        // Repository operations through UnitOfWork
+        await _unitOfWork.Users.AddAsync(user, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        // Map back to DTO and return success
+        var userDto = _mapper.Map<UserDto>(user);
+        return Result<UserDto>.Success(userDto, "User created successfully");
+    }
+}
+```
+
+#### 2. Query Pattern Implementation
+```csharp
+// ACTUAL query from Users module
+public class GetAllUsersQuery : IRequest<Result<PaginatedResult<UserDto>>>
+{
+    public PagedQuery PagedQuery { get; set; } = default!;
+}
+
+// ACTUAL query handler implementation
+public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, Result<PaginatedResult<UserDto>>>
+{
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IMapper _mapper;
+
+    public GetAllUsersQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
+    {
+        _unitOfWork = unitOfWork;
+        _mapper = mapper;
+    }
+
+    public async Task<Result<PaginatedResult<UserDto>>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
+    {
+        // Use repository pagination with complex filtering
+        var pagedUsers = await _unitOfWork.Users.GetPagedUsersWithRolesAsync(
+            pageNumber: request.PagedQuery.PageNumber,
+            pageSize: request.PagedQuery.PageSize,
+            predicate: u => !u.IsDeleted && 
+                          (string.IsNullOrEmpty(request.PagedQuery.SearchTerm) || 
+                           u.FirstName.Contains(request.PagedQuery.SearchTerm) ||
+                           u.LastName.Contains(request.PagedQuery.SearchTerm) ||
+                           u.Email.Contains(request.PagedQuery.SearchTerm)),
+            orderBy: u => u.FirstName,
+            ascending: true,
+            cancellationToken: cancellationToken);
+
+        // Map to DTOs
+        var userDtos = _mapper.Map<IEnumerable<UserDto>>(pagedUsers.Items);
+
+        // Create paginated result wrapper
+        var paginatedResult = new PaginatedResult<UserDto>
+        {
+            Items = userDtos,
+            CurrentPage = request.PagedQuery.PageNumber,
+            PageSize = request.PagedQuery.PageSize,
+            TotalCount = pagedUsers.TotalCount
+        };
+
+        return Result<PaginatedResult<UserDto>>.Success(paginatedResult);
+    }
+}
+```
+
+### Result Pattern Implementation (VERIFIED ACTUAL CODE)
+
+#### 1. Result<T> Classes
+```csharp
+// ACTUAL implementation from Result.cs
+public class Result<T>
+{
+    [JsonPropertyName("isSuccess")]
+    public bool IsSuccess { get; set; }
+    
+    [JsonPropertyName("data")]
+    public T? Data { get; set; }
+    
+    [JsonPropertyName("message")]
+    public string? Message { get; set; }
+    
+    [JsonPropertyName("errors")]
+    public IEnumerable<string>? Errors { get; set; }
+
+    public static Result<T> Success(T data, string? message = null)
+    {
+        return new Result<T>
+        {
+            IsSuccess = true,
+            Data = data,
+            Message = message
+        };
+    }
+
+    public static Result<T> Failure(string error)
+    {
+        return new Result<T>
+        {
+            IsSuccess = false,
+            Errors = new[] { error }
+        };
+    }
+
+    public static Result<T> Failure(IEnumerable<string> errors)
+    {
+        return new Result<T>
+        {
+            IsSuccess = false,
+            Errors = errors
+        };
+    }
+}
+
+public class Result
+{
+    [JsonPropertyName("isSuccess")]
+    public bool IsSuccess { get; set; }
+    
+    [JsonPropertyName("message")]
+    public string? Message { get; set; }
+    
+    [JsonPropertyName("errors")]
+    public IEnumerable<string>? Errors { get; set; }
+
+    public static Result Success(string? message = null)
+    {
+        return new Result
+        {
+            IsSuccess = true,
+            Message = message
+        };
+    }
+
+    public static Result Failure(string error)
+    {
+        return new Result
+        {
+            IsSuccess = false,
+            Errors = new[] { error }
+        };
+    }
+}
+```
+
+### BaseController Pattern Implementation (VERIFIED ACTUAL CODE)
+
+#### 1. BaseController Implementation
+```csharp
+// ACTUAL implementation from BaseController.cs
+[ApiController]
+[Route("api/[controller]")]
+public abstract class BaseController : ControllerBase
+{
+    protected readonly IMediator _mediator;
+
+    protected BaseController(IMediator mediator)
+    {
+        _mediator = mediator;
+    }
+
+    protected IActionResult HandleResult<T>(Application.Common.Models.Result<T> result)
+    {
+        if (result.IsSuccess)
+        {
+            return Ok(new
+            {
+                isSuccess = true,
+                data = result.Data,
+                message = result.Message
+            });
+        }
+
+        return BadRequest(new
+        {
+            isSuccess = false,
+            data = (T?)default,
+            message = result.Errors?.FirstOrDefault(),
+            errors = result.Errors
+        });
+    }
+
+    protected IActionResult HandleResult(Application.Common.Models.Result result)
+    {
+        if (result.IsSuccess)
+        {
+            return Ok(new
+            {
+                isSuccess = true,
+                message = result.Message
+            });
+        }
+
+        return BadRequest(new
+        {
+            isSuccess = false,
+            message = result.Errors?.FirstOrDefault(),
+            errors = result.Errors
+        });
+    }
+}
+```
+
+#### 2. Controller Implementation Pattern
+```csharp
+// ACTUAL controller implementation from UsersController.cs
+[ApiController]
+[Route("api/[controller]")]
+[Authorize]
+public class UsersController : BaseController
+{
+    public UsersController(IMediator mediator) : base(mediator)
+    {
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetUsers([FromQuery] PagedQuery query)
+    {
+        var command = new GetAllUsersQuery { PagedQuery = query };
+        var result = await _mediator.Send(command);
+        return HandleResult(result);
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetUser(Guid id)
+    {
+        var query = new GetUserByIdQuery { Id = id };
+        var result = await _mediator.Send(query);
+        return HandleResult(result);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> CreateUser([FromBody] CreateUserDto createUserDto)
+    {
+        var command = new CreateUserCommand { CreateUserDto = createUserDto };
+        var result = await _mediator.Send(command);
+        return HandleResult(result);
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateUserDto updateUserDto)
+    {
+        var command = new UpdateUserCommand { Id = id, UpdateUserDto = updateUserDto };
+        var result = await _mediator.Send(command);
+        return HandleResult(result);
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteUser(Guid id)
+    {
+        var command = new DeleteUserCommand { Id = id };
+        var result = await _mediator.Send(command);
+        return HandleResult(result);
+    }
+}
+```
+
+## 🏗️ Architecture Patterns Applied
 
 ### Frontend Patterns
 - **React Components**: Modern functional components with hooks

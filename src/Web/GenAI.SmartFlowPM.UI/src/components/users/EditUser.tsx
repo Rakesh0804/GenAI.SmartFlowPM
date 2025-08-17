@@ -97,7 +97,7 @@ export const EditUser: React.FC<EditUserProps> = ({
 
   const loadAvailableUsers = async () => {
     try {
-      const users = await userService.getUsers(1, 1000);
+      const users = await userService.getUsers(1, 100);
       setAvailableUsers(users || []);
     } catch (error) {
       console.error('Error loading users:', error);
