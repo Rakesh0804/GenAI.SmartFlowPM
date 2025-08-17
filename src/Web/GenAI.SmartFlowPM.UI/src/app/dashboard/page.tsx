@@ -19,6 +19,7 @@ import {
   UserCheck,
   Clock,
   FileText,
+  Loader2,
   MessageSquare,
   BarChart2,
   MapPin,
@@ -59,7 +60,7 @@ export default function DashboardPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+          <Loader2 className="w-12 h-12 animate-spin mx-auto mb-4 text-primary-600" />
           <p className="text-gray-600">Loading...</p>
         </div>
       </div>
@@ -115,7 +116,7 @@ function DashboardContent() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+          <Loader2 className="w-12 h-12 animate-spin mx-auto mb-4 text-primary-600" />
           <p className="text-gray-600">Loading dashboard...</p>
         </div>
       </div>
@@ -152,13 +153,18 @@ function DashboardContent() {
   };
 
   const handleAddProject = () => {
-    // Navigate to Projects page - we'll need to create this or navigate to existing one
-    router.push('/projects');
+    // Navigate to Add Project page
+    router.push('/projects/new');
   };
 
   const handleAddTask = () => {
     // Navigate to New Task page through the tasks management page
     router.push('/projects/tasks?action=create');
+  };
+
+  const handleCreateTeam = () => {
+    // Navigate to Create Team page
+    router.push('/teams/new');
   };
 
   const handleApplyLeave = () => {
@@ -181,8 +187,8 @@ function DashboardContent() {
               <p className="text-sm font-medium text-gray-500">Total Projects</p>
               <p className="text-3xl font-bold text-gray-900">{totalProjects}</p>
             </div>
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <FolderOpen className="w-6 h-6 text-blue-600" />
+            <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
+              <FolderOpen className="w-6 h-6 text-primary-500" />
             </div>
           </div>
         </div>
@@ -205,8 +211,8 @@ function DashboardContent() {
               <p className="text-sm font-medium text-gray-500">Team Members</p>
               <p className="text-3xl font-bold text-gray-900">{teamMembers}</p>
             </div>
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-              <Users className="w-6 h-6 text-purple-600" />
+            <div className="w-12 h-12 bg-accent-100 rounded-lg flex items-center justify-center">
+              <Users className="w-6 h-6 text-accent" />
             </div>
           </div>
         </div>
@@ -238,11 +244,11 @@ function DashboardContent() {
 
       {/* User Summary Section */}
       {userSummary && userSummary.userId && (
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border border-blue-200">
+        <div className="bg-gradient-to-r from-primary-50 to-primary-100 p-6 rounded-lg border border-primary-200">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                <UserCheck className="w-6 h-6 text-blue-600" />
+              <div className="w-12 h-12 bg-primary-200 rounded-full flex items-center justify-center">
+                <UserCheck className="w-6 h-6 text-primary-600" />
               </div>
               <div className="ml-4">
                 <h3 className="text-lg font-semibold text-gray-900">My Dashboard Summary</h3>
@@ -252,7 +258,7 @@ function DashboardContent() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="text-center p-3 bg-white rounded-lg border">
-              <p className="text-2xl font-bold text-blue-600">{userSummary.myTotalTasks}</p>
+              <p className="text-2xl font-bold text-primary-600">{userSummary.myTotalTasks}</p>
               <p className="text-sm text-gray-600">Total Tasks</p>
             </div>
             <div className="text-center p-3 bg-white rounded-lg border">
@@ -277,8 +283,8 @@ function DashboardContent() {
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center mb-6">
             <div className="flex-shrink-0">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <PieChart className="h-6 w-6 text-blue-600" />
+              <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
+                <PieChart className="h-6 w-6 text-primary-600" />
               </div>
             </div>
             <div className="ml-4">
@@ -311,8 +317,8 @@ function DashboardContent() {
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center mb-6">
             <div className="flex-shrink-0">
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <BarChart3 className="h-6 w-6 text-purple-600" />
+              <div className="w-12 h-12 bg-accent-100 rounded-lg flex items-center justify-center">
+                <BarChart3 className="h-6 w-6 text-accent" />
               </div>
             </div>
             <div className="ml-4">
@@ -414,8 +420,8 @@ function DashboardContent() {
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center mb-6">
             <div className="flex-shrink-0">
-              <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
-                <Plane className="h-6 w-6 text-indigo-600" />
+              <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
+                <Plane className="h-6 w-6 text-primary-600" />
               </div>
             </div>
             <div className="ml-4">
@@ -517,7 +523,7 @@ function DashboardContent() {
           </div>
           
           <div className="mt-4 pt-4 border-t border-gray-200">
-            <button className="text-indigo-600 text-sm hover:text-indigo-700 transition-colors">
+            <button className="text-primary-600 text-sm hover:text-indigo-700 transition-colors">
               Apply for Leave →
             </button>
           </div>
@@ -588,8 +594,8 @@ function DashboardContent() {
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center mb-6">
             <div className="flex-shrink-0">
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <TrendingUp className="h-6 w-6 text-purple-600" />
+              <div className="w-12 h-12 bg-accent-100 rounded-lg flex items-center justify-center">
+                <TrendingUp className="h-6 w-6 text-accent" />
               </div>
             </div>
             <div className="ml-4">
@@ -601,14 +607,14 @@ function DashboardContent() {
           <div className="grid grid-cols-2 gap-3">
             <button 
               onClick={handleAddProject}
-              className="flex flex-col items-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 rounded-lg transition-all duration-200 border border-blue-200"
+              className="flex flex-col items-center p-4 bg-gradient-to-br from-primary-50 to-primary-100 hover:from-primary-100 hover:to-primary-200 rounded-lg transition-all duration-200 border border-primary-200"
             >
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center mb-2">
+              <div className="w-8 h-8 bg-primary-500 rounded-lg flex items-center justify-center mb-2">
                 <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
               </div>
-              <span className="text-sm font-medium text-blue-900">Add Project</span>
+              <span className="text-sm font-medium text-secondary-500">Add Project</span>
             </button>
             
             <button 
@@ -624,20 +630,20 @@ function DashboardContent() {
             </button>
             
             <button 
-              onClick={handleApplyLeave}
-              className="flex flex-col items-center p-4 bg-gradient-to-br from-yellow-50 to-yellow-100 hover:from-yellow-100 hover:to-yellow-200 rounded-lg transition-all duration-200 border border-yellow-200"
+              onClick={handleCreateTeam}
+              className="flex flex-col items-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 rounded-lg transition-all duration-200 border border-blue-200"
             >
-              <div className="w-8 h-8 bg-yellow-600 rounded-lg flex items-center justify-center mb-2">
-                <Plane className="w-4 h-4 text-white" />
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center mb-2">
+                <Users className="w-4 h-4 text-white" />
               </div>
-              <span className="text-sm font-medium text-yellow-900">Apply Leave</span>
+              <span className="text-sm font-medium text-blue-900">Create Team</span>
             </button>
             
             <button 
               onClick={handleCalendar}
               className="flex flex-col items-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 rounded-lg transition-all duration-200 border border-purple-200"
             >
-              <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center mb-2">
+              <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center mb-2">
                 <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
@@ -647,7 +653,7 @@ function DashboardContent() {
           </div>
           
           <div className="mt-4 pt-4 border-t border-gray-200">
-            <button className="text-purple-600 text-sm hover:text-purple-700 transition-colors">
+            <button className="text-accent text-sm hover:text-purple-700 transition-colors">
               More Actions →
             </button>
           </div>
@@ -707,8 +713,8 @@ function DashboardContent() {
           <div className="p-6 border-b border-gray-200">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <Activity className="h-6 w-6 text-purple-600" />
+                <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                  <Activity className="h-6 w-6 text-accent" />
                 </div>
               </div>
               <div className="ml-4">
@@ -742,8 +748,8 @@ function DashboardContent() {
                 </div>
               </div>
               <div className="flex items-start space-x-3">
-                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <span className="text-blue-600 text-sm font-medium">MB</span>
+                <div className="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center">
+                  <span className="text-primary-600 text-sm font-medium">MB</span>
                 </div>
                 <div className="flex-1">
                   <p className="text-sm text-gray-900">
@@ -760,8 +766,8 @@ function DashboardContent() {
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Megaphone className="h-6 w-6 text-blue-600" />
+              <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
+                <Megaphone className="h-6 w-6 text-primary-600" />
               </div>
             </div>
             <div className="ml-4">
@@ -790,7 +796,7 @@ function DashboardContent() {
             </div>
           </div>
           <div className="mt-4">
-            <button className="text-blue-600 text-sm hover:text-blue-700 transition-colors">
+            <button className="text-primary-600 text-sm hover:text-primary-700 transition-colors">
               View all announcements →
             </button>
           </div>
@@ -801,8 +807,8 @@ function DashboardContent() {
       <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
         <div className="flex items-center mb-6">
           <div className="flex-shrink-0">
-            <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
-              <Settings className="h-6 w-6 text-indigo-600" />
+            <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
+              <Settings className="h-6 w-6 text-primary-600" />
             </div>
           </div>
           <div className="ml-4">
@@ -815,9 +821,9 @@ function DashboardContent() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           
           {/* User Management Module */}
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200 hover:shadow-md transition-all">
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border border-primary-200 hover:shadow-md transition-all">
             <div className="flex items-center justify-between mb-3">
-              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-primary-500 rounded-lg flex items-center justify-center">
                 <Users className="h-5 w-5 text-white" />
               </div>
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -853,7 +859,7 @@ function DashboardContent() {
           {/* Task Management Module */}
           <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200 hover:shadow-md transition-all">
             <div className="flex items-center justify-between mb-3">
-              <div className="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-accent rounded-lg flex items-center justify-center">
                 <CheckSquare className="h-5 w-5 text-white" />
               </div>
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
@@ -871,7 +877,7 @@ function DashboardContent() {
           {/* Organization Management Module */}
           <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 p-4 rounded-lg border border-indigo-200 hover:shadow-md transition-all">
             <div className="flex items-center justify-between mb-3">
-              <div className="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
                 <Building className="h-5 w-5 text-white" />
               </div>
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -887,9 +893,9 @@ function DashboardContent() {
           </div>
 
           {/* Tenant Management Module */}
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200 hover:shadow-md transition-all">
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border border-primary-200 hover:shadow-md transition-all">
             <div className="flex items-center justify-between mb-3">
-              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-primary-500 rounded-lg flex items-center justify-center">
                 <Building2 className="h-5 w-5 text-white" />
               </div>
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -928,15 +934,15 @@ function DashboardContent() {
               <div className="w-10 h-10 bg-teal-600 rounded-lg flex items-center justify-center">
                 <UserCheck className="h-5 w-5 text-white" />
               </div>
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                Planned
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                Complete
               </span>
             </div>
             <h4 className="font-semibold text-gray-900 mb-2">Team Management</h4>
-            <p className="text-sm text-gray-600 mb-3">Team collaboration features with member management, role assignments, and team-based project organization.</p>
+            <p className="text-sm text-gray-600 mb-3">Complete team lifecycle management with CQRS, member assignments, team cockpit, and comprehensive team analytics dashboard.</p>
             <div className="flex items-center text-xs text-gray-500">
-              <Clock className="h-3 w-3 mr-1" />
-              Development Planned
+              <CheckSquare className="h-3 w-3 mr-1" />
+              Backend & Frontend Complete
             </div>
           </div>
 
@@ -952,6 +958,78 @@ function DashboardContent() {
             </div>
             <h4 className="font-semibold text-gray-900 mb-2">Time Tracker</h4>
             <p className="text-sm text-gray-600 mb-3">Comprehensive time tracking with project-based logging, reporting, and productivity analytics.</p>
+            <div className="flex items-center text-xs text-gray-500">
+              <Clock className="h-3 w-3 mr-1" />
+              Development Planned
+            </div>
+          </div>
+
+          {/* Calendar Module */}
+          <div className="bg-gradient-to-br from-cyan-50 to-cyan-100 p-4 rounded-lg border border-cyan-200 hover:shadow-md transition-all">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 bg-cyan-600 rounded-lg flex items-center justify-center">
+                <CalendarDays className="h-5 w-5 text-white" />
+              </div>
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                Planned
+              </span>
+            </div>
+            <h4 className="font-semibold text-gray-900 mb-2">Calendar Management</h4>
+            <p className="text-sm text-gray-600 mb-3">Comprehensive calendar system for events, meetings, deadlines, and company holidays with recurring patterns.</p>
+            <div className="flex items-center text-xs text-gray-500">
+              <Clock className="h-3 w-3 mr-1" />
+              Development Planned
+            </div>
+          </div>
+
+          {/* Attendance Module */}
+          <div className="bg-gradient-to-br from-lime-50 to-lime-100 p-4 rounded-lg border border-lime-200 hover:shadow-md transition-all">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 bg-lime-600 rounded-lg flex items-center justify-center">
+                <UserCheck className="h-5 w-5 text-white" />
+              </div>
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                Planned
+              </span>
+            </div>
+            <h4 className="font-semibold text-gray-900 mb-2">Attendance Management</h4>
+            <p className="text-sm text-gray-600 mb-3">Employee attendance tracking with check-in/out, leave management, and workforce analytics.</p>
+            <div className="flex items-center text-xs text-gray-500">
+              <Clock className="h-3 w-3 mr-1" />
+              Development Planned
+            </div>
+          </div>
+
+          {/* Files Module */}
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-lg border border-gray-200 hover:shadow-md transition-all">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 bg-gray-600 rounded-lg flex items-center justify-center">
+                <FileText className="h-5 w-5 text-white" />
+              </div>
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                Planned
+              </span>
+            </div>
+            <h4 className="font-semibold text-gray-900 mb-2">File Management</h4>
+            <p className="text-sm text-gray-600 mb-3">Centralized document management with version control, sharing, and secure cloud storage integration.</p>
+            <div className="flex items-center text-xs text-gray-500">
+              <Clock className="h-3 w-3 mr-1" />
+              Development Planned
+            </div>
+          </div>
+
+          {/* Chat Module */}
+          <div className="bg-gradient-to-br from-slate-50 to-slate-100 p-4 rounded-lg border border-slate-200 hover:shadow-md transition-all">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 bg-slate-600 rounded-lg flex items-center justify-center">
+                <MessageSquare className="h-5 w-5 text-white" />
+              </div>
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                Planned
+              </span>
+            </div>
+            <h4 className="font-semibold text-gray-900 mb-2">Team Chat</h4>
+            <p className="text-sm text-gray-600 mb-3">Real-time messaging system with team channels, direct messages, and file sharing capabilities.</p>
             <div className="flex items-center text-xs text-gray-500">
               <Clock className="h-3 w-3 mr-1" />
               Development Planned
@@ -1033,7 +1111,7 @@ function DashboardContent() {
           {/* Certificate Management Module */}
           <div className="bg-gradient-to-br from-violet-50 to-violet-100 p-4 rounded-lg border border-violet-200 hover:shadow-md transition-all">
             <div className="flex items-center justify-between mb-3">
-              <div className="w-10 h-10 bg-violet-600 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
                 <FileText className="h-5 w-5 text-white" />
               </div>
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">

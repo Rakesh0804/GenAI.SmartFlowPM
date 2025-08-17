@@ -221,8 +221,8 @@ export const NewUser: React.FC<NewUserProps> = ({
         <div className="flex items-center justify-between bg-white p-4 border-b border-gray-200">
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <UserPlus className="w-6 h-6 text-blue-600" />
+              <div className="p-2 bg-primary-100 rounded-lg">
+                <UserPlus className="w-6 h-6 text-primary-600" />
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Create New User</h1>
@@ -235,7 +235,7 @@ export const NewUser: React.FC<NewUserProps> = ({
             <button
               type="button"
               onClick={handleCancel}
-              className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
               disabled={loading}
             >
               <X className="w-4 h-4" />
@@ -268,7 +268,7 @@ export const NewUser: React.FC<NewUserProps> = ({
                         name="firstName"
                         value={formData.firstName}
                         onChange={handleInputChange}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
                         placeholder="Enter first name"
                         disabled={loading}
                         required
@@ -291,7 +291,7 @@ export const NewUser: React.FC<NewUserProps> = ({
                         name="lastName"
                         value={formData.lastName}
                         onChange={handleInputChange}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
                         placeholder="Enter last name"
                         disabled={loading}
                         required
@@ -314,7 +314,7 @@ export const NewUser: React.FC<NewUserProps> = ({
                         name="email"
                         value={formData.email}
                         onChange={handleInputChange}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
                         placeholder="Enter email address"
                         disabled={loading}
                         required
@@ -337,7 +337,7 @@ export const NewUser: React.FC<NewUserProps> = ({
                         name="phoneNumber"
                         value={formData.phoneNumber}
                         onChange={handleInputChange}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
                         placeholder="Enter phone number"
                         disabled={loading}
                       />
@@ -361,7 +361,7 @@ export const NewUser: React.FC<NewUserProps> = ({
                         name="userName"
                         value={formData.userName}
                         onChange={handleInputChange}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
                         placeholder="Enter username"
                         disabled={loading}
                         required
@@ -385,7 +385,7 @@ export const NewUser: React.FC<NewUserProps> = ({
                         value={managerSearchTerm}
                         onChange={(e) => handleManagerSearch(e.target.value)}
                         onFocus={() => setShowManagerDropdown(true)}
-                        className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
                         placeholder="Search for a manager (optional)"
                         disabled={loading}
                         autoComplete="off"
@@ -460,7 +460,7 @@ export const NewUser: React.FC<NewUserProps> = ({
                         name="password"
                         value={formData.password}
                         onChange={handleInputChange}
-                        className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
                         placeholder="Enter password"
                         disabled={loading}
                         required
@@ -490,7 +490,7 @@ export const NewUser: React.FC<NewUserProps> = ({
                         name="confirmPassword"
                         value={formData.confirmPassword}
                         onChange={handleInputChange}
-                        className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
                         placeholder="Confirm password"
                         disabled={loading}
                         required
@@ -516,11 +516,11 @@ export const NewUser: React.FC<NewUserProps> = ({
                         name="hasReportee"
                         checked={formData.hasReportee}
                         onChange={handleInputChange}
-                        className="w-5 h-5 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 focus:ring-2"
+                        className="w-5 h-5 text-accent bg-gray-100 border-gray-300 rounded focus:ring-accent focus:ring-2"
                         disabled={loading}
                       />
                       <label htmlFor="hasReportee" className="flex items-center text-sm font-medium text-gray-700">
-                        <Users className="w-5 h-5 mr-2 text-purple-600" />
+                        <Users className="w-5 h-5 mr-2 text-accent" />
                         Manager Role
                       </label>
                     </div>
@@ -547,7 +547,7 @@ export const NewUser: React.FC<NewUserProps> = ({
                           key={role.id}
                           className={`relative rounded-lg border-2 cursor-pointer transition-colors p-4 ${
                             selectedRoleIds.includes(role.id)
-                              ? 'border-blue-500 bg-blue-50'
+                              ? 'border-blue-500 bg-primary-50'
                               : 'border-gray-200 hover:border-gray-300'
                           }`}
                           onClick={() => handleRoleToggle(role.id)}
@@ -558,12 +558,12 @@ export const NewUser: React.FC<NewUserProps> = ({
                                 type="checkbox"
                                 checked={selectedRoleIds.includes(role.id)}
                                 onChange={() => handleRoleToggle(role.id)}
-                                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                                className="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 focus:ring-2"
                               />
                             </div>
                             <div className="flex-1">
                               <div className="flex items-center space-x-2">
-                                <Shield className="w-4 h-4 text-blue-500" />
+                                <Shield className="w-4 h-4 text-primary-500" />
                                 <h4 className="text-sm font-medium text-gray-900">{role.name}</h4>
                               </div>
                               {role.description && (
@@ -591,15 +591,15 @@ export const NewUser: React.FC<NewUserProps> = ({
                   )}
                   
                   {selectedRoleIds.length > 0 && (
-                    <div className="bg-blue-50 p-4 rounded-lg">
-                      <h5 className="text-sm font-medium text-blue-900 mb-2">Selected Roles:</h5>
+                    <div className="bg-primary-50 p-4 rounded-lg">
+                      <h5 className="text-sm font-medium text-secondary-500 mb-2">Selected Roles:</h5>
                       <div className="flex flex-wrap gap-2">
                         {selectedRoleIds.map(roleId => {
                           const role = availableRoles.find(r => r.id === roleId);
                           return role ? (
                             <span
                               key={roleId}
-                              className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                              className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800"
                             >
                               {role.name}
                             </span>
@@ -623,7 +623,7 @@ export const NewUser: React.FC<NewUserProps> = ({
                 <button
                   type="button"
                   onClick={handleCancel}
-                  className="flex items-center space-x-2 px-8 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  className="flex items-center space-x-2 px-8 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
                   disabled={loading}
                 >
                   <X className="w-4 h-4" />

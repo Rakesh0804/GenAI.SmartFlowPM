@@ -55,8 +55,16 @@ export const TopBar: React.FC = () => {
                     <div className="relative">
                         <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/80 z-10" size={18} />
                         <input
+                            id="global-search-input"
+                            name="globalSearch"
                             type="text"
                             placeholder="Search projects, tasks, team members..."
+                            autoComplete="off"
+                            autoCorrect="off"
+                            autoCapitalize="off"
+                            spellCheck="false"
+                            data-form-type="other"
+                            data-lpignore="true"
                             className="w-full pl-10 pr-4 py-1.5 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/40 text-white placeholder-white/60 backdrop-blur-sm"
                         />
                     </div>

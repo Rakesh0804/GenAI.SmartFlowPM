@@ -7,6 +7,7 @@ using GenAI.SmartFlowPM.Application.DTOs.Task;
 using GenAI.SmartFlowPM.Application.DTOs.Tenant;
 using GenAI.SmartFlowPM.Application.DTOs.Campaign;
 using GenAI.SmartFlowPM.Application.DTOs.Certificate;
+using GenAI.SmartFlowPM.Application.DTOs.Team;
 using GenAI.SmartFlowPM.Domain.Entities;
 
 namespace GenAI.SmartFlowPM.Application.Common.Mappings;
@@ -130,5 +131,41 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.IssuerName, opt => opt.MapFrom(src => $"{src.Issuer.FirstName} {src.Issuer.LastName}"));
 
         CreateMap<CertificateTemplate, CertificateTemplateDto>();
+
+        // Team mappings
+        CreateMap<Team, TeamDto>()
+            .ForMember(dest => dest.LeaderName, opt => opt.MapFrom(src =>
+                src.Leader != null ? $"{src.Leader.FirstName} {src.Leader.LastName}" : null))
+            .ForMember(dest => dest.MemberCount, opt => opt.MapFrom(src => src.TeamMembers.Count(tm => tm.IsActive)))
+            .ForMember(dest => dest.Members, opt => opt.MapFrom(src => src.TeamMembers.Where(tm => tm.IsActive)));
+
+        CreateMap<CreateTeamDto, Team>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore());
+
+        CreateMap<UpdateTeamDto, Team>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore());
+
+        // Team Member mappings
+        CreateMap<TeamMember, TeamMemberDto>()
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.UserName))
+            .ForMember(dest => dest.UserEmail, opt => opt.MapFrom(src => src.User.Email));
+
+        CreateMap<AddTeamMemberDto, TeamMember>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.JoinedDate, opt => opt.Ignore());
+
+        CreateMap<UpdateTeamMemberDto, TeamMember>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.TeamId, opt => opt.Ignore())
+            .ForMember(dest => dest.UserId, opt => opt.Ignore())
+            .ForMember(dest => dest.JoinedDate, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore());
     }
 }

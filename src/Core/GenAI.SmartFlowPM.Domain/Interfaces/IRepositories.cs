@@ -164,3 +164,29 @@ public interface ICertificateTemplateRepository : IGenericRepository<Certificate
     Task<CertificateTemplate?> GetDefaultTemplateAsync(CertificateType type, CancellationToken cancellationToken = default);
     Task<IEnumerable<CertificateTemplate>> GetByTypeAsync(CertificateType type, CancellationToken cancellationToken = default);
 }
+
+public interface ITeamRepository : IGenericRepository<Team>
+{
+    Task<Team?> GetByNameAsync(string name, CancellationToken cancellationToken = default);
+    Task<bool> IsNameExistsAsync(string name, Guid? excludeTeamId = null, CancellationToken cancellationToken = default);
+    Task<IEnumerable<Team>> GetTeamsByLeaderIdAsync(Guid leaderId, CancellationToken cancellationToken = default);
+    Task<Team?> GetTeamWithMembersAsync(Guid teamId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<Team>> GetActiveTeamsAsync(CancellationToken cancellationToken = default);
+    Task<IEnumerable<Team>> SearchTeamsAsync(string searchTerm, CancellationToken cancellationToken = default);
+    Task<(IEnumerable<Team> Items, int TotalCount)> GetPagedTeamsWithIncludesAsync(
+        int pageNumber, 
+        int pageSize, 
+        System.Linq.Expressions.Expression<Func<Team, bool>>? predicate = null,
+        System.Linq.Expressions.Expression<Func<Team, object>>? orderBy = null,
+        bool ascending = true,
+        CancellationToken cancellationToken = default);
+}
+
+public interface ITeamMemberRepository : IGenericRepository<TeamMember>
+{
+    Task<IEnumerable<TeamMember>> GetByTeamIdAsync(Guid teamId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<TeamMember>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
+    Task<bool> ExistsAsync(Guid teamId, Guid userId, CancellationToken cancellationToken = default);
+    Task<TeamMember?> GetByTeamAndUserAsync(Guid teamId, Guid userId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<TeamMember>> GetActiveTeamMembersAsync(Guid teamId, CancellationToken cancellationToken = default);
+}

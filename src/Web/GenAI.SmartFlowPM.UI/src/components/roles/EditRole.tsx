@@ -176,7 +176,7 @@ export const EditRole: React.FC<EditRoleProps> = ({
     return (
       <div className="h-full w-full flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
+          <Loader2 className="w-8 h-8 animate-spin text-primary-600 mx-auto mb-4" />
           <p className="text-gray-600">Loading role details...</p>
         </div>
       </div>
@@ -192,7 +192,7 @@ export const EditRole: React.FC<EditRoleProps> = ({
           <p className="text-gray-600 mb-4">The requested role could not be found.</p>
           <button
             onClick={onBack}
-            className="text-blue-600 hover:text-blue-700 font-medium"
+            className="text-primary-600 hover:text-primary-700 font-medium"
           >
             Back to Roles
           </button>
@@ -412,12 +412,12 @@ export const EditRole: React.FC<EditRoleProps> = ({
 
               {/* Information Notice */}
               {!readOnly && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="bg-primary-50 border border-primary-200 rounded-lg p-4">
                   <div className="flex items-start space-x-3">
-                    <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                    <div className="text-sm text-blue-800">
+                    <Info className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                    <div className="text-sm text-primary-800">
                       <p className="font-medium mb-1">Role Management Information</p>
-                      <ul className="list-disc list-inside space-y-1 text-blue-700">
+                      <ul className="list-disc list-inside space-y-1 text-primary-700">
                         <li>Changes to roles will affect all users assigned to this role</li>
                         <li>Deactivating a role will prevent it from being assigned to new users</li>
                         <li>Existing user assignments will remain but may lose associated permissions</li>

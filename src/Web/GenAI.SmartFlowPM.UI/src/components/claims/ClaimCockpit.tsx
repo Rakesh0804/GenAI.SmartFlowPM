@@ -5,6 +5,7 @@ import { ClaimDto, PaginatedResponse } from '@/types/api.types';
 import { claimService } from '@/services/claim.service';
 import { useToast } from '@/contexts/ToastContext';
 import { Pagination } from '@/components/common/Pagination';
+import { CustomSelect } from '@/components/common/CustomSelect';
 import ConfirmationModal, { useConfirmationModal } from '@/components/common/ConfirmationModal';
 import { 
   Search, 
@@ -73,9 +74,9 @@ const ClaimCard: React.FC<ClaimCardProps> = ({
 
   const getTypeColor = (type: string) => {
     const colors = {
-      'permission': 'bg-blue-100 text-blue-800',
+      'permission': 'bg-primary-100 text-primary-800',
       'feature': 'bg-green-100 text-green-800',
-      'resource': 'bg-purple-100 text-purple-800',
+      'resource': 'bg-orange-100 text-purple-800',
       'action': 'bg-orange-100 text-orange-800',
       'default': 'bg-gray-100 text-gray-800'
     };
@@ -104,7 +105,7 @@ const ClaimCard: React.FC<ClaimCardProps> = ({
               e.stopPropagation();
               onView(claim);
             }}
-            className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-all duration-200"
+            className="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-md transition-all duration-200"
             title="View Details"
           >
             <Eye className="w-5 h-5" />
@@ -365,8 +366,8 @@ export const ClaimCockpit: React.FC<ClaimCockpitProps> = ({
         <div className="flex items-center justify-between bg-white p-4 border-b border-gray-200">
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-3">
-              <div className="p-3 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl shadow-lg">
-                <Key className="w-7 h-7 text-white" />
+              <div className="p-3 bg-primary-100 rounded-xl shadow-lg">
+                <Key className="w-7 h-7 text-primary-600" />
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Claims Cockpit</h1>
@@ -427,15 +428,16 @@ export const ClaimCockpit: React.FC<ClaimCockpitProps> = ({
                 <span className="text-sm font-medium text-gray-700">Filters</span>
               </div>
               
-              <select
+              <CustomSelect
                 value={filterActive === null ? '' : filterActive.toString()}
-                onChange={(e) => setFilterActive(e.target.value === '' ? null : e.target.value === 'true')}
-                className="w-32 px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all duration-200"
-              >
-                <option value="">All Status</option>
-                <option value="true">Active</option>
-                <option value="false">Inactive</option>
-              </select>
+                onChange={(value) => setFilterActive(value === '' ? null : value === 'true')}
+                options={[
+                  { value: '', label: 'All Status' },
+                  { value: 'true', label: 'Active' },
+                  { value: 'false', label: 'Inactive' }
+                ]}
+                className="w-32"
+              />
 
               {(searchTerm || filterActive !== null) && (
                 <button
@@ -456,7 +458,7 @@ export const ClaimCockpit: React.FC<ClaimCockpitProps> = ({
           <div className="p-6 max-w-full">
             {loading ? (
               <div className="flex items-center justify-center py-12">
-                <Loader2 className="animate-spin h-8 w-8 text-blue-600" />
+                <Loader2 className="animate-spin h-8 w-8 text-primary-600" />
                 <span className="ml-2 text-gray-600">Loading claims...</span>
               </div>
             ) : claims.length === 0 ? (

@@ -89,7 +89,7 @@ export default function ToastDemoPage() {
             case 'warning':
                 return 'bg-yellow-600 hover:bg-yellow-700 border-yellow-600';
             case 'info':
-                return 'bg-blue-600 hover:bg-blue-700 border-blue-600';
+                return 'bg-primary-500 hover:bg-primary-600 border-blue-600';
             default:
                 return 'bg-gray-600 hover:bg-gray-700 border-gray-600';
         }
@@ -133,7 +133,7 @@ export default function ToastDemoPage() {
                                 warning('Test Warning');
                                 info('Test Info');
                             }}
-                            className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                            className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
                         >
                             Show All Types
                         </button>
@@ -150,7 +150,7 @@ export default function ToastDemoPage() {
                                 <span className={`w-3 h-3 rounded-full mr-3 ${demo.type === 'success' ? 'bg-green-500' :
                                         demo.type === 'error' ? 'bg-red-500' :
                                             demo.type === 'warning' ? 'bg-yellow-500' :
-                                                'bg-blue-500'
+                                                'bg-primary-500'
                                     }`}></span>
                                 {demo.title}
                             </h2>
@@ -201,14 +201,14 @@ export default function ToastDemoPage() {
                     </div>
                 </div>
 
-                <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
-                    <h3 className="text-lg font-semibold text-blue-900 mb-2">
+                <div className="mt-8 bg-primary-50 border border-primary-200 rounded-lg p-6">
+                    <h3 className="text-lg font-semibold text-secondary-500 mb-2">
                         Usage Instructions
                     </h3>
-                    <p className="text-blue-800 mb-4">
-                        Import the <code className="bg-blue-100 px-1 rounded">useToast</code> hook in any component and call the appropriate method:
+                    <p className="text-primary-800 mb-4">
+                        Import the <code className="bg-primary-100 px-1 rounded">useToast</code> hook in any component and call the appropriate method:
                     </p>
-                    <div className="bg-blue-100 rounded-md p-4 font-mono text-sm text-blue-900">
+                    <div className="bg-primary-100 rounded-md p-4 font-mono text-sm text-secondary-500">
                         <div>const &#123; success, error, warning, info &#125; = useToast();</div>
                         <div className="mt-2">success('Title', 'Optional message', duration);</div>
                         <div>error('Title', 'Optional message', persistent);</div>

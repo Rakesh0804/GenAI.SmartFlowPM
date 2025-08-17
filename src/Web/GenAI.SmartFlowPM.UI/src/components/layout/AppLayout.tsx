@@ -14,7 +14,7 @@ const AppLayoutContent: React.FC<AppLayoutProps> = ({ children }) => {
     const { isCollapsed } = useSidebar();
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-primary-50/30 flex">
+        <div className="min-h-screen bg-gradient-to-br from-white via-orange-50 to-orange-100/30 flex">
             {/* Sidebar */}
             <Sidebar />
 

@@ -52,6 +52,10 @@ public class ComprehensiveDataSeeder
         await SeedEntityIfEmpty<Project>("Projects", SeedProjectsAsync);
         await SeedUserProjectsIfNeeded();
         await SeedTasksIfNeeded();
+        
+        // Teams and related entities
+        await SeedEntityIfEmpty<Team>("Teams", SeedTeamsAsync);
+        await SeedTeamMembersIfNeeded();
 
         Console.WriteLine("Comprehensive data seeding completed successfully!");
     }
@@ -942,6 +946,13 @@ public class ComprehensiveDataSeeder
                 _context.UserProjects.RemoveRange(_context.UserProjects);
             if (_context.Projects != null)
                 _context.Projects.RemoveRange(_context.Projects);
+            
+            // Clear Team entities
+            if (_context.TeamMembers != null)
+                _context.TeamMembers.RemoveRange(_context.TeamMembers);
+            if (_context.Teams != null)
+                _context.Teams.RemoveRange(_context.Teams);
+                
             if (_context.UserClaims != null)
                 _context.UserClaims.RemoveRange(_context.UserClaims);
             if (_context.UserRoles != null)
@@ -985,4 +996,168 @@ public class ComprehensiveDataSeeder
             // Continue with seeding even if clearing fails
         }
     }
+
+    #region Teams Seeding
+
+    private async Task SeedTeamsAsync()
+    {
+        Console.WriteLine("Seeding Teams...");
+
+        try
+        {
+            var tenants = await _context.Tenants.ToListAsync();
+            var users = await _context.Users.ToListAsync();
+            var allTeams = new List<Team>();
+
+            foreach (var tenant in tenants)
+            {
+                var tenantUsers = users.Where(u => u.TenantId == tenant.Id).ToList();
+                if (!tenantUsers.Any()) continue;
+
+                var faker = new Faker<Team>()
+                    .RuleFor(t => t.Id, f => Guid.NewGuid())
+                    .RuleFor(t => t.Name, f => f.PickRandom(new[]
+                    {
+                        "Development Team Alpha",
+                        "Quality Assurance Team",
+                        "UI/UX Design Team",
+                        "DevOps Engineering Team",
+                        "Product Management Team",
+                        "Backend Development Team",
+                        "Frontend Development Team",
+                        "Data Analytics Team",
+                        "Security Team",
+                        "Mobile Development Team",
+                        "Infrastructure Team",
+                        "Research & Development Team"
+                    }))
+                    .RuleFor(t => t.Description, (f, t) => f.Lorem.Sentence(10, 15))
+                    .RuleFor(t => t.Type, f => f.PickRandom<TeamType>())
+                    .RuleFor(t => t.Status, f => f.PickRandom<TeamStatus>())
+                    .RuleFor(t => t.LeaderId, f => f.PickRandom(tenantUsers).Id)
+                    .RuleFor(t => t.MaxMembers, f => f.Random.Int(5, 15))
+                    .RuleFor(t => t.CreatedAt, f => f.Date.Past(1))
+                    .RuleFor(t => t.TenantId, tenant.Id)
+                    .RuleFor(t => t.CreatedBy, f => f.PickRandom(tenantUsers).Id.ToString())
+                    .RuleFor(t => t.IsActive, f => f.Random.Bool(0.9f)); // 90% active
+
+                var teamFaker = new Faker();
+                var teams = faker.Generate(teamFaker.Random.Int(3, 6)); // 3-6 teams per tenant
+
+                // Ensure no duplicate team names within a tenant
+                var usedNames = new HashSet<string>();
+                foreach (var team in teams)
+                {
+                    var originalName = team.Name;
+                    var counter = 1;
+                    while (usedNames.Contains(team.Name))
+                    {
+                        team.Name = $"{originalName} {counter}";
+                        counter++;
+                    }
+                    usedNames.Add(team.Name);
+                }
+
+                allTeams.AddRange(teams);
+            }
+
+            await _context.Teams.AddRangeAsync(allTeams);
+            await _context.SaveChangesAsync();
+
+            Console.WriteLine($"Successfully seeded {allTeams.Count} teams");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error seeding teams: {ex.Message}");
+            throw;
+        }
+    }
+
+    private async Task SeedTeamMembersIfNeeded()
+    {
+        Console.WriteLine("Checking if Team Members seeding is needed...");
+
+        var existingTeamMembers = await _context.TeamMembers.CountAsync();
+        if (existingTeamMembers > 0)
+        {
+            Console.WriteLine($"Team Members already exist ({existingTeamMembers}). Skipping seeding.");
+            return;
+        }
+
+        await SeedTeamMembersAsync();
+    }
+
+    private async Task SeedTeamMembersAsync()
+    {
+        Console.WriteLine("Seeding Team Members...");
+
+        try
+        {
+            var teams = await _context.Teams
+                .Include(t => t.Leader)
+                .ToListAsync();
+            var users = await _context.Users.ToListAsync();
+            var allTeamMembers = new List<TeamMember>();
+
+            foreach (var team in teams)
+            {
+                var tenantUsers = users.Where(u => u.TenantId == team.TenantId && u.Id != team.LeaderId).ToList();
+                
+                // Add the team leader as a member (if LeaderId is not null)
+                if (team.LeaderId.HasValue)
+                {
+                    var leaderMember = new TeamMember
+                    {
+                        Id = Guid.NewGuid(),
+                        TeamId = team.Id,
+                        UserId = team.LeaderId.Value,
+                        Role = TeamMemberRole.Leader,
+                        JoinedDate = team.CreatedAt.AddDays(-1),
+                        IsActive = true,
+                        TenantId = team.TenantId,
+                        CreatedBy = team.CreatedBy,
+                        CreatedAt = team.CreatedAt
+                    };
+                    allTeamMembers.Add(leaderMember);
+                }
+
+                // Add random team members
+                if (tenantUsers.Any())
+                {
+                    var faker = new Faker();
+                    var numberOfMembers = faker.Random.Int(2, Math.Min(team.MaxMembers - 1, tenantUsers.Count));
+                    var selectedUsers = faker.PickRandom(tenantUsers, Math.Max(0, numberOfMembers)).ToList();
+
+                    foreach (var user in selectedUsers)
+                    {
+                        var member = new TeamMember
+                        {
+                            Id = Guid.NewGuid(),
+                            TeamId = team.Id,
+                            UserId = user.Id,
+                            Role = faker.PickRandom<TeamMemberRole>(TeamMemberRole.Member, TeamMemberRole.CoLeader),
+                            JoinedDate = faker.Date.Between(team.CreatedAt, DateTime.UtcNow),
+                            IsActive = faker.Random.Bool(0.95f), // 95% active
+                            TenantId = team.TenantId,
+                            CreatedBy = team.CreatedBy,
+                            CreatedAt = faker.Date.Between(team.CreatedAt, DateTime.UtcNow)
+                        };
+                        allTeamMembers.Add(member);
+                    }
+                }
+            }
+
+            await _context.TeamMembers.AddRangeAsync(allTeamMembers);
+            await _context.SaveChangesAsync();
+
+            Console.WriteLine($"Successfully seeded {allTeamMembers.Count} team members");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error seeding team members: {ex.Message}");
+            throw;
+        }
+    }
+
+    #endregion
 }

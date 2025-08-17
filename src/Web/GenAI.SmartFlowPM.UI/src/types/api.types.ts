@@ -132,6 +132,7 @@ export interface ProjectDto {
   budget?: number;
   managerId: string;
   managerName: string;
+  clientName?: string;
   teamMemberCount: number;
   taskCount: number;
   completedTaskCount: number;
@@ -150,6 +151,7 @@ export interface CreateProjectDto {
   priority: ProjectPriority;
   budget?: number;
   managerId: string;
+  clientName?: string;
 }
 
 export interface UpdateProjectDto {
@@ -161,6 +163,7 @@ export interface UpdateProjectDto {
   priority?: ProjectPriority;
   budget?: number;
   managerId?: string;
+  clientName?: string;
 }
 
 // Task types
@@ -572,4 +575,63 @@ export interface TenantSummaryDto {
   maxUsers: number;
   maxProjects: number;
   createdAt: Date;
+}
+
+// Team types
+export interface TeamDto {
+  id: string;
+  name: string;
+  description?: string;
+  leaderId: string;
+  leaderName: string;
+  memberCount: number;
+  projectCount: number;
+  taskCount: number;
+  completedTaskCount: number;
+  isActive: boolean;
+  tenantId: string;
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
+export interface CreateTeamDto {
+  name: string;
+  description?: string;
+  leaderId: string;
+  isActive?: boolean;
+}
+
+export interface UpdateTeamDto {
+  name?: string;
+  description?: string;
+  leaderId?: string;
+  isActive?: boolean;
+}
+
+export interface TeamMemberDto {
+  id: string;
+  teamId: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  role: TeamMemberRole;
+  joinedDate: Date;
+  isActive: boolean;
+}
+
+export interface AddTeamMemberDto {
+  teamId: string;
+  userId: string;
+  role: TeamMemberRole;
+}
+
+export interface UpdateTeamMemberDto {
+  role?: TeamMemberRole;
+  isActive?: boolean;
+}
+
+export enum TeamMemberRole {
+  Member = 0,
+  Lead = 1,
+  Admin = 2
 }

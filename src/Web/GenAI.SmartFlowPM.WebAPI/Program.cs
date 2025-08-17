@@ -15,6 +15,7 @@ using GenAI.SmartFlowPM.Persistence.Seeders;
 using GenAI.SmartFlowPM.Domain.Interfaces;
 using GenAI.SmartFlowPM.WebAPI.Extensions;
 using GenAI.SmartFlowPM.WebAPI.HealthChecks;
+using GenAI.SmartFlowPM.WebAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -127,6 +128,9 @@ builder.Services.AddSwaggerGen(c =>
 
 // Add Comprehensive Health Checks
 builder.Services.AddComprehensiveHealthChecks(builder.Configuration);
+
+// Add Database Management Service for CLI operations
+builder.Services.AddHostedService<DatabaseManagementService>();
 
 var app = builder.Build();
 

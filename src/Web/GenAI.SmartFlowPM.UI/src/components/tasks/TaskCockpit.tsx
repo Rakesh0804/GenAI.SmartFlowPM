@@ -9,6 +9,7 @@ import { CheckSquare, Calendar, User, Clock, Search, Filter, Plus, MoreVertical,
 import { useToast } from '@/contexts/ToastContext';
 import { Pagination } from '@/components/common/Pagination';
 import SearchableSelect from '@/components/common/SearchableSelect';
+import CustomSelect from '@/components/common/CustomSelect';
 import { useConfirmationModal } from '@/components/common/ConfirmationModal';
 import { TASK_TYPE_ACRONYMS, getTaskTypeLabel } from '@/constants/taskTypes';
 
@@ -40,7 +41,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onView, onDelete }) =
       case TaskStatus.InProgress:
         return {
           text: 'In Progress',
-          className: 'bg-blue-100 text-blue-700 border-blue-200'
+          className: 'bg-primary-100 text-primary-700 border-primary-200'
         };
       case TaskStatus.Review:
         return {
@@ -50,7 +51,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onView, onDelete }) =
       case TaskStatus.Testing:
         return {
           text: 'Testing',
-          className: 'bg-purple-100 text-purple-700 border-purple-200'
+          className: 'bg-orange-100 text-purple-700 border-purple-200'
         };
       case TaskStatus.Done:
         return {
@@ -83,7 +84,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onView, onDelete }) =
       case TASK_TYPE_ACRONYMS.TASK:
         return {
           text: getTaskTypeLabel(TASK_TYPE_ACRONYMS.TASK),
-          className: 'bg-purple-100 text-purple-700 border-purple-200',
+          className: 'bg-orange-100 text-accent border-primary-200',
           icon: <CheckSquare className="w-3 h-3" />
         };
       case TASK_TYPE_ACRONYMS.SPIKE:
@@ -101,7 +102,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onView, onDelete }) =
       default:
         return {
           text: getTaskTypeLabel(TASK_TYPE_ACRONYMS.TASK),
-          className: 'bg-purple-100 text-purple-700 border-purple-200',
+          className: 'bg-orange-100 text-accent border-primary-200',
           icon: <CheckSquare className="w-3 h-3" />
         };
     }
@@ -188,7 +189,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onView, onDelete }) =
         <div className="flex items-center space-x-1">
           <button
             onClick={() => onView(task)}
-            className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200"
+            className="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-md transition-all duration-200"
             title="View Details"
           >
             <Eye className="w-5 h-5" />
@@ -261,7 +262,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onView, onDelete }) =
         {/* Project & Assignment */}
         <div className="grid grid-cols-1 gap-2">
           <div className="flex items-center space-x-2 text-sm text-gray-600">
-            <Building2 className="w-4 h-4 flex-shrink-0 text-blue-500" />
+            <Building2 className="w-4 h-4 flex-shrink-0 text-primary-500" />
             <span className="truncate">{task.projectName}</span>
           </div>
         </div>
@@ -270,7 +271,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onView, onDelete }) =
         <div className="flex items-center space-x-2">
           <span className="text-xs text-gray-500">Assigned to:</span>
           {task.assignedToUserName ? (
-            <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-purple-50 text-purple-700 border border-purple-200">
+            <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-primary-50 text-primary-700 border border-primary-200">
               <User className="w-3 h-3 mr-1" />
               {task.assignedToUserName}
             </span>
@@ -322,7 +323,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onView, onDelete }) =
             )}
             {task.estimatedHours && (
               <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <Clock className="w-4 h-4 text-indigo-500 flex-shrink-0" />
+                <Clock className="w-4 h-4 text-primary-500 flex-shrink-0" />
                 <span>
                   {task.actualHours || 0}h / {task.estimatedHours}h
                   {task.estimatedHours > 0 && (
@@ -591,8 +592,8 @@ export const TaskCockpit: React.FC<TaskCockpitProps> = ({
         <div className="flex items-center justify-between p-6">
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-3">
-              <div className="p-3 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl shadow-lg">
-                <CheckSquare className="w-7 h-7 text-white" />
+              <div className="p-3 bg-primary-100 rounded-xl shadow-lg">
+                <CheckSquare className="w-7 h-7 text-primary-600" />
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Task Cockpit</h1>
@@ -656,45 +657,50 @@ export const TaskCockpit: React.FC<TaskCockpitProps> = ({
                 )}
               </div>
               
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value as TaskStatus | '')}
-                className="w-32 px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all duration-200"
-              >
-                <option value="">All Status</option>
-                <option value={TaskStatus.Todo}>To Do</option>
-                <option value={TaskStatus.InProgress}>In Progress</option>
-                <option value={TaskStatus.Review}>Review</option>
-                <option value={TaskStatus.Testing}>Testing</option>
-                <option value={TaskStatus.Done}>Done</option>
-                <option value={TaskStatus.Blocked}>Blocked</option>
-              </select>
+              <CustomSelect
+                value={filterStatus.toString()}
+                onChange={(value) => setFilterStatus(value as TaskStatus | '')}
+                options={[
+                  { value: '', label: 'All Status' },
+                  { value: TaskStatus.Todo.toString(), label: 'To Do' },
+                  { value: TaskStatus.InProgress.toString(), label: 'In Progress' },
+                  { value: TaskStatus.Review.toString(), label: 'Review' },
+                  { value: TaskStatus.Testing.toString(), label: 'Testing' },
+                  { value: TaskStatus.Done.toString(), label: 'Done' },
+                  { value: TaskStatus.Blocked.toString(), label: 'Blocked' }
+                ]}
+                className="w-32"
+                placeholder="All Status"
+              />
 
-              <select
-                value={filterPriority}
-                onChange={(e) => setFilterPriority(e.target.value as TaskPriority | '')}
-                className="w-32 px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all duration-200"
-              >
-                <option value="">All Priority</option>
-                <option value={TaskPriority.Low}>Low</option>
-                <option value={TaskPriority.Medium}>Medium</option>
-                <option value={TaskPriority.High}>High</option>
-                <option value={TaskPriority.Critical}>Critical</option>
-              </select>
+              <CustomSelect
+                value={filterPriority.toString()}
+                onChange={(value) => setFilterPriority(value as TaskPriority | '')}
+                options={[
+                  { value: '', label: 'All Priority' },
+                  { value: TaskPriority.Low.toString(), label: 'Low' },
+                  { value: TaskPriority.Medium.toString(), label: 'Medium' },
+                  { value: TaskPriority.High.toString(), label: 'High' },
+                  { value: TaskPriority.Critical.toString(), label: 'Critical' }
+                ]}
+                className="w-32"
+                placeholder="All Priority"
+              />
 
-              <select
+              <CustomSelect
                 value={filterProject}
-                onChange={(e) => setFilterProject(e.target.value)}
+                onChange={setFilterProject}
+                options={[
+                  { value: '', label: 'All Projects' },
+                  ...projects.map((project) => ({
+                    value: project.id,
+                    label: project.name
+                  }))
+                ]}
+                className="w-40"
+                placeholder="All Projects"
                 disabled={loadingProjects}
-                className="w-40 px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <option value="">All Projects</option>
-                {projects.map((project) => (
-                  <option key={project.id} value={project.id}>
-                    {project.name}
-                  </option>
-                ))}
-              </select>
+              />
 
               {/* Assigned To Filter */}
               <div className="w-48">

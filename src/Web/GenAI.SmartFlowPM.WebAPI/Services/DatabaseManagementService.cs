@@ -31,7 +31,7 @@ public class DatabaseManagementService : BackgroundService
             await InitializeDatabase();
             _applicationLifetime.StopApplication();
         }
-        else if (args.Contains("--seed-db"))
+        else if (args.Contains("--seed-db") || args.Contains("seed"))
         {
             await SeedDatabase(forceReseed: args.Contains("--force"));
             _applicationLifetime.StopApplication();

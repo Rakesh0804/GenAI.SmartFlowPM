@@ -198,7 +198,7 @@ export const EditClaim: React.FC<EditClaimProps> = ({
     return (
       <div className="h-full w-full flex items-center justify-center">
         <div className="flex items-center space-x-2">
-          <Loader2 className="animate-spin h-6 w-6 text-blue-600" />
+          <Loader2 className="animate-spin h-6 w-6 text-primary-600" />
           <span className="text-gray-600">Loading claim details...</span>
         </div>
       </div>
@@ -214,7 +214,7 @@ export const EditClaim: React.FC<EditClaimProps> = ({
           <p className="text-gray-500 mb-4">The claim you're looking for doesn't exist or has been deleted.</p>
           <button
             onClick={handleCancel}
-            className="px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700"
+            className="px-4 py-2 text-sm font-medium text-primary-600 hover:text-primary-700"
           >
             Go Back
           </button>
@@ -240,8 +240,8 @@ export const EditClaim: React.FC<EditClaimProps> = ({
               </button>
             )}
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Key className="w-6 h-6 text-blue-600" />
+              <div className="p-2 bg-primary-100 rounded-lg">
+                <Key className="w-6 h-6 text-primary-600" />
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">
@@ -258,7 +258,7 @@ export const EditClaim: React.FC<EditClaimProps> = ({
             <button
               type="button"
               onClick={handleCancel}
-              className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
               disabled={loading}
             >
               <X className="w-4 h-4" />
@@ -291,7 +291,7 @@ export const EditClaim: React.FC<EditClaimProps> = ({
                         name="name"
                         value={formData.name}
                         onChange={handleInputChange}
-                        className={`w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none ${
+                        className={`w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none ${
                           readOnly ? 'bg-gray-50 cursor-not-allowed' : ''
                         }`}
                         placeholder="Enter claim name"
@@ -318,7 +318,7 @@ export const EditClaim: React.FC<EditClaimProps> = ({
                         value={formData.type}
                         onChange={handleInputChange}
                         list="claim-types"
-                        className={`w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none ${
+                        className={`w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none ${
                           readOnly ? 'bg-gray-50 cursor-not-allowed' : ''
                         }`}
                         placeholder="Enter claim type"
@@ -357,7 +357,7 @@ export const EditClaim: React.FC<EditClaimProps> = ({
                       value={formData.description}
                       onChange={handleInputChange}
                       rows={4}
-                      className={`w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none ${
+                      className={`w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none resize-none ${
                         readOnly ? 'bg-gray-50 cursor-not-allowed' : ''
                       }`}
                       placeholder="Enter claim description (optional)"
@@ -388,13 +388,13 @@ export const EditClaim: React.FC<EditClaimProps> = ({
                       name="isActive"
                       checked={formData.isActive}
                       onChange={handleInputChange}
-                      className={`w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 ${
+                      className={`w-5 h-5 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 focus:ring-2 ${
                         readOnly ? 'cursor-not-allowed' : ''
                       }`}
                       disabled={loading || readOnly}
                     />
                     <label htmlFor="isActive" className="flex items-center text-sm font-medium text-gray-700">
-                      <Key className="w-5 h-5 mr-2 text-blue-600" />
+                      <Key className="w-5 h-5 mr-2 text-primary-600" />
                       Active Claim
                     </label>
                   </div>
@@ -442,7 +442,7 @@ export const EditClaim: React.FC<EditClaimProps> = ({
                   <button
                     type="button"
                     onClick={handleCancel}
-                    className="flex items-center space-x-2 px-8 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    className="flex items-center space-x-2 px-8 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
                     disabled={loading}
                   >
                     <X className="w-4 h-4" />

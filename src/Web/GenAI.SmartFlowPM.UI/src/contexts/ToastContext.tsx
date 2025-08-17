@@ -79,7 +79,7 @@ const getToastColors = (type: ToastType) => {
         default:
             return {
                 bg: 'bg-white border-l-4 border-l-blue-500 shadow-lg shadow-blue-100/50',
-                icon: 'text-blue-600',
+                icon: 'text-primary-600',
                 title: 'text-gray-800',
                 close: 'text-gray-400 hover:text-gray-600'
             };

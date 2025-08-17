@@ -38,6 +38,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICampaignEvaluationRepository, CampaignEvaluationRepository>();
         services.AddScoped<ICertificateRepository, CertificateRepository>();
         services.AddScoped<ICertificateTemplateRepository, CertificateTemplateRepository>();
+        services.AddScoped<ITeamRepository, TeamRepository>();
+        services.AddScoped<ITeamMemberRepository, TeamMemberRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork.UnitOfWork>();
 
         // Add services

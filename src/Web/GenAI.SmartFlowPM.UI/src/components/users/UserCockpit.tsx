@@ -5,6 +5,7 @@ import { UserDto, PaginatedResponse } from '@/types/api.types';
 import { userService } from '@/services/user.service';
 import { useToast } from '@/contexts/ToastContext';
 import ConfirmationModal, { useConfirmationModal } from '@/components/common/ConfirmationModal';
+import CustomSelect from '@/components/common/CustomSelect';
 import { 
   Search, 
   Filter, 
@@ -20,7 +21,7 @@ import {
   Phone,
   Calendar,
   Eye,
-  Loader,
+  Loader2,
   MoreHorizontal,
   Shield,
   Clock,
@@ -90,7 +91,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, onEdit, onView, onDelete, onT
         <div className="flex items-center space-x-1">
           <button
             onClick={onView}
-            className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-all duration-200"
+            className="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-md transition-all duration-200"
             title="View User"
           >
             <Eye className="w-5 h-5" />
@@ -178,7 +179,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, onEdit, onView, onDelete, onT
                 user.roles.map((role, index) => (
                   <span 
                     key={index}
-                    className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                    className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800"
                   >
                     {role}
                   </span>
@@ -216,8 +217,8 @@ const UserCard: React.FC<UserCardProps> = ({ user, onEdit, onView, onDelete, onT
             </div>
           </div>
           <div className="flex items-center space-x-1">
-            <Shield className="w-4 h-4 text-blue-500" />
-            <span className="text-sm text-blue-600 font-medium">Internal</span>
+            <Shield className="w-4 h-4 text-primary-500" />
+            <span className="text-sm text-primary-600 font-medium">Internal</span>
           </div>
         </div>
       </div>
@@ -422,8 +423,8 @@ export const UserCockpit: React.FC<UserCockpitProps> = ({
         <div className="flex items-center justify-between bg-white p-4 border-b border-gray-200">
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-3">
-              <div className="p-3 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl shadow-lg">
-                <Users className="w-7 h-7 text-white" />
+              <div className="p-3 bg-primary-100 rounded-xl shadow-lg">
+                <Users className="w-7 h-7 text-primary-600" />
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">User Cockpit</h1>
@@ -484,25 +485,29 @@ export const UserCockpit: React.FC<UserCockpitProps> = ({
                 <span className="text-sm font-medium text-gray-700">Filters</span>
               </div>
               
-              <select
+              <CustomSelect
                 value={filterActive === null ? '' : filterActive.toString()}
-                onChange={(e) => setFilterActive(e.target.value === '' ? null : e.target.value === 'true')}
-                className="w-32 px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all duration-200"
-              >
-                <option value="">All Status</option>
-                <option value="true">Active</option>
-                <option value="false">Inactive</option>
-              </select>
+                onChange={(value) => setFilterActive(value === '' ? null : value === 'true')}
+                options={[
+                  { value: '', label: 'All Status' },
+                  { value: 'true', label: 'Active' },
+                  { value: 'false', label: 'Inactive' }
+                ]}
+                className="w-32"
+                placeholder="All Status"
+              />
 
-              <select
+              <CustomSelect
                 value={filterManager === null ? '' : filterManager.toString()}
-                onChange={(e) => setFilterManager(e.target.value === '' ? null : e.target.value === 'true')}
-                className="px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all duration-200"
-              >
-                <option value="">All Users</option>
-                <option value="true">Managers</option>
-                <option value="false">Non-Managers</option>
-              </select>
+                onChange={(value) => setFilterManager(value === '' ? null : value === 'true')}
+                options={[
+                  { value: '', label: 'All Users' },
+                  { value: 'true', label: 'Managers' },
+                  { value: 'false', label: 'Non-Managers' }
+                ]}
+                className="w-36"
+                placeholder="All Users"
+              />
 
               <button
                 onClick={clearFilters}
@@ -528,7 +533,7 @@ export const UserCockpit: React.FC<UserCockpitProps> = ({
         <div className="h-full overflow-y-auto p-4 pb-20">
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader className="animate-spin w-8 h-8 text-blue-500" />
+              <Loader2 className="animate-spin w-8 h-8 text-primary-500" />
               <span className="ml-3 text-gray-600">Loading users...</span>
             </div>
           ) : users.length === 0 ? (

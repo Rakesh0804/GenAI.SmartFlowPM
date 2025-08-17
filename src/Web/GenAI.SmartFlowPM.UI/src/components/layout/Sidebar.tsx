@@ -30,6 +30,7 @@ import {
     ShieldIcon,
     KeyIcon,
     BuildingIcon,
+    ServerIcon,
     MegaphoneIcon,
     AwardIcon
 } from 'lucide-react';
@@ -62,6 +63,7 @@ const menuItems: MenuItem[] = [
         icon: FolderIcon, 
         href: '/projects',
         subItems: [
+            { id: 'project-cockpit', label: 'Project Cockpit', icon: BarChart3Icon, href: '/projects/cockpit' },
             { id: 'tasks', label: 'Tasks', icon: CheckSquareIcon, href: '/projects/tasks', badge: 12 }
         ]
     },
@@ -70,14 +72,23 @@ const menuItems: MenuItem[] = [
         label: 'Manage', 
         icon: SettingsIcon,
         subItems: [
-            { id: 'tenants', label: 'Tenants', icon: BuildingIcon, href: '/manage/tenants' },
+            { id: 'tenants', label: 'Tenants', icon: ServerIcon, href: '/manage/tenants' },
             { id: 'organizations', label: 'Organizations', icon: BuildingIcon, href: '/manage/organizations' },
             { id: 'users', label: 'Users', icon: UsersIcon, href: '/manage/users' },
             { id: 'roles', label: 'Roles', icon: ShieldIcon, href: '/manage/roles' },
             { id: 'claims', label: 'Claims', icon: KeyIcon, href: '/manage/claims' }
         ]
     },
-    { id: 'team', label: 'Team', icon: UsersIcon, href: '/team' },
+    { 
+        id: 'teams', 
+        label: 'Teams', 
+        icon: UsersIcon, 
+        href: '/teams',
+        subItems: [
+            { id: 'team-cockpit', label: 'Team Cockpit', icon: BarChart3Icon, href: '/teams/cockpit' },
+            { id: 'new-team', label: 'Create Team', icon: UsersIcon, href: '/teams/new' }
+        ]
+    },
     { id: 'calendar', label: 'Calendar', icon: CalendarIcon, href: '/calendar' },
     { id: 'timetracker', label: 'Time Tracker', icon: ClockIcon, href: '/timetracker' },
     { id: 'attendance', label: 'Attendance', icon: UserCheckIcon, href: '/attendance' },
@@ -132,9 +143,9 @@ export const Sidebar: React.FC = () => {
     // Don't render until mounted on client to avoid hydration issues
     if (!mounted) {
         return (
-            <div className="fixed left-0 top-0 h-full w-64 bg-gradient-to-b from-primary-600 to-primary-700 border-r border-primary-500 z-50">
+            <div className="fixed left-0 top-0 h-full w-64 border-r border-orange-200 z-50" style={{backgroundColor: '#FFF8F0'}}>
                 <div className="p-4">
-                    <div className="h-8 bg-white/20 rounded animate-pulse"></div>
+                    <div className="h-8 bg-orange-100 rounded animate-pulse"></div>
                 </div>
             </div>
         );
@@ -142,24 +153,37 @@ export const Sidebar: React.FC = () => {
 
     return (
         <>
-            <div className={`fixed left-0 top-0 h-full bg-gradient-to-b from-primary-600 to-primary-700 border-r border-primary-500 transition-all duration-300 ease-in-out z-50 ${isCollapsed ? 'w-16' : 'w-64'
-                }`}>
+            <div className={`fixed left-0 top-0 h-full border-r border-orange-200 transition-all duration-300 ease-in-out z-50 ${isCollapsed ? 'w-16' : 'w-64'
+                }`} style={{backgroundColor: '#FFF8F0'}}>
             {/* Header */}
-            <div className={`flex items-center p-4 border-b border-primary-500/30 ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
+            <div className={`flex items-center p-4 border-b border-orange-200/50 ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
                 {!isCollapsed && (
-                    <div className={`flex items-center space-x-2 transition-all duration-300 ease-in-out ${isCollapsed ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}>
-                        <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center ring-1 ring-white/30">
-                            <span className="text-white font-bold text-sm">SF</span>
+                    <div className={`flex items-center space-x-3 transition-all duration-300 ease-in-out ${isCollapsed ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}>
+                        <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center ring-1 ring-orange-200 shadow-sm">
+                            <img 
+                                src="/images/flow-logo-transparent.png" 
+                                alt="SmartFlowPM Logo" 
+                                className="w-6 h-6 object-contain"
+                            />
                         </div>
-                        <span className={`font-bold text-white transition-all duration-300 ease-in-out ${isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'
+                        <span className={`font-bold text-secondary-800 text-lg transition-all duration-300 ease-in-out ${isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'
                             }`}>
                             SmartFlowPM
                         </span>
                     </div>
                 )}
+                {isCollapsed && (
+                    <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center ring-1 ring-orange-200 shadow-sm">
+                        <img 
+                            src="/images/flow-logo-transparent.png" 
+                            alt="SmartFlowPM Logo" 
+                            className="w-5 h-5 object-contain"
+                        />
+                    </div>
+                )}
                 <button
                     onClick={toggleSidebar}
-                    className="p-1 rounded-md hover:bg-white/10 text-white/70 hover:text-white transition-colors duration-200 flex-shrink-0"
+                    className="p-1 rounded-md hover:bg-orange-100 text-secondary-600 hover:text-secondary-800 transition-colors duration-200 flex-shrink-0"
                     title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
                 >
                     {isCollapsed ? (
@@ -191,15 +215,15 @@ export const Sidebar: React.FC = () => {
                                 }}
                                 className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ease-in-out group ${
                                     active
-                                        ? 'bg-white/20 text-white backdrop-blur-sm border-r-2 border-white/50 shadow-lg'
-                                        : 'text-white/70 hover:text-white hover:bg-white/10'
+                                        ? 'bg-primary-500 text-white backdrop-blur-sm border-r-2 border-primary-600 shadow-lg'
+                                        : 'text-secondary-700 hover:text-secondary-900 hover:bg-primary-50'
                                 }`}
                                 title={isCollapsed ? item.label : undefined}
                             >
                                 <Icon
                                     size={20}
                                     className={`${isCollapsed ? 'mx-auto' : 'mr-3'} transition-all duration-200 ease-in-out ${
-                                        active ? 'text-white' : 'text-white/70 group-hover:text-white'
+                                        active ? 'text-white' : 'text-secondary-600 group-hover:text-secondary-800'
                                     }`}
                                 />
                                 <div className={`flex items-center justify-between flex-1 transition-all duration-300 ease-in-out overflow-hidden ${
@@ -208,16 +232,16 @@ export const Sidebar: React.FC = () => {
                                     <span className="text-left whitespace-nowrap">{item.label}</span>
                                     <div className="flex items-center space-x-2">
                                         {item.badge && (
-                                            <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-primary-600 bg-white rounded-full shadow-sm">
+                                            <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-primary-500 rounded-full shadow-sm">
                                                 {item.badge}
                                             </span>
                                         )}
                                         {hasSubItems && !isCollapsed && (
                                             <div className="transition-transform duration-200">
                                                 {isExpanded ? (
-                                                    <ChevronUpIcon size={16} className="text-white/70" />
+                                                    <ChevronUpIcon size={16} className="text-secondary-500" />
                                                 ) : (
-                                                    <ChevronDownIcon size={16} className="text-white/70" />
+                                                    <ChevronDownIcon size={16} className="text-secondary-500" />
                                                 )}
                                             </div>
                                         )}
@@ -235,23 +259,26 @@ export const Sidebar: React.FC = () => {
                                         return (
                                             <button
                                                 key={subItem.id}
-                                                onClick={() => handleNavigation(subItem.href)}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleNavigation(subItem.href);
+                                                }}
                                                 className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ease-in-out group ${
                                                     subActive
-                                                        ? 'bg-white/20 text-white backdrop-blur-sm border-l-2 border-white/50 shadow-lg'
-                                                        : 'text-white/60 hover:text-white hover:bg-white/10'
+                                                        ? 'bg-primary-500 text-white backdrop-blur-sm border-l-2 border-primary-600 shadow-lg'
+                                                        : 'text-secondary-600 hover:text-secondary-800 hover:bg-primary-50'
                                                 }`}
                                             >
                                                 <SubIcon
                                                     size={18}
                                                     className={`mr-3 transition-all duration-200 ease-in-out ${
-                                                        subActive ? 'text-white' : 'text-white/60 group-hover:text-white'
+                                                        subActive ? 'text-white' : 'text-secondary-600 group-hover:text-secondary-800'
                                                     }`}
                                                 />
                                                 <div className="flex items-center justify-between flex-1">
                                                     <span className="text-left whitespace-nowrap">{subItem.label}</span>
                                                     {subItem.badge && (
-                                                        <span className="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-primary-600 bg-white rounded-full shadow-sm">
+                                                        <span className="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-primary-500 rounded-full shadow-sm">
                                                             {subItem.badge}
                                                         </span>
                                                     )}
@@ -267,7 +294,7 @@ export const Sidebar: React.FC = () => {
             </nav>
 
             {/* User Profile Section - Replaces Bottom Navigation */}
-            <div className="border-t border-primary-500/30 px-2 py-4">
+            <div className="border-t border-orange-200/50 px-2 py-4">
                 <UserProfileSection isCollapsed={isCollapsed} />
             </div>
         </div>
@@ -276,7 +303,7 @@ export const Sidebar: React.FC = () => {
         {isCollapsed && (
             <button
                 onClick={toggleSidebar}
-                className="fixed left-2 top-20 z-60 p-2 bg-primary-600 hover:bg-primary-700 text-white rounded-full shadow-lg transition-all duration-200 hover:scale-110"
+                className="fixed left-2 top-20 z-60 p-2 bg-primary-500 hover:bg-primary-600 text-white rounded-full shadow-lg transition-all duration-200 hover:scale-110"
                 title="Expand sidebar"
             >
                 <ChevronRightIcon size={16} />
@@ -290,6 +317,7 @@ export const Sidebar: React.FC = () => {
 const UserProfileSection: React.FC<{ isCollapsed: boolean }> = ({ isCollapsed }) => {
     const { user, logout } = useAuth();
     const [showProfileMenu, setShowProfileMenu] = useState(false);
+    const router = isClient ? useRouter() : null;
 
     const getUserDisplayName = () => {
         if (!user) return 'Guest User';
@@ -338,13 +366,23 @@ const UserProfileSection: React.FC<{ isCollapsed: boolean }> = ({ isCollapsed })
             {/* User Info Display - Styled like other menu items */}
             <button
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
-                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ease-in-out group text-white/70 hover:text-white hover:bg-white/10 ${
+                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ease-in-out group ${
                     isCollapsed ? 'justify-center' : ''
-                } ${showProfileMenu ? 'bg-white/20 text-white backdrop-blur-sm' : ''}`}
+                } ${
+                    showProfileMenu 
+                        ? 'bg-primary-500 text-white' 
+                        : 'text-secondary-700 hover:text-secondary-900 hover:bg-primary-50'
+                }`}
                 title={isCollapsed ? getUserDisplayName() : undefined}
             >
-                <div className="w-5 h-5 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center ring-1 ring-white/30 flex-shrink-0">
-                    <span className="text-white font-medium text-xs">
+                <div className={`w-5 h-5 rounded-full flex items-center justify-center ring-1 flex-shrink-0 transition-all duration-200 ${
+                    showProfileMenu 
+                        ? 'bg-white/20 ring-white/30' 
+                        : 'bg-primary-100 ring-primary-200'
+                }`}>
+                    <span className={`font-medium text-xs transition-all duration-200 ${
+                        showProfileMenu ? 'text-white' : 'text-primary-700'
+                    }`}>
                         {getUserInitials()}
                     </span>
                 </div>
@@ -352,10 +390,10 @@ const UserProfileSection: React.FC<{ isCollapsed: boolean }> = ({ isCollapsed })
                 {/* Only show text when expanded */}
                 {!isCollapsed && (
                     <div className={`flex-1 text-left transition-all duration-300 ease-in-out overflow-hidden ml-3`}>
-                        <div className="text-sm font-medium text-white truncate">
+                        <div className={`text-sm font-medium truncate ${showProfileMenu ? 'text-white' : 'text-secondary-800'}`}>
                             {getUserDisplayName()}
                         </div>
-                        <div className="text-xs text-white/70 truncate">
+                        <div className={`text-xs truncate ${showProfileMenu ? 'text-white/90' : 'text-secondary-600'}`}>
                             {getUserRole()}
                         </div>
                     </div>
@@ -378,7 +416,9 @@ const UserProfileSection: React.FC<{ isCollapsed: boolean }> = ({ isCollapsed })
                         onClick={() => {
                             setShowProfileMenu(false);
                             // Navigate to profile page
-                            window.location.href = '/profile';
+                            if (router) {
+                                router.push('/profile');
+                            }
                         }}
                         className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150"
                     >

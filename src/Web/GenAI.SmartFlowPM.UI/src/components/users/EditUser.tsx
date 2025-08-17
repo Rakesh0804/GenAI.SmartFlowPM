@@ -328,7 +328,7 @@ export const EditUser: React.FC<EditUserProps> = ({
     return (
       <div className="page-container">
         <div className="flex items-center justify-center py-12">
-          <Loader className="animate-spin w-8 h-8 text-blue-600" />
+          <Loader className="animate-spin w-8 h-8 text-primary-600" />
           <span className="ml-3 text-gray-600">Loading user details...</span>
         </div>
       </div>
@@ -357,11 +357,11 @@ export const EditUser: React.FC<EditUserProps> = ({
         <div className="flex items-center justify-between bg-white p-4 border-b border-gray-200">
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
+              <div className="p-2 bg-primary-100 rounded-lg">
                 {readOnly ? (
-                  <Eye className="w-6 h-6 text-blue-600" />
+                  <Eye className="w-6 h-6 text-primary-600" />
                 ) : (
-                  <Edit className="w-6 h-6 text-blue-600" />
+                  <Edit className="w-6 h-6 text-primary-600" />
                 )}
               </div>
               <div>
@@ -379,7 +379,7 @@ export const EditUser: React.FC<EditUserProps> = ({
             <button
               type="button"
               onClick={handleCancel}
-              className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
               disabled={loading}
             >
               <X className="w-4 h-4" />
@@ -412,7 +412,7 @@ export const EditUser: React.FC<EditUserProps> = ({
                         name="firstName"
                         value={formData.firstName || ''}
                         onChange={handleInputChange}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
                         placeholder="Enter first name"
                         disabled={loading || readOnly}
                         required
@@ -435,7 +435,7 @@ export const EditUser: React.FC<EditUserProps> = ({
                         name="lastName"
                         value={formData.lastName || ''}
                         onChange={handleInputChange}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
                         placeholder="Enter last name"
                         disabled={loading || readOnly}
                         required
@@ -458,7 +458,7 @@ export const EditUser: React.FC<EditUserProps> = ({
                         name="email"
                         value={formData.email || ''}
                         onChange={handleInputChange}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
                         placeholder="Enter email address"
                         disabled={loading || readOnly}
                         required
@@ -481,7 +481,7 @@ export const EditUser: React.FC<EditUserProps> = ({
                         name="phoneNumber"
                         value={formData.phoneNumber || ''}
                         onChange={handleInputChange}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
                         placeholder="Enter phone number"
                         disabled={loading || readOnly}
                       />
@@ -505,7 +505,7 @@ export const EditUser: React.FC<EditUserProps> = ({
                         name="userName"
                         value={formData.userName || ''}
                         onChange={handleInputChange}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
                         placeholder="Enter username"
                         disabled={loading || readOnly}
                         required
@@ -553,7 +553,7 @@ export const EditUser: React.FC<EditUserProps> = ({
                             onChange={handleManagerSearch}
                             onFocus={() => setShowManagerDropdown(true)}
                             onBlur={() => setTimeout(() => setShowManagerDropdown(false), 200)}
-                            className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                            className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
                             placeholder="Search for a manager (optional)"
                             disabled={loading}
                           />
@@ -623,7 +623,7 @@ export const EditUser: React.FC<EditUserProps> = ({
                         name="hasReportee"
                         checked={formData.hasReportee || false}
                         onChange={handleInputChange}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                         disabled={loading || readOnly}
                       />
                       <label htmlFor="hasReportee" className="ml-3 flex items-center text-sm font-medium text-gray-700">
@@ -644,7 +644,7 @@ export const EditUser: React.FC<EditUserProps> = ({
                         name="isActive"
                         checked={formData.isActive || false}
                         onChange={handleInputChange}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                         disabled={loading || readOnly}
                       />
                       <label htmlFor="isActive" className="ml-3 text-sm font-medium text-gray-700">
@@ -678,7 +678,7 @@ export const EditUser: React.FC<EditUserProps> = ({
                           key={role.id}
                           className={`relative rounded-lg border-2 transition-colors p-4 ${
                             selectedRoleIds.includes(role.id)
-                              ? 'border-blue-500 bg-blue-50'
+                              ? 'border-blue-500 bg-primary-50'
                               : 'border-gray-200 hover:border-gray-300'
                           } ${readOnly ? 'cursor-default' : 'cursor-pointer'}`}
                           onClick={() => !readOnly && handleRoleToggle(role.id)}
@@ -689,13 +689,13 @@ export const EditUser: React.FC<EditUserProps> = ({
                                 type="checkbox"
                                 checked={selectedRoleIds.includes(role.id)}
                                 onChange={() => !readOnly && handleRoleToggle(role.id)}
-                                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                                className="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 focus:ring-2"
                                 disabled={readOnly}
                               />
                             </div>
                             <div className="flex-1">
                               <div className="flex items-center space-x-2">
-                                <Shield className="w-4 h-4 text-blue-500" />
+                                <Shield className="w-4 h-4 text-primary-500" />
                                 <h4 className="text-sm font-medium text-gray-900">{role.name}</h4>
                               </div>
                               {role.description && (
@@ -723,15 +723,15 @@ export const EditUser: React.FC<EditUserProps> = ({
                   )}
                   
                   {selectedRoleIds.length > 0 && (
-                    <div className="bg-blue-50 p-4 rounded-lg">
-                      <h5 className="text-sm font-medium text-blue-900 mb-2">Selected Roles:</h5>
+                    <div className="bg-primary-50 p-4 rounded-lg">
+                      <h5 className="text-sm font-medium text-secondary-500 mb-2">Selected Roles:</h5>
                       <div className="flex flex-wrap gap-2">
                         {selectedRoleIds.map(roleId => {
                           const role = availableRoles.find(r => r.id === roleId);
                           return role ? (
                             <span
                               key={roleId}
-                              className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                              className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800"
                             >
                               {role.name}
                             </span>
@@ -775,7 +775,7 @@ export const EditUser: React.FC<EditUserProps> = ({
                   <button
                     type="button"
                     onClick={handleCancel}
-                    className="px-6 py-3 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                    className="px-6 py-3 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200"
                     disabled={loading}
                   >
                     Cancel

@@ -148,6 +148,13 @@ export class UserService extends BaseApiService {
   async toggleUserStatus(id: string, isActive: boolean): Promise<UserDto> {
     return this.patch<UserDto>(`/users/${id}/status`, { isActive });
   }
+
+  async changePassword(currentPassword: string, newPassword: string): Promise<void> {
+    return this.post<void>('/users/change-password', {
+      currentPassword,
+      newPassword
+    });
+  }
 }
 
 // Export singleton instance

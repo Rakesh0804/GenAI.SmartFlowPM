@@ -5,6 +5,7 @@ import { OrganizationDto, BranchWithManagerDto, PaginatedResponse } from '@/type
 import { organizationService } from '@/services/organization.service';
 import { useToast } from '@/contexts/ToastContext';
 import { Pagination } from '@/components/common/Pagination';
+import { CustomSelect } from '@/components/common/CustomSelect';
 import { useConfirmationModal } from '@/components/common/ConfirmationModal';
 import { 
   Search, 
@@ -94,7 +95,7 @@ const OrganizationCard: React.FC<OrganizationCardProps> = ({
         <div className="flex items-center space-x-1">
           <button
             onClick={onView}
-            className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-all duration-200"
+            className="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-md transition-all duration-200"
             title="View Organization"
           >
             <Eye className="w-5 h-5" />
@@ -153,7 +154,7 @@ const OrganizationCard: React.FC<OrganizationCardProps> = ({
         {/* Organization Name */}
         <div className="flex items-start space-x-3">
           <div className="flex-shrink-0 mt-0.5">
-            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+            <div className="w-2 h-2 bg-primary-500 rounded-full"></div>
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Organization Name</p>
@@ -180,7 +181,7 @@ const OrganizationCard: React.FC<OrganizationCardProps> = ({
         <div className="grid grid-cols-1 gap-2">
           {organization.website && (
             <div className="flex items-center space-x-2 text-sm text-gray-600">
-              <Globe className="w-3 h-3 flex-shrink-0 text-blue-500" />
+              <Globe className="w-3 h-3 flex-shrink-0 text-primary-500" />
               <span className="truncate">{organization.website}</span>
             </div>
           )}
@@ -224,8 +225,8 @@ const OrganizationCard: React.FC<OrganizationCardProps> = ({
             <div className="space-y-1">
               {displayBranches.map((branch) => (
                 <div key={branch.id} className="flex items-center space-x-2 text-sm text-gray-700">
-                  <div className="p-0.5 bg-purple-100 rounded">
-                    <Building className="w-3 h-3 text-purple-600 flex-shrink-0" />
+                  <div className="p-0.5 bg-orange-100 rounded">
+                    <Building className="w-3 h-3 text-accent flex-shrink-0" />
                   </div>
                   <span className="truncate">
                     {branch.name} ({organizationService.getBranchTypeDisplay(branch.branchType)})
@@ -457,8 +458,8 @@ export const OrganizationCockpit: React.FC<OrganizationCockpitProps> = ({
         <div className="flex items-center justify-between bg-white p-4 border-b border-gray-200">
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-3">
-              <div className="p-3 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl shadow-lg">
-                <Building2 className="w-7 h-7 text-white" />
+              <div className="p-3 bg-primary-100 rounded-xl shadow-lg">
+                <Building2 className="w-7 h-7 text-primary-600" />
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Organization Cockpit</h1>
@@ -519,15 +520,16 @@ export const OrganizationCockpit: React.FC<OrganizationCockpitProps> = ({
                 <span className="text-sm font-medium text-gray-700">Filters</span>
               </div>
               
-              <select
+              <CustomSelect
                 value={filterActive === null ? '' : filterActive.toString()}
-                onChange={(e) => setFilterActive(e.target.value === '' ? null : e.target.value === 'true')}
-                className="w-32 px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all duration-200"
-              >
-                <option value="">All Status</option>
-                <option value="true">Active</option>
-                <option value="false">Inactive</option>
-              </select>
+                onChange={(value) => setFilterActive(value === '' ? null : value === 'true')}
+                options={[
+                  { value: '', label: 'All Status' },
+                  { value: 'true', label: 'Active' },
+                  { value: 'false', label: 'Inactive' }
+                ]}
+                className="w-32"
+              />
 
               <button
                 onClick={clearFilters}

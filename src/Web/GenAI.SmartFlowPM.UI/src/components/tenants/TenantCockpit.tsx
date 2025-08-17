@@ -6,10 +6,11 @@ import { TenantDto } from '../../types/api.types';
 import { 
   Building, Building2, Calendar, Globe, Mail, Phone, MapPin, Search, Filter, Plus, 
   MoreVertical, Edit, Eye, X, Clock, CheckCircle, XCircle, Users, FolderOpen, 
-  CreditCard, AlertTriangle, Crown, DollarSign, CalendarDays 
+  CreditCard, AlertTriangle, Crown, DollarSign, CalendarDays, Server 
 } from 'lucide-react';
 import { useToast } from '@/contexts/ToastContext';
 import { Pagination } from '@/components/common/Pagination';
+import { CustomSelect } from '@/components/common/CustomSelect';
 import ConfirmationModal, { useConfirmationModal } from '@/components/common/ConfirmationModal';
 
 interface TenantCockpitProps {
@@ -61,7 +62,7 @@ const TenantCard: React.FC<TenantCardProps> = ({ tenant, onEdit, onView, onDelet
     switch (plan?.toLowerCase()) {
       case 'enterprise': return Crown;
       case 'premium': return CreditCard;
-      case 'standard': return Building;
+      case 'standard': return Server;
       default: return Calendar;
     }
   };
@@ -93,7 +94,7 @@ const TenantCard: React.FC<TenantCardProps> = ({ tenant, onEdit, onView, onDelet
         <div className="flex items-center space-x-4 flex-1 min-w-0">
           <div className="relative">
             <div className="p-3 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl shadow-md">
-              <Building className="w-6 h-6 text-white" />
+              <Server className="w-6 h-6 text-white" />
             </div>
             {/* Status indicator dot */}
             <div className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${
@@ -122,7 +123,7 @@ const TenantCard: React.FC<TenantCardProps> = ({ tenant, onEdit, onView, onDelet
         <div className="flex items-center space-x-2">
           <button
             onClick={() => onView(tenant)}
-            className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
+            className="p-2 text-gray-500 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200"
             title="View Details"
           >
             <Eye className="w-5 h-5" />
@@ -180,12 +181,12 @@ const TenantCard: React.FC<TenantCardProps> = ({ tenant, onEdit, onView, onDelet
       {/* Card Body */}
       <div className="p-6 space-y-5">
         {/* Tenant Name */}
-        <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg">
-          <div className="p-2 bg-blue-100 rounded-lg">
-            <Building2 className="w-4 h-4 text-blue-600" />
+        <div className="flex items-center space-x-3 p-3 bg-primary-50 rounded-lg">
+          <div className="p-2 bg-primary-100 rounded-lg">
+            <Server className="w-4 h-4 text-primary-600" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium text-blue-700 uppercase tracking-wide">Tenant Name</p>
+            <p className="text-xs font-medium text-primary-700 uppercase tracking-wide">Tenant Name</p>
             <p className="text-sm font-bold text-gray-900 break-words">{tenant.name}</p>
           </div>
         </div>
@@ -213,8 +214,8 @@ const TenantCard: React.FC<TenantCardProps> = ({ tenant, onEdit, onView, onDelet
 
           {tenant.contactPhone && (
             <div className="flex items-center space-x-3 p-3 bg-purple-50 rounded-lg">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <Phone className="w-4 h-4 text-purple-600" />
+              <div className="p-2 bg-orange-100 rounded-lg">
+                <Phone className="w-4 h-4 text-accent" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium text-purple-700 uppercase tracking-wide">Phone</p>
@@ -245,28 +246,28 @@ const TenantCard: React.FC<TenantCardProps> = ({ tenant, onEdit, onView, onDelet
         {tenant.subscriptionPlan && (
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-100">
             <div className="flex items-center space-x-3 mb-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <PlanIcon className="w-5 h-5 text-blue-600" />
+              <div className="p-2 bg-primary-100 rounded-lg">
+                <PlanIcon className="w-5 h-5 text-primary-600" />
               </div>
               <div>
-                <p className="text-xs font-medium text-blue-700 uppercase tracking-wide">Subscription Plan</p>
-                <p className="text-lg font-bold text-blue-900">{tenant.subscriptionPlan}</p>
+                <p className="text-xs font-medium text-primary-700 uppercase tracking-wide">Subscription Plan</p>
+                <p className="text-lg font-bold text-secondary-500">{tenant.subscriptionPlan}</p>
               </div>
             </div>
             
             {/* Plan Details Grid */}
             <div className="grid grid-cols-2 gap-3">
               <div className="flex items-center space-x-2 p-2 bg-white/60 rounded-md">
-                <Users className="w-4 h-4 text-blue-600" />
+                <Users className="w-4 h-4 text-primary-600" />
                 <div>
-                  <p className="text-xs text-blue-700">Users</p>
+                  <p className="text-xs text-primary-700">Users</p>
                   <p className="text-sm font-semibold text-gray-900">{tenant.maxUsers}</p>
                 </div>
               </div>
               <div className="flex items-center space-x-2 p-2 bg-white/60 rounded-md">
-                <FolderOpen className="w-4 h-4 text-blue-600" />
+                <FolderOpen className="w-4 h-4 text-primary-600" />
                 <div>
-                  <p className="text-xs text-blue-700">Projects</p>
+                  <p className="text-xs text-primary-700">Projects</p>
                   <p className="text-sm font-semibold text-gray-900">{tenant.maxProjects}</p>
                 </div>
               </div>
@@ -309,9 +310,9 @@ const TenantCard: React.FC<TenantCardProps> = ({ tenant, onEdit, onView, onDelet
         {(tenant.timeZone || tenant.currency) && (
           <div className="grid grid-cols-2 gap-3">
             {tenant.timeZone && (
-              <div className="flex items-center space-x-3 p-3 bg-indigo-50 rounded-lg">
-                <div className="p-2 bg-indigo-100 rounded-lg">
-                  <Globe className="w-4 h-4 text-indigo-600" />
+              <div className="flex items-center space-x-3 p-3 bg-primary-50 rounded-lg">
+                <div className="p-2 bg-primary-100 rounded-lg">
+                  <Globe className="w-4 h-4 text-primary-600" />
                 </div>
                 <div>
                   <p className="text-xs font-medium text-indigo-700 uppercase tracking-wide">Timezone</p>
@@ -464,8 +465,8 @@ export const TenantCockpit: React.FC<TenantCockpitProps> = ({
         <div className="flex items-center justify-between bg-white p-4 border-b border-gray-200">
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-3">
-              <div className="p-3 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl shadow-lg">
-                <Building2 className="w-7 h-7 text-white" />
+              <div className="p-3 bg-primary-100 rounded-xl shadow-lg">
+                <Server className="w-7 h-7 text-primary-600" />
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Tenant Cockpit</h1>
@@ -517,15 +518,16 @@ export const TenantCockpit: React.FC<TenantCockpitProps> = ({
                 <span className="text-sm font-medium text-gray-700">Filters</span>
               </div>
               
-              <select
+              <CustomSelect
                 value={filterActive === null ? '' : filterActive.toString()}
-                onChange={(e) => setFilterActive(e.target.value === '' ? null : e.target.value === 'true')}
-                className="w-32 px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all duration-200"
-              >
-                <option value="">All Status</option>
-                <option value="true">Active</option>
-                <option value="false">Inactive</option>
-              </select>
+                onChange={(value) => setFilterActive(value === '' ? null : value === 'true')}
+                options={[
+                  { value: '', label: 'All Status' },
+                  { value: 'true', label: 'Active' },
+                  { value: 'false', label: 'Inactive' }
+                ]}
+                className="w-32"
+              />
 
               {(searchTerm || filterActive !== null) && (
                 <button
@@ -571,7 +573,7 @@ export const TenantCockpit: React.FC<TenantCockpitProps> = ({
           // Empty State
           <div className="h-full flex items-center justify-center">
             <div className="text-center max-w-md mx-auto px-4">
-              <Building className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <Server className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">No Tenants Found</h3>
               <p className="text-gray-500 mb-4">
                 {searchTerm ? `No tenants match "${searchTerm}"` : 'Get started by creating your first tenant'}

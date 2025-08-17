@@ -25,44 +25,57 @@ module.exports = {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
-          50: "#f5f3ff",
-          100: "#ede9fe",
-          200: "#ddd6fe",
-          300: "#c4b5fd",
-          400: "#a78bfa",
-          500: "#8b5cf6",
-          600: "#7c3aed",
-          700: "#6d28d9",
-          800: "#5b21b6",
-          900: "#4c1d95",
+          50: "#fff4e6",
+          100: "#ffe4cc",
+          200: "#ffc999",
+          300: "#ffae66",
+          400: "#ff9333",
+          500: "#FF851B", // Light Orange - Primary
+          600: "#E76E04", // Dark Orange - Primary Dark
+          700: "#cc5500",
+          800: "#b34400",
+          900: "#993300",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
           foreground: "hsl(var(--secondary-foreground))",
-          50: "#f8fafc",
-          100: "#f1f5f9",
-          200: "#e2e8f0",
-          300: "#cbd5e1",
-          400: "#94a3b8",
-          500: "#64748b",
-          600: "#475569",
-          700: "#334155",
-          800: "#1e293b",
-          900: "#0f172a",
+          50: "#f8f9fb",
+          100: "#f1f3f7",
+          200: "#e3e7ef",
+          300: "#d5dae7",
+          400: "#bdc4d1",
+          500: "#001F3F", // Black Type - Text Primary
+          600: "#001935",
+          700: "#00142b",
+          800: "#000f21",
+          900: "#000a17",
         },
         accent: {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
-          50: "#f0fdf4",
-          100: "#dcfce7",
-          200: "#bbf7d0",
-          300: "#86efac",
-          400: "#4ade80",
-          500: "#22c55e",
-          600: "#16a34a",
-          700: "#15803d",
-          800: "#166534",
-          900: "#14532d",
+          50: "#fff4e6",
+          100: "#ffe4cc",
+          200: "#ffc999",
+          300: "#ffae66",
+          400: "#ff9333",
+          500: "#E76E04", // Dark Orange - Accent Color
+          600: "#cc5500",
+          700: "#b34400",
+          800: "#993300",
+          900: "#802200",
+        },
+        // Custom orange scales to match the exact colors
+        orange: {
+          50: "#fff8f1",
+          100: "#feecdc", 
+          200: "#fcd9bd",
+          300: "#fdba74",
+          400: "#fb923c",
+          500: "#FF851B", // Light Orange - matching primary
+          600: "#E76E04", // Dark Orange - matching accent
+          700: "#c2410c",
+          800: "#9a3412",
+          900: "#7c2d12",
         },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
@@ -80,23 +93,25 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // Custom brand colors for GenAI Smart Flow PM
+        // Custom brand colors for GenAI Smart Flow PM - Updated Color Scheme
         brand: {
-          primary: "#0ea5e9", // Sky blue
-          secondary: "#64748b", // Slate gray
-          accent: "#22c55e", // Green
-          success: "#10b981", // Emerald
-          warning: "#f59e0b", // Amber
-          error: "#ef4444", // Red
-          info: "#3b82f6", // Blue
+          primary: "#FF851B", // Light Orange
+          primaryDark: "#E76E04", // Dark Orange
+          background: "#FFFFFF", // White background
+          text: "#001F3F", // Black Type for text
+          accent: "#E76E04", // Dark Orange accent
+          success: "#22c55e", // Green - keep existing
+          warning: "#f59e0b", // Amber - keep existing
+          error: "#ef4444", // Red - keep existing
+          info: "#FF851B", // Light Orange for info
         },
-        // Status colors for tasks/projects
+        // Status colors for tasks/projects - Updated with new color scheme
         status: {
-          todo: "#64748b",
-          inprogress: "#3b82f6",
-          inreview: "#f59e0b",
-          done: "#10b981",
-          blocked: "#ef4444",
+          todo: "#001F3F", // Black Type
+          inprogress: "#FF851B", // Light Orange
+          inreview: "#E76E04", // Dark Orange
+          done: "#22c55e", // Keep green for completion
+          blocked: "#ef4444", // Keep red for blocked
         }
       },
       borderRadius: {
@@ -105,9 +120,10 @@ module.exports = {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ["Inter", "system-ui", "sans-serif"],
+        sans: ["Ubuntu", "system-ui", "sans-serif"],
         mono: ["JetBrains Mono", "Fira Code", "monospace"],
-        heading: ["Inter", "system-ui", "sans-serif"],
+        heading: ["Ubuntu", "system-ui", "sans-serif"],
+        ubuntu: ["Ubuntu", "system-ui", "sans-serif"],
       },
       fontSize: {
         '2xs': ['0.625rem', { lineHeight: '0.75rem' }],

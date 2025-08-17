@@ -30,6 +30,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<CampaignEvaluation> CampaignEvaluations { get; set; }
     public DbSet<Certificate> Certificates { get; set; }
     public DbSet<CertificateTemplate> CertificateTemplates { get; set; }
+    public DbSet<Team> Teams { get; set; }
+    public DbSet<TeamMember> TeamMembers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -59,6 +61,8 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<CampaignEvaluation>().HasQueryFilter(e => !e.IsDeleted);
         modelBuilder.Entity<Certificate>().HasQueryFilter(e => !e.IsDeleted);
         modelBuilder.Entity<CertificateTemplate>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<Team>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<TeamMember>().HasQueryFilter(e => !e.IsDeleted);
     }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

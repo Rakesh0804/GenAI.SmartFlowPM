@@ -2,6 +2,9 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { ProjectDto } from '@/types/api.types';
+import ProjectCockpit from '@/components/projects/ProjectCockpit';
+import ProjectFormNew from '@/components/projects/ProjectFormNew';
 import { 
   FolderOpen, 
   CheckSquare, 
@@ -12,22 +15,111 @@ import {
   ArrowRight 
 } from 'lucide-react';
 
+type ViewMode = 'dashboard' | 'cockpit' | 'create' | 'edit' | 'view';
+
+interface ProjectViewState {
+  mode: ViewMode;
+  selectedProject?: ProjectDto;
+}
+
 export default function ProjectsPage() {
   const router = useRouter();
+  const [viewState, setViewState] = useState<ProjectViewState>({ mode: 'dashboard' });
 
   const handleNavigateToTasks = () => {
     router.push('/projects/tasks');
   };
 
+  const handleNavigateToCockpit = () => {
+    setViewState({ mode: 'cockpit' });
+  };
+
   const handleCreateProject = () => {
-    // This would navigate to project creation form when implemented
-    console.log('Create project functionality coming soon');
+    setViewState({ mode: 'create' });
   };
 
   const handleCreateTask = () => {
     router.push('/projects/tasks?action=create');
   };
 
+  const handleEditProject = (project: ProjectDto) => {
+    setViewState({ mode: 'edit', selectedProject: project });
+  };
+
+  const handleViewProject = (project: ProjectDto) => {
+    setViewState({ mode: 'view', selectedProject: project });
+  };
+
+  const handleBackToDashboard = () => {
+    setViewState({ mode: 'dashboard' });
+  };
+
+  const handleBackToCockpit = () => {
+    setViewState({ mode: 'cockpit' });
+  };
+
+  const handleProjectSaved = (project: ProjectDto) => {
+    console.log('Project saved:', project);
+    setViewState({ mode: 'cockpit' });
+  };
+
+  const handleProjectFormCancel = () => {
+    setViewState({ mode: 'cockpit' });
+  };
+
+  const handleEditFromView = () => {
+    if (viewState.selectedProject) {
+      setViewState({ mode: 'edit', selectedProject: viewState.selectedProject });
+    }
+  };
+
+  // Render based on current view mode
+  if (viewState.mode === 'cockpit') {
+    return (
+      <ProjectCockpit
+        onNewProject={handleCreateProject}
+        onEditProject={handleEditProject}
+        onViewProject={handleViewProject}
+        onBackClick={handleBackToDashboard}
+      />
+    );
+  }
+
+  if (viewState.mode === 'create') {
+    return (
+      <ProjectFormNew
+        mode="create"
+        onSave={handleProjectSaved}
+        onCancel={handleProjectFormCancel}
+        onBack={handleBackToCockpit}
+      />
+    );
+  }
+
+  if (viewState.mode === 'edit') {
+    return (
+      <ProjectFormNew
+        project={viewState.selectedProject}
+        mode="edit"
+        onSave={handleProjectSaved}
+        onCancel={handleProjectFormCancel}
+        onBack={handleBackToCockpit}
+      />
+    );
+  }
+
+  if (viewState.mode === 'view') {
+    return (
+      <ProjectFormNew
+        project={viewState.selectedProject}
+        mode="view"
+        onEdit={handleEditFromView}
+        onBack={handleBackToCockpit}
+      />
+    );
+  }
+
+  // Dashboard view (default)
   const projectStats = [
     { label: 'Total Projects', value: 8, icon: FolderOpen, color: 'blue' },
     { label: 'Active Tasks', value: 34, icon: CheckSquare, color: 'green' },
@@ -37,24 +129,31 @@ export default function ProjectsPage() {
 
   const quickActions = [
     {
+      title: 'Project Cockpit',
+      description: 'View, create, and manage all projects',
+      icon: FolderOpen,
+      color: 'blue',
+      action: handleNavigateToCockpit
+    },
+    {
       title: 'Manage Tasks',
       description: 'View, create, and manage all project tasks',
       icon: CheckSquare,
-      color: 'blue',
+      color: 'green',
       action: handleNavigateToTasks
     },
     {
       title: 'Create Project',
       description: 'Start a new project with team members',
       icon: Plus,
-      color: 'green',
+      color: 'purple',
       action: handleCreateProject
     },
     {
       title: 'Create Task',
       description: 'Add a new task to existing projects',
       icon: Plus,
-      color: 'purple',
+      color: 'orange',
       action: handleCreateTask
     }
   ];
@@ -80,9 +179,9 @@ export default function ProjectsPage() {
           {projectStats.map((stat, index) => {
             const Icon = stat.icon;
             const colorClasses = {
-              blue: 'bg-blue-100 text-blue-600',
+              blue: 'bg-primary-100 text-primary-600',
               green: 'bg-green-100 text-green-600',
-              purple: 'bg-purple-100 text-purple-600',
+              purple: 'bg-orange-100 text-accent',
               orange: 'bg-orange-100 text-orange-600'
             };
 
@@ -105,19 +204,21 @@ export default function ProjectsPage() {
         {/* Quick Actions */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
           <h2 className="text-xl font-semibold text-gray-900 mb-6">Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {quickActions.map((action, index) => {
               const Icon = action.icon;
               const colorClasses = {
-                blue: 'bg-blue-50 border-blue-200 hover:bg-blue-100',
+                blue: 'bg-primary-50 border-primary-200 hover:bg-primary-100',
                 green: 'bg-green-50 border-green-200 hover:bg-green-100',
-                purple: 'bg-purple-50 border-purple-200 hover:bg-purple-100'
+                purple: 'bg-purple-50 border-purple-200 hover:bg-orange-100',
+                orange: 'bg-orange-50 border-orange-200 hover:bg-orange-100'
               };
 
               const iconClasses = {
-                blue: 'text-blue-600',
+                blue: 'text-primary-600',
                 green: 'text-green-600',
-                purple: 'text-purple-600'
+                purple: 'text-accent',
+                orange: 'text-orange-600'
               };
 
               return (
@@ -144,7 +245,7 @@ export default function ProjectsPage() {
             <BarChart3 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-900 mb-2">More Features Coming Soon</h3>
             <p className="text-gray-600 mb-4">
-              Project creation, team management, and advanced analytics are under development.
+              Advanced analytics, team collaboration tools, and project templates are under development.
             </p>
             <div className="flex items-center justify-center space-x-4 text-sm text-gray-500">
               <span>• Project Templates</span>

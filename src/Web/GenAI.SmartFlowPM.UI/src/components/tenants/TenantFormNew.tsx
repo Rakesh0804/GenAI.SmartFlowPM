@@ -11,8 +11,9 @@ import {
 } from '@/interfaces/tenant.interface';
 import { tenantService } from '@/services/tenant.service';
 import { useToast } from '@/contexts/ToastContext';
+import { CustomSelect } from '@/components/common/CustomSelect';
 import { 
-  Building, 
+  Server, 
   Mail, 
   Phone, 
   MapPin,
@@ -267,8 +268,8 @@ export const TenantFormNew: React.FC<TenantFormNewProps> = ({
         <div className="flex items-center justify-between bg-white p-4 border-b border-gray-200">
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Building className="w-6 h-6 text-blue-600" />
+              <div className="p-2 bg-primary-100 rounded-lg">
+                <Server className="w-6 h-6 text-primary-600" />
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">{getTitle()}</h1>
@@ -307,7 +308,7 @@ export const TenantFormNew: React.FC<TenantFormNewProps> = ({
                       Tenant Name <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
-                      <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                      <Server className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                       <input
                         type="text"
                         id="name"
@@ -540,21 +541,22 @@ export const TenantFormNew: React.FC<TenantFormNewProps> = ({
                       Subscription Plan
                     </label>
                     <div className="relative">
-                      <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                      <select
-                        id="subscriptionPlan"
-                        name="subscriptionPlan"
+                      <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 z-10" />
+                      <CustomSelect
                         value={formData.subscriptionPlan}
-                        onChange={handleInputChange}
+                        onChange={(value) => {
+                          setFormData(prev => ({
+                            ...prev,
+                            subscriptionPlan: value
+                          }));
+                        }}
+                        options={SUBSCRIPTION_PLANS.map(plan => ({
+                          value: plan,
+                          label: plan
+                        }))}
                         disabled={isReadOnly || loading}
-                        className={`w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none ${
-                          isReadOnly ? 'bg-gray-50 text-gray-600' : ''
-                        }`}
-                      >
-                        {SUBSCRIPTION_PLANS.map(plan => (
-                          <option key={plan} value={plan}>{plan}</option>
-                        ))}
-                      </select>
+                        className="pl-10"
+                      />
                     </div>
                   </div>
 
@@ -679,21 +681,22 @@ export const TenantFormNew: React.FC<TenantFormNewProps> = ({
                       Time Zone
                     </label>
                     <div className="relative">
-                      <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                      <select
-                        id="timeZone"
-                        name="timeZone"
+                      <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 z-10" />
+                      <CustomSelect
                         value={formData.timeZone}
-                        onChange={handleInputChange}
+                        onChange={(value) => {
+                          setFormData(prev => ({
+                            ...prev,
+                            timeZone: value
+                          }));
+                        }}
+                        options={TIMEZONES.map(tz => ({
+                          value: tz,
+                          label: tz
+                        }))}
                         disabled={isReadOnly || loading}
-                        className={`w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none ${
-                          isReadOnly ? 'bg-gray-50 text-gray-600' : ''
-                        }`}
-                      >
-                        {TIMEZONES.map(tz => (
-                          <option key={tz} value={tz}>{tz}</option>
-                        ))}
-                      </select>
+                        className="pl-10"
+                      />
                     </div>
                   </div>
 
@@ -702,21 +705,22 @@ export const TenantFormNew: React.FC<TenantFormNewProps> = ({
                       Currency
                     </label>
                     <div className="relative">
-                      <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                      <select
-                        id="currency"
-                        name="currency"
+                      <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 z-10" />
+                      <CustomSelect
                         value={formData.currency}
-                        onChange={handleInputChange}
+                        onChange={(value) => {
+                          setFormData(prev => ({
+                            ...prev,
+                            currency: value
+                          }));
+                        }}
+                        options={CURRENCIES.map(currency => ({
+                          value: currency,
+                          label: currency
+                        }))}
                         disabled={isReadOnly || loading}
-                        className={`w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none ${
-                          isReadOnly ? 'bg-gray-50 text-gray-600' : ''
-                        }`}
-                      >
-                        {CURRENCIES.map(currency => (
-                          <option key={currency} value={currency}>{currency}</option>
-                        ))}
-                      </select>
+                        className="pl-10"
+                      />
                     </div>
                   </div>
                 </div>

@@ -89,12 +89,14 @@ export default function LoginForm() {
       <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-20 xl:px-24 bg-gray-50">
         <div className="w-full max-w-sm">
           <div className="animate-fade-in">
-            {/* Logo Placeholder */}
+            {/* Logo */}
             <div className="text-center mb-8">
-              <div className="w-16 h-16 mx-auto mb-6 bg-primary-600 rounded-lg flex items-center justify-center">
-                <div className="w-8 h-8 border-2 border-white rounded transform rotate-45 relative">
-                  <div className="absolute inset-2 bg-white rounded-sm"></div>
-                </div>
+              <div className="w-full max-w-xs mx-auto mb-6 flex items-center justify-center px-6 py-3">
+                <img 
+                  src="/images/flow-logo-transparent.png" 
+                  alt="SmartFlowPM Logo" 
+                  className="w-full h-full object-fill"
+                />
               </div>
             </div>
 
@@ -211,7 +213,7 @@ export default function LoginForm() {
                     Signing In...
                   </div>
                 ) : (
-                  'Login to Your Account'
+                  'Login'
                 )}
               </button>
             </form>
@@ -248,10 +250,12 @@ export default function LoginForm() {
           {/* Text Content */}
           <div className="bg-white rounded-2xl p-6 shadow-lg max-w-md">
             <div className="flex items-center mb-4">
-              <div className="w-8 h-8 bg-primary-600 rounded-lg mr-3 flex items-center justify-center">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-white">
-                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+              <div className="w-8 h-8 bg-white rounded-lg mr-3 flex items-center justify-center shadow-sm">
+                <img 
+                  src="/images/flow-logo-transparent.png" 
+                  alt="SmartFlowPM Logo" 
+                  className="w-5 h-5 object-contain"
+                />
               </div>
               <h3 className="text-lg font-semibold text-gray-900">
                 Smart Project Management Made Simple.

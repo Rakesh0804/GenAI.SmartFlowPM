@@ -1325,6 +1325,151 @@ namespace GenAI.SmartFlowPM.Persistence.Migrations
                     b.ToTable("Roles", (string)null);
                 });
 
+            modelBuilder.Entity("GenAI.SmartFlowPM.Domain.Entities.Team", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid?>("LeaderId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Location")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int>("MaxMembers")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LeaderId")
+                        .HasDatabaseName("IX_Teams_LeaderId");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Teams_Name");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("IX_Teams_Status");
+
+                    b.HasIndex("TenantId");
+
+                    b.HasIndex("Type")
+                        .HasDatabaseName("IX_Teams_Type");
+
+                    b.ToTable("Teams", (string)null);
+                });
+
+            modelBuilder.Entity("GenAI.SmartFlowPM.Domain.Entities.TeamMember", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("JoinedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("LeftDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TeamId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JoinedDate")
+                        .HasDatabaseName("IX_TeamMembers_JoinedDate");
+
+                    b.HasIndex("Role")
+                        .HasDatabaseName("IX_TeamMembers_Role");
+
+                    b.HasIndex("TenantId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("TeamId", "UserId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_TeamMembers_TeamId_UserId");
+
+                    b.ToTable("TeamMembers", (string)null);
+                });
+
             modelBuilder.Entity("GenAI.SmartFlowPM.Domain.Entities.Tenant", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1613,6 +1758,9 @@ namespace GenAI.SmartFlowPM.Persistence.Migrations
                     b.Property<int>("Role")
                         .HasColumnType("integer");
 
+                    b.Property<Guid?>("TeamId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
 
@@ -1634,6 +1782,8 @@ namespace GenAI.SmartFlowPM.Persistence.Migrations
                         .HasDatabaseName("IX_UserProjects_AssignedDate");
 
                     b.HasIndex("ProjectId");
+
+                    b.HasIndex("TeamId");
 
                     b.HasIndex("TenantId");
 
@@ -2027,6 +2177,51 @@ namespace GenAI.SmartFlowPM.Persistence.Migrations
                     b.Navigation("Tenant");
                 });
 
+            modelBuilder.Entity("GenAI.SmartFlowPM.Domain.Entities.Team", b =>
+                {
+                    b.HasOne("GenAI.SmartFlowPM.Domain.Entities.User", "Leader")
+                        .WithMany()
+                        .HasForeignKey("LeaderId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("GenAI.SmartFlowPM.Domain.Entities.Tenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Leader");
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("GenAI.SmartFlowPM.Domain.Entities.TeamMember", b =>
+                {
+                    b.HasOne("GenAI.SmartFlowPM.Domain.Entities.Team", "Team")
+                        .WithMany("TeamMembers")
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GenAI.SmartFlowPM.Domain.Entities.Tenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GenAI.SmartFlowPM.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Team");
+
+                    b.Navigation("Tenant");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("GenAI.SmartFlowPM.Domain.Entities.User", b =>
                 {
                     b.HasOne("GenAI.SmartFlowPM.Domain.Entities.User", "Manager")
@@ -2079,6 +2274,10 @@ namespace GenAI.SmartFlowPM.Persistence.Migrations
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("GenAI.SmartFlowPM.Domain.Entities.Team", null)
+                        .WithMany("TeamProjects")
+                        .HasForeignKey("TeamId");
 
                     b.HasOne("GenAI.SmartFlowPM.Domain.Entities.Tenant", "Tenant")
                         .WithMany()
@@ -2176,6 +2375,13 @@ namespace GenAI.SmartFlowPM.Persistence.Migrations
             modelBuilder.Entity("GenAI.SmartFlowPM.Domain.Entities.Role", b =>
                 {
                     b.Navigation("UserRoles");
+                });
+
+            modelBuilder.Entity("GenAI.SmartFlowPM.Domain.Entities.Team", b =>
+                {
+                    b.Navigation("TeamMembers");
+
+                    b.Navigation("TeamProjects");
                 });
 
             modelBuilder.Entity("GenAI.SmartFlowPM.Domain.Entities.Tenant", b =>

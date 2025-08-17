@@ -43,15 +43,15 @@ export default function CalendarPage() {
         <div 
           key={day} 
           className={`h-24 border border-gray-200 p-2 hover:bg-gray-50 cursor-pointer ${
-            isToday ? 'bg-blue-50 border-blue-300' : 'bg-white'
+            isToday ? 'bg-primary-50 border-blue-300' : 'bg-white'
           }`}
         >
-          <div className={`text-sm font-medium ${isToday ? 'text-blue-600' : 'text-gray-900'}`}>
+          <div className={`text-sm font-medium ${isToday ? 'text-primary-600' : 'text-gray-900'}`}>
             {day}
           </div>
           {/* Sample events */}
           {day === 15 && (
-            <div className="mt-1 text-xs bg-blue-100 text-blue-800 px-1 py-0.5 rounded truncate">
+            <div className="mt-1 text-xs bg-primary-100 text-primary-800 px-1 py-0.5 rounded truncate">
               Project Meeting
             </div>
           )}
@@ -107,7 +107,7 @@ export default function CalendarPage() {
               <p className="text-gray-600">Manage your schedule and events</p>
             </div>
           </div>
-          <button className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+          <button className="flex items-center space-x-2 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors">
             <Plus className="w-5 h-5" />
             <span>Add Event</span>
           </button>
@@ -160,7 +160,7 @@ export default function CalendarPage() {
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Today</h3>
               <div className="text-center">
-                <div className="text-3xl font-bold text-purple-600">
+                <div className="text-3xl font-bold text-primary-600">
                   {new Date().getDate()}
                 </div>
                 <div className="text-sm text-gray-600">

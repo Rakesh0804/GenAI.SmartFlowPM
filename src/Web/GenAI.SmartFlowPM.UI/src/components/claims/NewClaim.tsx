@@ -121,8 +121,8 @@ export const NewClaim: React.FC<NewClaimProps> = ({ onBack, onClaimCreated }) =>
               </button>
             )}
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Key className="w-6 h-6 text-blue-600" />
+              <div className="p-2 bg-primary-100 rounded-lg">
+                <Key className="w-6 h-6 text-primary-600" />
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Create New Claim</h1>
@@ -135,7 +135,7 @@ export const NewClaim: React.FC<NewClaimProps> = ({ onBack, onClaimCreated }) =>
             <button
               type="button"
               onClick={onBack}
-              className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
               disabled={loading}
             >
               <X className="w-4 h-4" />
@@ -167,7 +167,7 @@ export const NewClaim: React.FC<NewClaimProps> = ({ onBack, onClaimCreated }) =>
                         id="name"
                         value={formData.name}
                         onChange={(e) => handleInputChange('name', e.target.value)}
-                        className={`w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none ${
+                        className={`w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none ${
                           errors.name ? 'border-red-300' : ''
                         }`}
                         placeholder="Enter claim name"
@@ -195,7 +195,7 @@ export const NewClaim: React.FC<NewClaimProps> = ({ onBack, onClaimCreated }) =>
                         value={formData.type}
                         onChange={(e) => handleInputChange('type', e.target.value)}
                         list="claim-types"
-                        className={`w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none ${
+                        className={`w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none ${
                           errors.type ? 'border-red-300' : ''
                         }`}
                         placeholder="Enter claim type"
@@ -228,7 +228,7 @@ export const NewClaim: React.FC<NewClaimProps> = ({ onBack, onClaimCreated }) =>
                       value={formData.description || ''}
                       onChange={(e) => handleInputChange('description', e.target.value)}
                       rows={4}
-                      className={`w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none ${
+                      className={`w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none resize-none ${
                         errors.description ? 'border-red-300' : ''
                       }`}
                       placeholder="Enter claim description (optional)"
@@ -255,11 +255,11 @@ export const NewClaim: React.FC<NewClaimProps> = ({ onBack, onClaimCreated }) =>
                       id="isActive"
                       checked={formData.isActive}
                       onChange={(e) => handleInputChange('isActive', e.target.checked)}
-                      className="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                      className="w-5 h-5 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 focus:ring-2"
                       disabled={loading}
                     />
                     <label htmlFor="isActive" className="flex items-center text-sm font-medium text-gray-700">
-                      <Key className="w-5 h-5 mr-2 text-blue-600" />
+                      <Key className="w-5 h-5 mr-2 text-primary-600" />
                       Active Claim
                     </label>
                   </div>
@@ -274,7 +274,7 @@ export const NewClaim: React.FC<NewClaimProps> = ({ onBack, onClaimCreated }) =>
                 <button
                   type="button"
                   onClick={onBack}
-                  className="flex items-center space-x-2 px-8 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  className="flex items-center space-x-2 px-8 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
                   disabled={loading}
                 >
                   <X className="w-4 h-4" />

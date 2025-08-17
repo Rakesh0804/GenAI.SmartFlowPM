@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Building2, 
+  Server, 
   Save, 
   X, 
   ArrowLeft,
@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { TenantDto, CreateTenantDto, UpdateTenantDto, TenantFormData, SUBSCRIPTION_PLANS, TIMEZONES, CURRENCIES } from '../../interfaces/tenant.interface';
 import { tenantService } from '../../services/tenant.service';
+import { CustomSelect } from '@/components/common/CustomSelect';
 
 interface TenantFormProps {
   tenant?: TenantDto;
@@ -233,7 +234,7 @@ export const TenantForm: React.FC<TenantFormProps> = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <div className="p-2 bg-primary-100 rounded-lg">
-              <Building2 className="w-7 h-7 text-primary-700" />
+              <Server className="w-7 h-7 text-primary-700" />
             </div>
             <div>
               <h1 className="text-2xl font-bold">{getTitle()}</h1>
@@ -261,7 +262,7 @@ export const TenantForm: React.FC<TenantFormProps> = ({
             {/* Basic Information */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
-                <Building2 className="w-5 h-5 mr-2 text-primary-600" />
+                <Server className="w-5 h-5 mr-2 text-primary-600" />
                 Basic Information
               </h3>
               
@@ -480,18 +481,15 @@ export const TenantForm: React.FC<TenantFormProps> = ({
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Subscription Plan
                   </label>
-                  <select
+                  <CustomSelect
                     value={formData.subscriptionPlan}
-                    onChange={(e) => handleInputChange('subscriptionPlan', e.target.value)}
+                    onChange={(value) => handleInputChange('subscriptionPlan', value)}
+                    options={SUBSCRIPTION_PLANS.map(plan => ({
+                      value: plan,
+                      label: plan
+                    }))}
                     disabled={isReadOnly}
-                    className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all duration-200 ${
-                      isReadOnly ? 'bg-gray-50 text-gray-600' : 'border-gray-300'
-                    }`}
-                  >
-                    {SUBSCRIPTION_PLANS.map(plan => (
-                      <option key={plan} value={plan}>{plan}</option>
-                    ))}
-                  </select>
+                  />
                 </div>
 
                 <div>
@@ -586,18 +584,15 @@ export const TenantForm: React.FC<TenantFormProps> = ({
                     <Clock className="w-4 h-4 inline mr-1" />
                     Time Zone
                   </label>
-                  <select
+                  <CustomSelect
                     value={formData.timeZone}
-                    onChange={(e) => handleInputChange('timeZone', e.target.value)}
+                    onChange={(value) => handleInputChange('timeZone', value)}
+                    options={TIMEZONES.map(tz => ({
+                      value: tz,
+                      label: tz
+                    }))}
                     disabled={isReadOnly}
-                    className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all duration-200 ${
-                      isReadOnly ? 'bg-gray-50 text-gray-600' : 'border-gray-300'
-                    }`}
-                  >
-                    {TIMEZONES.map(tz => (
-                      <option key={tz} value={tz}>{tz}</option>
-                    ))}
-                  </select>
+                  />
                 </div>
 
                 <div>
@@ -605,18 +600,15 @@ export const TenantForm: React.FC<TenantFormProps> = ({
                     <DollarSign className="w-4 h-4 inline mr-1" />
                     Currency
                   </label>
-                  <select
+                  <CustomSelect
                     value={formData.currency}
-                    onChange={(e) => handleInputChange('currency', e.target.value)}
+                    onChange={(value) => handleInputChange('currency', value)}
+                    options={CURRENCIES.map(currency => ({
+                      value: currency,
+                      label: currency
+                    }))}
                     disabled={isReadOnly}
-                    className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all duration-200 ${
-                      isReadOnly ? 'bg-gray-50 text-gray-600' : 'border-gray-300'
-                    }`}
-                  >
-                    {CURRENCIES.map(currency => (
-                      <option key={currency} value={currency}>{currency}</option>
-                    ))}
-                  </select>
+                  />
                 </div>
 
                 <div>

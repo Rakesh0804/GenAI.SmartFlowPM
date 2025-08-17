@@ -6,6 +6,7 @@ import { TASK_TYPES, DEFAULT_TASK_ACRONYM } from '@/constants/taskTypes';
 import { projectService } from '@/services/project.service';
 import { userService } from '@/services/user.service';
 import SearchableSelect from '@/components/common/SearchableSelect';
+import CustomSelect from '@/components/common/CustomSelect';
 import { 
   CheckSquare, 
   FileText, 
@@ -385,21 +386,18 @@ export default function TaskFormNew({ task, mode, onSave, onCancel, onBack, onEd
                     Task Type *
                   </label>
                   <div className="relative">
-                    <Hash className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <select
-                      id="acronym"
-                      name="acronym"
+                    <Hash className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 z-10 pointer-events-none" />
+                    <CustomSelect
                       value={formData.acronym}
-                      onChange={handleInputChange}
+                      onChange={(value) => handleInputChange({ target: { name: 'acronym', value } } as any)}
+                      options={TASK_TYPES.map((taskType) => ({
+                        value: taskType.value,
+                        label: `${taskType.label} - ${taskType.description}`
+                      }))}
                       disabled={isReadOnly}
-                      className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:bg-gray-50 disabled:text-gray-500 transition-all duration-200"
-                    >
-                      {TASK_TYPES.map((taskType) => (
-                        <option key={taskType.value} value={taskType.value}>
-                          {taskType.label} - {taskType.description}
-                        </option>
-                      ))}
-                    </select>
+                      className="pl-11"
+                      placeholder="Select task type"
+                    />
                   </div>
                   {errors.acronym && <p className="mt-1 text-sm text-red-600">{errors.acronym}</p>}
                 </div>
@@ -465,21 +463,20 @@ export default function TaskFormNew({ task, mode, onSave, onCancel, onBack, onEd
                   <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-2">
                     Status
                   </label>
-                  <select
-                    id="status"
-                    name="status"
-                    value={formData.status}
-                    onChange={handleInputChange}
+                  <CustomSelect
+                    value={formData.status.toString()}
+                    onChange={(value) => handleInputChange({ target: { name: 'status', value } } as any)}
+                    options={[
+                      { value: TaskStatus.Todo.toString(), label: 'To Do' },
+                      { value: TaskStatus.InProgress.toString(), label: 'In Progress' },
+                      { value: TaskStatus.Review.toString(), label: 'Review' },
+                      { value: TaskStatus.Testing.toString(), label: 'Testing' },
+                      { value: TaskStatus.Done.toString(), label: 'Done' },
+                      { value: TaskStatus.Blocked.toString(), label: 'Blocked' }
+                    ]}
                     disabled={isReadOnly}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:bg-gray-50 disabled:text-gray-500 transition-all duration-200"
-                  >
-                    <option value={TaskStatus.Todo}>To Do</option>
-                    <option value={TaskStatus.InProgress}>In Progress</option>
-                    <option value={TaskStatus.Review}>Review</option>
-                    <option value={TaskStatus.Testing}>Testing</option>
-                    <option value={TaskStatus.Done}>Done</option>
-                    <option value={TaskStatus.Blocked}>Blocked</option>
-                  </select>
+                    placeholder="Select status"
+                  />
                 </div>
 
                 {/* Priority */}
@@ -488,20 +485,24 @@ export default function TaskFormNew({ task, mode, onSave, onCancel, onBack, onEd
                     Priority
                   </label>
                   <div className="relative">
-                    <Flag className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <select
-                      id="priority"
-                      name="priority"
-                      value={formData.priority}
-                      onChange={handleInputChange}
+                    <Flag className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 z-10" />
+                    <CustomSelect
+                      value={formData.priority.toString()}
+                      onChange={(value) => {
+                        setFormData(prev => ({
+                          ...prev,
+                          priority: Number(value) as TaskPriority
+                        }));
+                      }}
+                      options={[
+                        { value: TaskPriority.Low.toString(), label: 'Low' },
+                        { value: TaskPriority.Medium.toString(), label: 'Medium' },
+                        { value: TaskPriority.High.toString(), label: 'High' },
+                        { value: TaskPriority.Critical.toString(), label: 'Critical' }
+                      ]}
                       disabled={isReadOnly}
-                      className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:bg-gray-50 disabled:text-gray-500 transition-all duration-200"
-                    >
-                      <option value={TaskPriority.Low}>Low</option>
-                      <option value={TaskPriority.Medium}>Medium</option>
-                      <option value={TaskPriority.High}>High</option>
-                      <option value={TaskPriority.Critical}>Critical</option>
-                    </select>
+                      className="pl-11"
+                    />
                   </div>
                 </div>
 
