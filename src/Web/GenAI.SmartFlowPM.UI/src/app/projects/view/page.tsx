@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ProjectDto } from '@/types/api.types';
 import { projectService } from '@/services/project.service';
@@ -8,7 +8,7 @@ import ProjectFormNew from '@/components/projects/ProjectFormNew';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { useToast } from '@/contexts/ToastContext';
 
-export default function ViewProjectPage() {
+function ViewProjectContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const projectId = searchParams.get('id');
@@ -81,5 +81,17 @@ export default function ViewProjectPage() {
       onEdit={handleEdit}
       onBack={handleBack}
     />
+  );
+}
+
+export default function ViewProjectPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex justify-center items-center min-h-screen">
+        <LoadingSpinner size="lg" />
+      </div>
+    }>
+      <ViewProjectContent />
+    </Suspense>
   );
 }

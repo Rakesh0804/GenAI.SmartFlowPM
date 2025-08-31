@@ -393,7 +393,7 @@ export const EditRole: React.FC<EditRoleProps> = ({
                       <label className="block text-sm font-medium text-gray-700">Created Date</label>
                       <div className="flex items-center space-x-2 text-gray-900 py-3">
                         <Calendar className="w-4 h-4 text-gray-400" />
-                        <span>{formatDate(role.createdAt.toString())}</span>
+                        <span>{formatDate(role.createdAt?.toString() || '')}</span>
                       </div>
                     </div>
                     

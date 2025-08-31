@@ -81,11 +81,11 @@ export const TimeTrackerPage: React.FC<TimeTrackerPageProps> = ({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-10 h-10 bg-brand-primary rounded-lg">
-            <Clock className="h-6 w-6 text-white" />
+          <div className="flex items-center justify-center w-10 h-10 bg-primary-100 rounded-lg">
+            <Clock className="h-6 w-6 text-primary-600" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-secondary-500">Time Tracker</h1>
+            <h1 className="text-2xl font-bold text-primary-600">Time Tracker</h1>
             <p className="text-sm text-gray-600">Manage your time effectively</p>
           </div>
         </div>

@@ -40,6 +40,13 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICertificateTemplateRepository, CertificateTemplateRepository>();
         services.AddScoped<ITeamRepository, TeamRepository>();
         services.AddScoped<ITeamMemberRepository, TeamMemberRepository>();
+        
+        // TimeTracker repositories
+        services.AddScoped<ITimeCategoryRepository, TimeCategoryRepository>();
+        services.AddScoped<ITimeEntryRepository, TimeEntryRepository>();
+        services.AddScoped<ITimesheetRepository, TimesheetRepository>();
+        services.AddScoped<IActiveTrackingSessionRepository, ActiveTrackingSessionRepository>();
+        
         services.AddScoped<IUnitOfWork, UnitOfWork.UnitOfWork>();
 
         // Add services

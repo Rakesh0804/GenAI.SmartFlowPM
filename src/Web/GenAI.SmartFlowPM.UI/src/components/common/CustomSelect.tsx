@@ -185,8 +185,8 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
                 ${value === option.value 
                   ? 'bg-brand-primary text-white' 
                   : highlightedIndex === index 
-                    ? 'bg-orange-50 text-brand-primary' 
-                    : 'text-gray-900 hover:bg-orange-50 hover:text-brand-primary'
+                    ? 'bg-teal-50 text-brand-primary' 
+                    : 'text-gray-900 hover:bg-teal-50 hover:text-brand-primary'
                 }
               `}
             >

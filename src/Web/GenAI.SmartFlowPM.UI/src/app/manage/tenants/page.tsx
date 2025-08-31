@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { TenantCockpit } from '../../../components/tenants/TenantCockpit';
 import { TenantFormNew } from '../../../components/tenants/TenantFormNew';
-import { TenantDto } from '../../../interfaces/tenant.interface';
+import { TenantDto } from '../../../interfaces/tenant.interfaces';
 
 type ViewMode = 'cockpit' | 'create' | 'edit' | 'view';
 

@@ -15,7 +15,7 @@ import {
   Clock,
   DollarSign
 } from 'lucide-react';
-import { TenantDto, CreateTenantDto, UpdateTenantDto, TenantFormData, SUBSCRIPTION_PLANS, TIMEZONES, CURRENCIES } from '../../interfaces/tenant.interface';
+import { TenantDto, CreateTenantDto, UpdateTenantDto, TenantFormData, SUBSCRIPTION_PLANS, TIMEZONES, CURRENCIES } from '../../interfaces/tenant.interfaces';
 import { tenantService } from '../../services/tenant.service';
 import { CustomSelect } from '@/components/common/CustomSelect';
 
@@ -54,8 +54,8 @@ export const TenantForm: React.FC<TenantFormProps> = ({
       ? new Date(tenant.subscriptionEndDate).toISOString().split('T')[0] 
       : '',
     subscriptionPlan: tenant?.subscriptionPlan || 'Basic',
-    maxUsers: tenant?.maxUsers || 10,
-    maxProjects: tenant?.maxProjects || 5,
+    maxUsers: tenant?.maxUsers?.toString() || '10',
+    maxProjects: tenant?.maxProjects?.toString() || '5',
     timeZone: tenant?.timeZone || 'UTC',
     currency: tenant?.currency || 'USD',
     logoUrl: tenant?.logoUrl || ''
@@ -65,14 +65,14 @@ export const TenantForm: React.FC<TenantFormProps> = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleInputChange = (field: keyof TenantFormData, value: string | number) => {
-    setFormData(prev => ({
+    setFormData((prev: TenantFormData) => ({
       ...prev,
       [field]: value
     }));
 
     // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors(prev => ({
+    if (errors[field as string]) {
+      setErrors((prev: Record<string, string>) => ({
         ...prev,
         [field]: ''
       }));
@@ -104,11 +104,11 @@ export const TenantForm: React.FC<TenantFormProps> = ({
     }
 
     // Numeric validations
-    if (formData.maxUsers < 1) {
+    if (parseInt(formData.maxUsers) < 1) {
       newErrors.maxUsers = 'Maximum users must be at least 1';
     }
 
-    if (formData.maxProjects < 1) {
+    if (parseInt(formData.maxProjects) < 1) {
       newErrors.maxProjects = 'Maximum projects must be at least 1';
     }
 
@@ -154,8 +154,8 @@ export const TenantForm: React.FC<TenantFormProps> = ({
           ? new Date(formData.subscriptionEndDate) 
           : undefined,
         subscriptionPlan: formData.subscriptionPlan || undefined,
-        maxUsers: formData.maxUsers,
-        maxProjects: formData.maxProjects,
+        maxUsers: parseInt(formData.maxUsers),
+        maxProjects: parseInt(formData.maxProjects),
         timeZone: formData.timeZone || undefined,
         currency: formData.currency || undefined,
         logoUrl: formData.logoUrl.trim() || undefined
@@ -485,8 +485,8 @@ export const TenantForm: React.FC<TenantFormProps> = ({
                     value={formData.subscriptionPlan}
                     onChange={(value) => handleInputChange('subscriptionPlan', value)}
                     options={SUBSCRIPTION_PLANS.map(plan => ({
-                      value: plan,
-                      label: plan
+                      value: plan.value,
+                      label: plan.label
                     }))}
                     disabled={isReadOnly}
                   />
@@ -588,8 +588,8 @@ export const TenantForm: React.FC<TenantFormProps> = ({
                     value={formData.timeZone}
                     onChange={(value) => handleInputChange('timeZone', value)}
                     options={TIMEZONES.map(tz => ({
-                      value: tz,
-                      label: tz
+                      value: tz.value,
+                      label: tz.label
                     }))}
                     disabled={isReadOnly}
                   />
@@ -604,8 +604,8 @@ export const TenantForm: React.FC<TenantFormProps> = ({
                     value={formData.currency}
                     onChange={(value) => handleInputChange('currency', value)}
                     options={CURRENCIES.map(currency => ({
-                      value: currency,
-                      label: currency
+                      value: currency.value,
+                      label: currency.label
                     }))}
                     disabled={isReadOnly}
                   />

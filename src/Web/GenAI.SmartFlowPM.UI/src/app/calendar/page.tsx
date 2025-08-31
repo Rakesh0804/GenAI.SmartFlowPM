@@ -99,8 +99,8 @@ export default function CalendarPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-4">
-            <div className="p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg">
-              <Calendar className="w-8 h-8 text-white" />
+            <div className="p-3 bg-primary-100 rounded-xl shadow-lg">
+              <Calendar className="w-8 h-8 text-primary-600" />
             </div>
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Calendar</h1>

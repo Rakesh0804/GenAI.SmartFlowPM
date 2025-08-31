@@ -8,7 +8,7 @@ import {
   SUBSCRIPTION_PLANS,
   TIMEZONES,
   CURRENCIES 
-} from '@/interfaces/tenant.interface';
+} from '@/interfaces/tenant.interfaces';
 import { tenantService } from '@/services/tenant.service';
 import { useToast } from '@/contexts/ToastContext';
 import { CustomSelect } from '@/components/common/CustomSelect';
@@ -551,8 +551,8 @@ export const TenantFormNew: React.FC<TenantFormNewProps> = ({
                           }));
                         }}
                         options={SUBSCRIPTION_PLANS.map(plan => ({
-                          value: plan,
-                          label: plan
+                          value: plan.value,
+                          label: plan.label
                         }))}
                         disabled={isReadOnly || loading}
                         className="pl-10"
@@ -691,8 +691,8 @@ export const TenantFormNew: React.FC<TenantFormNewProps> = ({
                           }));
                         }}
                         options={TIMEZONES.map(tz => ({
-                          value: tz,
-                          label: tz
+                          value: tz.value,
+                          label: tz.label
                         }))}
                         disabled={isReadOnly || loading}
                         className="pl-10"
@@ -715,8 +715,8 @@ export const TenantFormNew: React.FC<TenantFormNewProps> = ({
                           }));
                         }}
                         options={CURRENCIES.map(currency => ({
-                          value: currency,
-                          label: currency
+                          value: currency.value,
+                          label: currency.label
                         }))}
                         disabled={isReadOnly || loading}
                         className="pl-10"

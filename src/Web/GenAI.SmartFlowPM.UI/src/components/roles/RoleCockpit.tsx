@@ -170,7 +170,7 @@ const RoleCard: React.FC<RoleCardProps> = ({ role, onEdit, onView, onDelete, onT
       <div className="px-4 py-3 bg-gray-50">
         <div className="flex items-center space-x-2 text-xs text-gray-500">
           <Clock className="w-4 h-4 flex-shrink-0" />
-          <span>Created {formatDate(role.createdAt)}</span>
+          <span>Created {formatDate(role.createdAt || new Date())}</span>
           {role.updatedAt && (
             <>
               <span>•</span>
@@ -302,7 +302,7 @@ export const RoleCockpit: React.FC<RoleCockpitProps> = ({
           `"${role.name}"`,
           `"${role.description || ''}"`,
           role.isActive ? 'Active' : 'Inactive',
-          new Date(role.createdAt).toLocaleDateString(),
+          new Date(role.createdAt || new Date()).toLocaleDateString(),
           role.updatedAt ? new Date(role.updatedAt).toLocaleDateString() : ''
         ].join(','))
       ].join('\n');

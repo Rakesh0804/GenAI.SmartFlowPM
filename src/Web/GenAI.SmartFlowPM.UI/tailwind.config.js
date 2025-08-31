@@ -25,57 +25,44 @@ module.exports = {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
-          50: "#fff4e6",
-          100: "#ffe4cc",
-          200: "#ffc999",
-          300: "#ffae66",
-          400: "#ff9333",
-          500: "#FF851B", // Light Orange - Primary
-          600: "#E76E04", // Dark Orange - Primary Dark
-          700: "#cc5500",
-          800: "#b34400",
-          900: "#993300",
+          50: "#f8f9fb",
+          100: "#f1f3f7",
+          200: "#e3e7ef",
+          300: "#d1d5db",
+          400: "#9ca3af",
+          500: "#33364d", // New Primary Color - Dark Blue Grey
+          600: "#2a2d40",
+          700: "#212433",
+          800: "#181b26",
+          900: "#0f1219",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
           foreground: "hsl(var(--secondary-foreground))",
-          50: "#f8f9fb",
-          100: "#f1f3f7",
-          200: "#e3e7ef",
-          300: "#d5dae7",
-          400: "#bdc4d1",
-          500: "#001F3F", // Black Type - Text Primary
-          600: "#001935",
-          700: "#00142b",
-          800: "#000f21",
-          900: "#000a17",
+          50: "#f0fdfc",
+          100: "#ccfbf1",
+          200: "#99f6e4",
+          300: "#5eead4",
+          400: "#2dd4bf",
+          500: "#109e92", // New Secondary Color - Teal
+          600: "#0d7377",
+          700: "#0f5f63",
+          800: "#134e4a",
+          900: "#134e4a",
         },
         accent: {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
-          50: "#fff4e6",
-          100: "#ffe4cc",
-          200: "#ffc999",
-          300: "#ffae66",
-          400: "#ff9333",
-          500: "#E76E04", // Dark Orange - Accent Color
-          600: "#cc5500",
-          700: "#b34400",
-          800: "#993300",
-          900: "#802200",
-        },
-        // Custom orange scales to match the exact colors
-        orange: {
-          50: "#fff8f1",
-          100: "#feecdc", 
-          200: "#fcd9bd",
-          300: "#fdba74",
-          400: "#fb923c",
-          500: "#FF851B", // Light Orange - matching primary
-          600: "#E76E04", // Dark Orange - matching accent
-          700: "#c2410c",
-          800: "#9a3412",
-          900: "#7c2d12",
+          50: "#f0fdfc",
+          100: "#ccfbf1",
+          200: "#99f6e4",
+          300: "#5eead4",
+          400: "#2dd4bf",
+          500: "#109e92", // New Secondary Color - Teal for accent
+          600: "#0d7377",
+          700: "#0f5f63",
+          800: "#134e4a",
+          900: "#134e4a",
         },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
@@ -95,21 +82,23 @@ module.exports = {
         },
         // Custom brand colors for GenAI Smart Flow PM - Updated Color Scheme
         brand: {
-          primary: "#FF851B", // Light Orange
-          primaryDark: "#E76E04", // Dark Orange
+          primary: "#33364d", // New Primary Color - Dark Blue Grey
+          primaryDark: "#2a2d40", // Darker variant of primary
+          secondary: "#109e92", // New Secondary Color - Teal
+          secondaryDark: "#0d7377", // Darker variant of secondary
           background: "#FFFFFF", // White background
-          text: "#001F3F", // Black Type for text
-          accent: "#E76E04", // Dark Orange accent
+          text: "#33364d", // Primary color for text
+          accent: "#109e92", // Secondary color for accent
           success: "#22c55e", // Green - keep existing
           warning: "#f59e0b", // Amber - keep existing
           error: "#ef4444", // Red - keep existing
-          info: "#FF851B", // Light Orange for info
+          info: "#109e92", // Secondary color for info
         },
         // Status colors for tasks/projects - Updated with new color scheme
         status: {
-          todo: "#001F3F", // Black Type
-          inprogress: "#FF851B", // Light Orange
-          inreview: "#E76E04", // Dark Orange
+          todo: "#33364d", // Primary color
+          inprogress: "#109e92", // Secondary color
+          inreview: "#2a2d40", // Darker primary
           done: "#22c55e", // Keep green for completion
           blocked: "#ef4444", // Keep red for blocked
         }

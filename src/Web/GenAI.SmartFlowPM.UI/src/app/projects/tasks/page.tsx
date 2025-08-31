@@ -1,13 +1,14 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { TaskCockpit, TaskFormNew } from '../../../components/tasks';
 import { TaskDto } from '@/types/api.types';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 
 type ViewMode = 'cockpit' | 'create' | 'edit' | 'view';
 
-export default function TaskManagementPage() {
+function TaskManagementContent() {
   const [currentView, setCurrentView] = useState<ViewMode>('cockpit');
   const [selectedTask, setSelectedTask] = useState<TaskDto | undefined>(undefined);
   const searchParams = useSearchParams();
@@ -84,5 +85,17 @@ export default function TaskManagementPage() {
         />
       )}
     </>
+  );
+}
+
+export default function TaskManagementPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex justify-center items-center min-h-screen">
+        <LoadingSpinner size="lg" />
+      </div>
+    }>
+      <TaskManagementContent />
+    </Suspense>
   );
 }
