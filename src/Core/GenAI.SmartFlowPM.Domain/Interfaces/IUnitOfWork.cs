@@ -23,6 +23,12 @@ public interface IUnitOfWork : IDisposable
     ITimesheetRepository Timesheets { get; }
     IActiveTrackingSessionRepository ActiveTrackingSessions { get; }
 
+    // Calendar repositories
+    ICalendarEventRepository CalendarEvents { get; }
+    IEventAttendeeRepository EventAttendees { get; }
+    IEventReminderRepository EventReminders { get; }
+    IRecurrencePatternRepository RecurrencePatterns { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     Task BeginTransactionAsync(CancellationToken cancellationToken = default);
     Task CommitTransactionAsync(CancellationToken cancellationToken = default);

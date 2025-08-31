@@ -63,6 +63,11 @@ public class ComprehensiveDataSeeder
         await SeedEntityIfEmpty<TimeEntry>("Time Entries", SeedTimeEntriesAsync);
         await SeedEntityIfEmpty<ActiveTrackingSession>("Active Tracking Sessions", SeedActiveTrackingSessionsAsync);
 
+        // Calendar entities
+        await SeedEntityIfEmpty<CalendarEvent>("Calendar Events", SeedCalendarEventsAsync);
+        await SeedCalendarAttendeesIfNeeded();
+        await SeedCalendarRemindersIfNeeded();
+
         Console.WriteLine("Comprehensive data seeding completed successfully!");
     }
 
@@ -1445,6 +1450,267 @@ public class ComprehensiveDataSeeder
         catch (Exception ex)
         {
             Console.WriteLine($"Error seeding active tracking sessions: {ex.Message}");
+            throw;
+        }
+    }
+
+    #endregion
+
+    #region Calendar Entities Seeding
+
+    private async Task SeedCalendarEventsAsync()
+    {
+        try
+        {
+            Console.WriteLine("Seeding Calendar Events...");
+            
+            var users = await _context.Users.Take(10).ToListAsync();
+            var projects = await _context.Projects.Take(5).ToListAsync();
+            var tasks = await _context.ProjectTasks.Take(10).ToListAsync();
+            
+            if (!users.Any())
+            {
+                Console.WriteLine("No users found. Skipping calendar events seeding.");
+                return;
+            }
+
+            var faker = new Faker();
+            var events = new List<CalendarEvent>();
+
+            var eventTypes = Enum.GetValues<EventType>();
+            var priorities = Enum.GetValues<EventPriority>();
+            var statuses = Enum.GetValues<EventStatus>();
+            var colors = new[] { "#33364d", "#109e92", "#f39c12", "#e74c3c", "#9b59b6", "#3498db", "#2ecc71", "#f1c40f" };
+
+            for (int i = 0; i < 50; i++)
+            {
+                var user = faker.PickRandom(users);
+                var startDate = faker.Date.Between(DateTime.UtcNow.AddDays(-30), DateTime.UtcNow.AddDays(60));
+                var duration = faker.Random.Int(30, 480); // 30 minutes to 8 hours
+                var endDate = startDate.AddMinutes(duration);
+                var isAllDay = faker.Random.Bool(0.2f); // 20% chance of all-day events
+
+                if (isAllDay)
+                {
+                    startDate = startDate.Date;
+                    endDate = startDate.AddDays(1).AddSeconds(-1);
+                }
+
+                var calendarEvent = new CalendarEvent
+                {
+                    Id = Guid.NewGuid(),
+                    Title = faker.PickRandom(new[]
+                    {
+                        "Team Standup", "Project Review", "Client Meeting", "Sprint Planning",
+                        "Code Review", "Training Session", "One-on-One", "Product Demo",
+                        "Architecture Discussion", "Bug Triage", "Release Planning",
+                        "Team Building", "Performance Review", "Requirements Gathering"
+                    }),
+                    Description = faker.Lorem.Paragraph(),
+                    EventType = faker.PickRandom(eventTypes),
+                    StartDateTime = startDate,
+                    EndDateTime = endDate,
+                    IsAllDay = isAllDay,
+                    Location = faker.Random.Bool(0.7f) ? faker.PickRandom(new[]
+                    {
+                        "Conference Room A", "Conference Room B", "Main Office",
+                        "Google Meet", "Zoom", "Microsoft Teams", "Remote",
+                        "Client Office", "Training Room", "Executive Boardroom"
+                    }) : null,
+                    Priority = faker.PickRandom(priorities),
+                    Status = faker.PickRandom(statuses),
+                    EventCreatedBy = user.Id,
+                    ProjectId = projects.Any() && faker.Random.Bool(0.4f) ? faker.PickRandom(projects).Id : null,
+                    TaskId = tasks.Any() && faker.Random.Bool(0.3f) ? faker.PickRandom(tasks).Id : null,
+                    IsRecurring = faker.Random.Bool(0.3f),
+                    IsPrivate = faker.Random.Bool(0.1f), // 10% private events
+                    Color = faker.PickRandom(colors),
+                    TenantId = user.TenantId,
+                    CreatedBy = user.Id.ToString(),
+                    CreatedAt = DateTime.UtcNow.AddDays(-faker.Random.Int(1, 30)),
+                    UpdatedBy = user.Id.ToString(),
+                    UpdatedAt = DateTime.UtcNow
+                };
+
+                events.Add(calendarEvent);
+            }
+
+            await _context.CalendarEvents.AddRangeAsync(events);
+            Console.WriteLine($"Successfully seeded {events.Count} calendar events");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error seeding calendar events: {ex.Message}");
+            throw;
+        }
+    }
+
+    private async Task SeedCalendarAttendeesIfNeeded()
+    {
+        try
+        {
+            var existingAttendees = await _context.EventAttendees.CountAsync();
+            if (existingAttendees > 0)
+            {
+                Console.WriteLine($"Event attendees already exist ({existingAttendees} records), skipping.");
+                return;
+            }
+
+            Console.WriteLine("Seeding Event Attendees...");
+            
+            var events = await _context.CalendarEvents.Take(30).ToListAsync();
+            var users = await _context.Users.Take(10).ToListAsync();
+            
+            if (!events.Any() || !users.Any())
+            {
+                Console.WriteLine("No events or users found. Skipping attendees seeding.");
+                return;
+            }
+
+            var faker = new Faker();
+            var attendees = new List<EventAttendee>();
+            var responses = Enum.GetValues<AttendeeResponse>();
+
+            foreach (var eventItem in events)
+            {
+                // Add the event creator as organizer
+                var organizer = users.FirstOrDefault(u => u.Id == eventItem.EventCreatedBy);
+                if (organizer != null)
+                {
+                    attendees.Add(new EventAttendee
+                    {
+                        Id = Guid.NewGuid(),
+                        EventId = eventItem.Id,
+                        UserId = organizer.Id,
+                        Response = AttendeeResponse.Accepted,
+                        IsRequired = true,
+                        IsOrganizer = true,
+                        InvitedAt = eventItem.CreatedAt,
+                        ResponseAt = eventItem.CreatedAt,
+                        TenantId = organizer.TenantId,
+                        CreatedBy = organizer.Id.ToString(),
+                        CreatedAt = eventItem.CreatedAt
+                    });
+                }
+
+                // Add 1-5 additional attendees for non-private events
+                if (!eventItem.IsPrivate)
+                {
+                    var attendeeCount = faker.Random.Int(1, 5);
+                    var eventUsers = faker.PickRandom(users.Where(u => u.Id != eventItem.EventCreatedBy), attendeeCount);
+                    
+                    foreach (var user in eventUsers)
+                    {
+                        var invitedAt = eventItem.CreatedAt.AddMinutes(faker.Random.Int(1, 60));
+                        var hasResponded = faker.Random.Bool(0.8f); // 80% response rate
+                        
+                        attendees.Add(new EventAttendee
+                        {
+                            Id = Guid.NewGuid(),
+                            EventId = eventItem.Id,
+                            UserId = user.Id,
+                            Response = hasResponded ? faker.PickRandom(responses) : AttendeeResponse.Pending,
+                            IsRequired = faker.Random.Bool(0.7f), // 70% required attendees
+                            IsOrganizer = false,
+                            InvitedAt = invitedAt,
+                            ResponseAt = hasResponded ? invitedAt.AddMinutes(faker.Random.Int(5, 1440)) : null, // Response within 24 hours
+                            Notes = faker.Random.Bool(0.3f) ? faker.Lorem.Sentence() : null,
+                            TenantId = user.TenantId,
+                            CreatedBy = eventItem.EventCreatedBy.ToString(),
+                            CreatedAt = invitedAt
+                        });
+                    }
+                }
+            }
+
+            await _context.EventAttendees.AddRangeAsync(attendees);
+            Console.WriteLine($"Successfully seeded {attendees.Count} event attendees");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error seeding event attendees: {ex.Message}");
+            throw;
+        }
+    }
+
+    private async Task SeedCalendarRemindersIfNeeded()
+    {
+        try
+        {
+            var existingReminders = await _context.EventReminders.CountAsync();
+            if (existingReminders > 0)
+            {
+                Console.WriteLine($"Event reminders already exist ({existingReminders} records), skipping.");
+                return;
+            }
+
+            Console.WriteLine("Seeding Event Reminders...");
+            
+            var attendees = await _context.EventAttendees
+                .Include(a => a.Event)
+                .Include(a => a.User)
+                .Take(100)
+                .ToListAsync();
+            
+            if (!attendees.Any())
+            {
+                Console.WriteLine("No event attendees found. Skipping reminders seeding.");
+                return;
+            }
+
+            var faker = new Faker();
+            var reminders = new List<EventReminder>();
+            var reminderTypes = Enum.GetValues<ReminderType>();
+            var reminderTimes = new[] { 5, 10, 15, 30, 60, 120, 1440 }; // Minutes before event
+
+            foreach (var attendee in attendees)
+            {
+                // Skip reminders for past events
+                if (attendee.Event.StartDateTime < DateTime.UtcNow)
+                    continue;
+
+                // 70% chance of having a reminder
+                if (!faker.Random.Bool(0.7f))
+                    continue;
+
+                // Some users might have multiple reminders
+                var reminderCount = faker.Random.Int(1, faker.Random.Bool(0.3f) ? 2 : 1);
+                
+                for (int i = 0; i < reminderCount; i++)
+                {
+                    var reminderTime = faker.PickRandom(reminderTimes);
+                    
+                    // Don't create duplicate reminder times for the same user/event
+                    if (reminders.Any(r => r.EventId == attendee.EventId && 
+                                          r.UserId == attendee.UserId && 
+                                          r.ReminderTime == reminderTime))
+                        continue;
+
+                    var reminder = new EventReminder
+                    {
+                        Id = Guid.NewGuid(),
+                        EventId = attendee.EventId,
+                        UserId = attendee.UserId,
+                        ReminderType = faker.PickRandom(reminderTypes),
+                        ReminderTime = reminderTime,
+                        IsSent = false,
+                        SentAt = null,
+                        IsActive = true,
+                        TenantId = attendee.TenantId,
+                        CreatedBy = attendee.UserId.ToString(),
+                        CreatedAt = attendee.CreatedAt.AddMinutes(faker.Random.Int(1, 30))
+                    };
+
+                    reminders.Add(reminder);
+                }
+            }
+
+            await _context.EventReminders.AddRangeAsync(reminders);
+            Console.WriteLine($"Successfully seeded {reminders.Count} event reminders");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error seeding event reminders: {ex.Message}");
             throw;
         }
     }

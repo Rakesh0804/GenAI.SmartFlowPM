@@ -9,6 +9,7 @@ using GenAI.SmartFlowPM.Application.DTOs.Campaign;
 using GenAI.SmartFlowPM.Application.DTOs.Certificate;
 using GenAI.SmartFlowPM.Application.DTOs.Team;
 using GenAI.SmartFlowPM.Application.DTOs.TimeTracker;
+using GenAI.SmartFlowPM.Application.DTOs.Calendar;
 using GenAI.SmartFlowPM.Domain.Entities;
 
 namespace GenAI.SmartFlowPM.Application.Common.Mappings;
@@ -267,5 +268,127 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.IsActive, opt => opt.Ignore())
             .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
             .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore());
+        
+        // Calendar mappings
+        // Calendar Event mappings
+        CreateMap<CalendarEvent, CalendarEventDto>()
+            .ForMember(dest => dest.EventCreatorName, opt => opt.MapFrom(src => 
+                src.EventCreator != null ? $"{src.EventCreator.FirstName} {src.EventCreator.LastName}" : null))
+            .ForMember(dest => dest.ProjectName, opt => opt.MapFrom(src => src.Project != null ? src.Project.Name : null))
+            .ForMember(dest => dest.TaskName, opt => opt.MapFrom(src => src.Task != null ? src.Task.Title : null))
+            .ForMember(dest => dest.Attendees, opt => opt.MapFrom(src => src.Attendees))
+            .ForMember(dest => dest.Reminders, opt => opt.MapFrom(src => src.Reminders))
+            .ForMember(dest => dest.RecurrencePattern, opt => opt.MapFrom(src => src.Recurrence));
+
+        CreateMap<CalendarEvent, CalendarEventSummaryDto>()
+            .ForMember(dest => dest.AttendeeCount, opt => opt.MapFrom(src => src.Attendees.Count));
+
+        CreateMap<CreateCalendarEventDto, CalendarEvent>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.EventCreatedBy, opt => opt.Ignore()) // Will be set from current user
+            .ForMember(dest => dest.TenantId, opt => opt.Ignore()) // Will be set from current user
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.RecurrencePattern, opt => opt.Ignore()) // JSON serialized
+            .ForMember(dest => dest.Attendees, opt => opt.Ignore()) // Mapped separately
+            .ForMember(dest => dest.Reminders, opt => opt.Ignore()) // Mapped separately
+            .ForMember(dest => dest.Recurrence, opt => opt.Ignore()); // Mapped separately
+
+        CreateMap<UpdateCalendarEventDto, CalendarEvent>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.EventCreatedBy, opt => opt.Ignore())
+            .ForMember(dest => dest.TenantId, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.RecurrencePattern, opt => opt.Ignore()); // JSON serialized
+
+        // Event Attendee mappings
+        CreateMap<EventAttendee, EventAttendeeDto>()
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => 
+                src.User != null ? $"{src.User.FirstName} {src.User.LastName}" : string.Empty))
+            .ForMember(dest => dest.UserEmail, opt => opt.MapFrom(src => src.User != null ? src.User.Email : string.Empty));
+
+        CreateMap<EventAttendee, EventAttendeeSummaryDto>()
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => 
+                src.User != null ? $"{src.User.FirstName} {src.User.LastName}" : string.Empty))
+            .ForMember(dest => dest.UserEmail, opt => opt.MapFrom(src => src.User != null ? src.User.Email : string.Empty));
+
+        CreateMap<CreateEventAttendeeDto, EventAttendee>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.EventId, opt => opt.Ignore()) // Will be set from context
+            .ForMember(dest => dest.TenantId, opt => opt.Ignore()) // Will be set from current user
+            .ForMember(dest => dest.Response, opt => opt.MapFrom(src => Domain.Enums.AttendeeResponse.Pending))
+            .ForMember(dest => dest.InvitedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore());
+
+        CreateMap<UpdateEventAttendeeDto, EventAttendee>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.EventId, opt => opt.Ignore())
+            .ForMember(dest => dest.UserId, opt => opt.Ignore())
+            .ForMember(dest => dest.TenantId, opt => opt.Ignore())
+            .ForMember(dest => dest.Response, opt => opt.Ignore())
+            .ForMember(dest => dest.IsOrganizer, opt => opt.Ignore())
+            .ForMember(dest => dest.InvitedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.ResponseAt, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore());
+
+        // Event Reminder mappings
+        CreateMap<EventReminder, EventReminderDto>()
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => 
+                src.User != null ? $"{src.User.FirstName} {src.User.LastName}" : string.Empty));
+
+        CreateMap<EventReminder, EventReminderSummaryDto>();
+
+        CreateMap<CreateEventReminderDto, EventReminder>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.EventId, opt => opt.Ignore()) // Will be set from context
+            .ForMember(dest => dest.TenantId, opt => opt.Ignore()) // Will be set from current user
+            .ForMember(dest => dest.IsSent, opt => opt.MapFrom(src => false))
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore());
+
+        CreateMap<UpdateEventReminderDto, EventReminder>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.EventId, opt => opt.Ignore())
+            .ForMember(dest => dest.UserId, opt => opt.Ignore())
+            .ForMember(dest => dest.TenantId, opt => opt.Ignore())
+            .ForMember(dest => dest.IsSent, opt => opt.Ignore())
+            .ForMember(dest => dest.SentAt, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore());
+
+        // Recurrence Pattern mappings
+        CreateMap<RecurrencePattern, RecurrencePatternDto>();
+
+        CreateMap<RecurrencePattern, RecurrencePatternSummaryDto>()
+            .ForMember(dest => dest.Description, opt => opt.MapFrom(src => GetRecurrenceDescription(src)));
+
+        CreateMap<CreateRecurrencePatternDto, RecurrencePattern>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.EventId, opt => opt.Ignore()) // Will be set from context
+            .ForMember(dest => dest.TenantId, opt => opt.Ignore()) // Will be set from current user
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore());
+
+        CreateMap<UpdateRecurrencePatternDto, RecurrencePattern>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.EventId, opt => opt.Ignore())
+            .ForMember(dest => dest.TenantId, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore());
+    }
+
+    private static string GetRecurrenceDescription(RecurrencePattern pattern)
+    {
+        return pattern.RecurrenceType switch
+        {
+            Domain.Enums.RecurrenceType.Daily => $"Every {pattern.Interval} day(s)",
+            Domain.Enums.RecurrenceType.Weekly => $"Every {pattern.Interval} week(s)",
+            Domain.Enums.RecurrenceType.Monthly => $"Every {pattern.Interval} month(s)",
+            Domain.Enums.RecurrenceType.Yearly => $"Every {pattern.Interval} year(s)",
+            _ => "Custom recurrence"
+        };
     }
 }

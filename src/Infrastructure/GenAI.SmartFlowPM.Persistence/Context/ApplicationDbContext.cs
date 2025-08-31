@@ -38,6 +38,12 @@ public class ApplicationDbContext : DbContext
     public DbSet<TimeEntry> TimeEntries { get; set; }
     public DbSet<Timesheet> Timesheets { get; set; }
     public DbSet<ActiveTrackingSession> ActiveTrackingSessions { get; set; }
+    
+    // Calendar entities
+    public DbSet<CalendarEvent> CalendarEvents { get; set; }
+    public DbSet<EventAttendee> EventAttendees { get; set; }
+    public DbSet<EventReminder> EventReminders { get; set; }
+    public DbSet<RecurrencePattern> RecurrencePatterns { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -75,6 +81,12 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<TimeEntry>().HasQueryFilter(e => !e.IsDeleted);
         modelBuilder.Entity<Timesheet>().HasQueryFilter(e => !e.IsDeleted);
         modelBuilder.Entity<ActiveTrackingSession>().HasQueryFilter(e => !e.IsDeleted);
+        
+        // Calendar query filters
+        modelBuilder.Entity<CalendarEvent>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<EventAttendee>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<EventReminder>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<RecurrencePattern>().HasQueryFilter(e => !e.IsDeleted);
     }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

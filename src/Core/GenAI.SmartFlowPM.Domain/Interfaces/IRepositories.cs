@@ -224,3 +224,66 @@ public interface IActiveTrackingSessionRepository : IGenericRepository<ActiveTra
     Task<IEnumerable<ActiveTrackingSession>> GetByUserIdAsync(Guid userId, Guid tenantId, CancellationToken cancellationToken = default);
     Task StopAllActiveSessionsAsync(Guid userId, Guid tenantId, CancellationToken cancellationToken = default);
 }
+
+// Calendar repository interfaces
+public interface ICalendarEventRepository : IGenericRepository<CalendarEvent>
+{
+    Task<IEnumerable<CalendarEvent>> GetByUserIdAsync(Guid userId, Guid tenantId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<CalendarEvent>> GetByProjectIdAsync(Guid projectId, Guid tenantId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<CalendarEvent>> GetByTaskIdAsync(Guid taskId, Guid tenantId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<CalendarEvent>> GetByDateRangeAsync(DateTime startDate, DateTime endDate, Guid tenantId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<CalendarEvent>> GetByUserAndDateRangeAsync(Guid userId, DateTime startDate, DateTime endDate, Guid tenantId, CancellationToken cancellationToken = default);
+    Task<CalendarEvent?> GetWithAttendeesAsync(Guid eventId, Guid tenantId, CancellationToken cancellationToken = default);
+    Task<CalendarEvent?> GetWithRemindersAsync(Guid eventId, Guid tenantId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<CalendarEvent>> GetRecurringEventsAsync(Guid tenantId, CancellationToken cancellationToken = default);
+    Task<(IEnumerable<CalendarEvent> Items, int TotalCount, int PageNumber, int PageSize, int TotalPages)> GetPagedAsync(
+        Guid tenantId,
+        int pageNumber,
+        int pageSize,
+        DateTime? startDate = null,
+        DateTime? endDate = null,
+        EventType? eventType = null,
+        EventStatus? eventStatus = null,
+        string? searchTerm = null,
+        Guid? projectId = null,
+        CancellationToken cancellationToken = default);
+    Task<(IEnumerable<CalendarEvent> Items, int TotalCount, int PageNumber, int PageSize, int TotalPages)> GetUserEventsAsync(
+        Guid userId,
+        Guid tenantId,
+        int pageNumber,
+        int pageSize,
+        DateTime? startDate = null,
+        DateTime? endDate = null,
+        EventStatus? eventStatus = null,
+        CancellationToken cancellationToken = default);
+    Task<IEnumerable<CalendarEvent>> GetUpcomingEventsAsync(
+        Guid userId,
+        Guid tenantId,
+        DateTime startDate,
+        DateTime endDate,
+        int limit,
+        CancellationToken cancellationToken = default);
+}
+
+public interface IEventAttendeeRepository : IGenericRepository<EventAttendee>
+{
+    Task<IEnumerable<EventAttendee>> GetByEventIdAsync(Guid eventId, Guid tenantId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<EventAttendee>> GetByUserIdAsync(Guid userId, Guid tenantId, CancellationToken cancellationToken = default);
+    Task<EventAttendee?> GetByEventAndUserAsync(Guid eventId, Guid userId, Guid tenantId, CancellationToken cancellationToken = default);
+    Task<bool> ExistsAsync(Guid eventId, Guid userId, Guid tenantId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<EventAttendee>> GetPendingResponsesAsync(Guid userId, Guid tenantId, CancellationToken cancellationToken = default);
+}
+
+public interface IEventReminderRepository : IGenericRepository<EventReminder>
+{
+    Task<IEnumerable<EventReminder>> GetByEventIdAsync(Guid eventId, Guid tenantId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<EventReminder>> GetByUserIdAsync(Guid userId, Guid tenantId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<EventReminder>> GetPendingRemindersAsync(DateTime checkTime, Guid tenantId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<EventReminder>> GetActiveRemindersAsync(Guid tenantId, CancellationToken cancellationToken = default);
+}
+
+public interface IRecurrencePatternRepository : IGenericRepository<RecurrencePattern>
+{
+    Task<RecurrencePattern?> GetByEventIdAsync(Guid eventId, Guid tenantId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<RecurrencePattern>> GetActiveRecurrencesAsync(Guid tenantId, CancellationToken cancellationToken = default);
+}

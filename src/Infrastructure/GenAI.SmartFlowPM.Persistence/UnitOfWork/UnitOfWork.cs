@@ -32,6 +32,12 @@ public class UnitOfWork : IUnitOfWork
         TimeEntries = new TimeEntryRepository(_context);
         Timesheets = new TimesheetRepository(_context);
         ActiveTrackingSessions = new ActiveTrackingSessionRepository(_context);
+        
+        // Calendar repositories
+        CalendarEvents = new CalendarEventRepository(_context);
+        EventAttendees = new EventAttendeeRepository(_context);
+        EventReminders = new EventReminderRepository(_context);
+        RecurrencePatterns = new RecurrencePatternRepository(_context);
     }
 
     public ITenantRepository Tenants { get; }
@@ -52,6 +58,12 @@ public class UnitOfWork : IUnitOfWork
     public ITimeEntryRepository TimeEntries { get; }
     public ITimesheetRepository Timesheets { get; }
     public IActiveTrackingSessionRepository ActiveTrackingSessions { get; }
+    
+    // Calendar repositories
+    public ICalendarEventRepository CalendarEvents { get; }
+    public IEventAttendeeRepository EventAttendees { get; }
+    public IEventReminderRepository EventReminders { get; }
+    public IRecurrencePatternRepository RecurrencePatterns { get; }
 
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {

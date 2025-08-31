@@ -283,7 +283,7 @@ export const TimeCalendar: React.FC<TimeCalendarProps> = ({
                   day.isCurrentMonth 
                     ? 'border-gray-200 bg-white hover:bg-gray-50' 
                     : 'border-gray-100 bg-gray-50 text-gray-400'
-                } ${day.isToday ? 'ring-2 ring-brand-primary' : ''}`}
+                } ${day.isToday ? 'ring-2 ring-brand-primary border-2 border-brand-primary' : ''}`}
               >
                 <div className="flex items-center justify-between mb-2">
                   <span className={`text-sm font-medium ${
