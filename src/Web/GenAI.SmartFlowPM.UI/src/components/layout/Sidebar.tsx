@@ -92,7 +92,16 @@ const menuItems: MenuItem[] = [
     { id: 'compensation', label: 'Compensation', icon: DollarSignIcon, href: '/compensation' },
     { id: 'reports', label: 'Reports', icon: BarChart3Icon, href: '/reports' },
     { id: 'chat', label: 'Chat', icon: MessageSquareIcon, href: '/chat', badge: 3 },
-    { id: 'campaign', label: 'Campaign', icon: MegaphoneIcon, href: '/campaign' },
+    { 
+        id: 'campaign', 
+        label: 'Campaign', 
+        icon: MegaphoneIcon,
+        subItems: [
+            { id: 'campaign-dashboard', label: 'Dashboard', icon: BarChart3Icon, href: '/campaigns/dashboard' },
+            { id: 'campaign-cockpit', label: 'Cockpit', icon: SettingsIcon, href: '/campaigns/cockpit' },
+            { id: 'campaign-groups', label: 'Groups', icon: UsersIcon, href: '/campaigns/groups' }
+        ]
+    },
     { id: 'certificate', label: 'Certificate', icon: AwardIcon, href: '/certificate' },
 ];
 
@@ -163,7 +172,7 @@ export const Sidebar: React.FC = () => {
                         </div>
                         <span className={`font-bold text-secondary-800 text-lg transition-all duration-300 ease-in-out ${isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'
                             }`}>
-                            SmartFlowPM
+                            Flow
                         </span>
                     </div>
                 )}

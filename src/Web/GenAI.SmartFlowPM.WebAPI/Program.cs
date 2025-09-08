@@ -19,7 +19,8 @@ using GenAI.SmartFlowPM.WebAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container
+// Add Aspire service defaults (this configures OpenTelemetry for Aspire)
+builder.AddServiceDefaults();
 builder.Services.AddControllers();
 
 // Add HttpContextAccessor for tenant context service
@@ -35,8 +36,8 @@ builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices();
 builder.Services.AddPersistenceServices(builder.Configuration);
 
-// Add Observability (OpenTelemetry, Tracing, Metrics)
-builder.Services.AddObservability(builder.Configuration);
+// Add custom observability for EF Core (ServiceDefaults handles basic OpenTelemetry)
+builder.Services.AddCustomObservability(builder.Configuration);
 
 // Add Resilience Policies and Named HTTP Clients
 builder.Services.AddResiliencePolicies(builder.Configuration);
@@ -158,6 +159,9 @@ app.UseSmartFlowCors(app.Environment);
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Map Aspire default endpoints (health checks)
+app.MapDefaultEndpoints();
 
 // Map comprehensive health check endpoints
 app.MapComprehensiveHealthChecks();

@@ -431,7 +431,8 @@ namespace GenAI.SmartFlowPM.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CreatedByUserId");
+                    b.HasIndex("CreatedByUserId")
+                        .HasDatabaseName("IX_Campaigns_CreatedByUserId");
 
                     b.HasIndex("Status")
                         .HasDatabaseName("IX_Campaigns_Status");
@@ -452,9 +453,6 @@ namespace GenAI.SmartFlowPM.Persistence.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("CampaignId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("CampaignId1")
                         .HasColumnType("uuid");
 
                     b.Property<string>("ClaimEvaluations")
@@ -518,8 +516,6 @@ namespace GenAI.SmartFlowPM.Persistence.Migrations
                     b.HasIndex("CampaignId")
                         .HasDatabaseName("IX_CampaignEvaluations_CampaignId");
 
-                    b.HasIndex("CampaignId1");
-
                     b.HasIndex("EvaluatedUserId")
                         .HasDatabaseName("IX_CampaignEvaluations_EvaluatedUserId");
 
@@ -546,10 +542,7 @@ namespace GenAI.SmartFlowPM.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("CampaignId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("CampaignId1")
+                    b.Property<Guid?>("CampaignId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
@@ -604,8 +597,6 @@ namespace GenAI.SmartFlowPM.Persistence.Migrations
 
                     b.HasIndex("CampaignId")
                         .HasDatabaseName("IX_CampaignGroups_CampaignId");
-
-                    b.HasIndex("CampaignId1");
 
                     b.HasIndex("ManagerId")
                         .HasDatabaseName("IX_CampaignGroups_ManagerId");
@@ -2666,7 +2657,7 @@ namespace GenAI.SmartFlowPM.Persistence.Migrations
                     b.HasOne("GenAI.SmartFlowPM.Domain.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedByUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("GenAI.SmartFlowPM.Domain.Entities.Tenant", "Tenant")
@@ -2682,15 +2673,9 @@ namespace GenAI.SmartFlowPM.Persistence.Migrations
 
             modelBuilder.Entity("GenAI.SmartFlowPM.Domain.Entities.CampaignEvaluation", b =>
                 {
-                    b.HasOne("GenAI.SmartFlowPM.Domain.Entities.Campaign", null)
-                        .WithMany()
-                        .HasForeignKey("CampaignId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("GenAI.SmartFlowPM.Domain.Entities.Campaign", "Campaign")
                         .WithMany("Evaluations")
-                        .HasForeignKey("CampaignId1")
+                        .HasForeignKey("CampaignId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -2734,17 +2719,10 @@ namespace GenAI.SmartFlowPM.Persistence.Migrations
 
             modelBuilder.Entity("GenAI.SmartFlowPM.Domain.Entities.CampaignGroup", b =>
                 {
-                    b.HasOne("GenAI.SmartFlowPM.Domain.Entities.Campaign", null)
-                        .WithMany()
-                        .HasForeignKey("CampaignId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("GenAI.SmartFlowPM.Domain.Entities.Campaign", "Campaign")
                         .WithMany("Groups")
-                        .HasForeignKey("CampaignId1")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("CampaignId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("GenAI.SmartFlowPM.Domain.Entities.User", "Manager")
                         .WithMany()

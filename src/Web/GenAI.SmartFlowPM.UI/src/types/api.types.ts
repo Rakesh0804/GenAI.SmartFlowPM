@@ -15,5 +15,6 @@ export * from '../interfaces/claim.interfaces';
 export * from '../interfaces/tenant.interfaces';
 export * from '../interfaces/team.interfaces';
 export * from '../interfaces/timetracker.interfaces';
+export * from '../interfaces/campaign.interfaces';
 export * from '../interfaces/enums.interfaces';
 // export * from '../interfaces/common.interfaces';

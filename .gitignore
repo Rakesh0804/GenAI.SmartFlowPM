@@ -530,7 +530,6 @@ jspm_packages/
 
 # Gatsby files
 .cache/
-public
 
 # Storybook build outputs
 .out
@@ -586,7 +585,6 @@ Thumbs.db
 # Secrets and configuration
 secrets.json
 appsettings.*.json
-!appsettings.json
 !appsettings.Development.json
 
 # Local development
@@ -597,7 +595,6 @@ appsettings.*.json
 *~
 
 # AspNet Core
-appsettings.json
 !appsettings.Development.json
 wwwroot/lib/
 

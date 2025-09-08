@@ -70,6 +70,122 @@ public class CampaignsController : BaseController
     }
 
     /// <summary>
+    /// Get dashboard overview with key metrics and recent activities
+    /// </summary>
+    [HttpGet("dashboard/overview")]
+    public async Task<IActionResult> GetDashboardOverview([FromQuery] DateTime? fromDate, [FromQuery] DateTime? toDate)
+    {
+        var query = new GetCampaignStatisticsQuery { FromDate = fromDate, ToDate = toDate };
+        var result = await _mediator.Send(query);
+        
+        if (result.IsSuccess)
+        {
+            return Ok(new
+            {
+                success = true,
+                data = new
+                {
+                    overview = result.Data,
+                    timestamp = DateTime.UtcNow
+                }
+            });
+        }
+        
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Get active campaigns summary for dashboard
+    /// </summary>
+    [HttpGet("dashboard/active-campaigns")]
+    public async Task<IActionResult> GetActiveCampaigns()
+    {
+        var query = new GetCampaignsQuery { Status = CampaignStatus.Active };
+        var result = await _mediator.Send(query);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Get pending evaluations count by manager
+    /// </summary>
+    [HttpGet("dashboard/pending-evaluations")]
+    public async Task<IActionResult> GetPendingEvaluations()
+    {
+        // This would typically aggregate evaluations by manager
+        var myCampaignsQuery = new GetMyCampaignsQuery { Status = CampaignStatus.Active };
+        var result = await _mediator.Send(myCampaignsQuery);
+        
+        if (result.IsSuccess)
+        {
+            var pendingCount = result.Data?.Sum(c => c.PendingEvaluations) ?? 0;
+            return Ok(new
+            {
+                success = true,
+                data = new
+                {
+                    pendingEvaluations = pendingCount,
+                    campaigns = result.Data?.Count ?? 0
+                }
+            });
+        }
+        
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Get recent campaign activities for dashboard
+    /// </summary>
+    [HttpGet("dashboard/recent-activities")]
+    public async Task<IActionResult> GetRecentActivities([FromQuery] int limit = 10)
+    {
+        var query = new GetCampaignStatisticsQuery();
+        var result = await _mediator.Send(query);
+        
+        if (result.IsSuccess)
+        {
+            return Ok(new
+            {
+                success = true,
+                data = new
+                {
+                    activities = result.Data?.RecentActivity?.Take(limit) ?? new List<CampaignActivityDto>()
+                }
+            });
+        }
+        
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Get campaign progress analytics for dashboard
+    /// </summary>
+    [HttpGet("dashboard/progress-analytics")]
+    public async Task<IActionResult> GetProgressAnalytics([FromQuery] DateTime? fromDate, [FromQuery] DateTime? toDate)
+    {
+        var query = new GetCampaignStatisticsQuery { FromDate = fromDate, ToDate = toDate };
+        var result = await _mediator.Send(query);
+        
+        if (result.IsSuccess)
+        {
+            return Ok(new
+            {
+                success = true,
+                data = new
+                {
+                    totalCampaigns = result.Data?.TotalCampaigns ?? 0,
+                    activeCampaigns = result.Data?.ActiveCampaigns ?? 0,
+                    completedCampaigns = result.Data?.CompletedCampaigns ?? 0,
+                    overallProgress = result.Data?.OverallProgressPercentage ?? 0,
+                    averageCompletionTime = result.Data?.AverageCompletionTime ?? 0,
+                    mostActiveCampaignType = result.Data?.MostActiveCampaignType.ToString() ?? "Unknown"
+                }
+            });
+        }
+        
+        return HandleResult(result);
+    }
+
+    /// <summary>
     /// Get campaign progress report
     /// </summary>
     [HttpGet("{id}/progress")]
@@ -254,6 +370,16 @@ public class CampaignsController : BaseController
     public async Task<IActionResult> GetEligibleUsers([FromQuery] GetCampaignEligibleUsersQuery query)
     {
         var result = await _mediator.Send(query);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Submit campaign evaluation
+    /// </summary>
+    [HttpPost("evaluations")]
+    public async Task<IActionResult> SubmitCampaignEvaluation([FromBody] SubmitCampaignEvaluationCommand command)
+    {
+        var result = await _mediator.Send(command);
         return HandleResult(result);
     }
 

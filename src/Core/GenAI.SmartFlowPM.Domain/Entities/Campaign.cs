@@ -44,6 +44,16 @@ public class Campaign : TenantBaseEntity
 
     public bool IsActive { get; set; } = true;
 
+    /// <summary>
+    /// Foreign key to User who created this campaign
+    /// </summary>
+    public Guid CreatedByUserId { get; set; }
+
+    /// <summary>
+    /// Navigation property to the User who created this campaign
+    /// </summary>
+    public virtual User CreatedByUser { get; set; } = null!;
+
     // Helper properties for working with JSON lists
     public List<Guid> GetAssignedManagers()
     {
@@ -80,7 +90,6 @@ public class Campaign : TenantBaseEntity
     }
 
     // Navigation Properties
-    public User CreatedByUser { get; set; } = null!;
     public ICollection<CampaignGroup> Groups { get; set; } = new List<CampaignGroup>();
     public ICollection<CampaignEvaluation> Evaluations { get; set; } = new List<CampaignEvaluation>();
     public ICollection<Certificate> Certificates { get; set; } = new List<Certificate>();
@@ -91,8 +100,7 @@ public class Campaign : TenantBaseEntity
 /// </summary>
 public class CampaignGroup : TenantBaseEntity
 {
-    [Required]
-    public Guid CampaignId { get; set; }
+    public Guid? CampaignId { get; set; } // Nullable to allow standalone groups
 
     [Required]
     [MaxLength(200)]

@@ -11,6 +11,49 @@ public static class ObservabilityExtensions
 {
     private static readonly ActivitySource ActivitySource = new("SmartFlowPM.WebAPI");
     
+    public static IServiceCollection AddCustomObservability(this IServiceCollection services, IConfiguration configuration)
+    {
+        // Add custom instrumentation for EF Core that ServiceDefaults doesn't include
+        services.AddOpenTelemetry()
+            .WithTracing(tracing =>
+            {
+                tracing
+                    .AddSource(ActivitySource.Name)
+                    .AddEntityFrameworkCoreInstrumentation(options =>
+                    {
+                        options.SetDbStatementForText = true;
+                        options.SetDbStatementForStoredProcedure = true;
+                        options.Filter = (activityName, command) =>
+                        {
+                            // Skip health check queries to reduce noise
+                            return !command.CommandText.Contains("INFORMATION_SCHEMA") &&
+                                   !command.CommandText.Contains("pg_stat");
+                        };
+                        options.EnrichWithIDbCommand = (activity, command) =>
+                        {
+                            var stateDisplayName = $"{command.CommandType} {command.CommandText}";
+                            activity.DisplayName = stateDisplayName;
+                            activity.SetTag("db.operation.name", stateDisplayName);
+                            activity.SetTag("db.statement", command.CommandText);
+                            
+                            // Add parameter information for better debugging
+                            if (command.Parameters.Count > 0)
+                            {
+                                var parameters = string.Join(", ", 
+                                    command.Parameters.Cast<System.Data.Common.DbParameter>()
+                                        .Select(p => $"{p.ParameterName}={p.Value}"));
+                                activity.SetTag("db.parameters", parameters);
+                            }
+                        };
+                    });
+            });
+
+        // Register ActivitySource as singleton
+        services.AddSingleton(ActivitySource);
+
+        return services;
+    }
+
     public static IServiceCollection AddObservability(this IServiceCollection services, IConfiguration configuration)
     {
         var serviceName = configuration["OTEL_SERVICE_NAME"] ?? "SmartFlowPM.WebAPI";
@@ -74,33 +117,65 @@ public static class ObservabilityExtensions
                     {
                         options.SetDbStatementForText = true;
                         options.SetDbStatementForStoredProcedure = true;
+                        options.Filter = (activityName, command) =>
+                        {
+                            // Skip health check queries to reduce noise
+                            return !command.CommandText.Contains("INFORMATION_SCHEMA") &&
+                                   !command.CommandText.Contains("pg_stat");
+                        };
                         options.EnrichWithIDbCommand = (activity, command) =>
                         {
                             var stateDisplayName = $"{command.CommandType} {command.CommandText}";
                             activity.DisplayName = stateDisplayName;
                             activity.SetTag("db.operation.name", stateDisplayName);
+                            activity.SetTag("db.statement", command.CommandText);
+                            activity.SetTag("db.connection_string", command.Connection?.ConnectionString);
+                            
+                            // Add parameter information for better debugging
+                            if (command.Parameters.Count > 0)
+                            {
+                                var parameters = string.Join(", ", 
+                                    command.Parameters.Cast<System.Data.Common.DbParameter>()
+                                        .Select(p => $"{p.ParameterName}={p.Value}"));
+                                activity.SetTag("db.parameters", parameters);
+                            }
                         };
                     });
 
-                // Add OTLP exporter if endpoint is configured
-                var otlpEndpoint = configuration["OTEL_EXPORTER_OTLP_ENDPOINT"];
-                if (!string.IsNullOrEmpty(otlpEndpoint))
+                // Add Console exporter for development (Aspire dashboard visibility)
+                // Only enable console tracing if specifically configured
+                if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development" &&
+                    configuration.GetValue<bool>("Observability:EnableConsoleTracing", true))
                 {
-                    tracing.AddOtlpExporter();
+                    tracing.AddConsoleExporter();
                 }
+
+                // Always add OTLP exporter for Aspire
+                tracing.AddOtlpExporter();
             })
             .WithMetrics(metrics =>
             {
                 metrics
                     .AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation();
-
-                // Add OTLP exporter if endpoint is configured
-                var otlpEndpoint = configuration["OTEL_EXPORTER_OTLP_ENDPOINT"];
-                if (!string.IsNullOrEmpty(otlpEndpoint))
+                
+                // Only add runtime and process metrics if specifically needed
+                // These generate a lot of noise but are useful for performance monitoring
+                if (configuration.GetValue<bool>("Observability:EnableRuntimeMetrics", false))
                 {
-                    metrics.AddOtlpExporter();
+                    metrics.AddRuntimeInstrumentation();
+                    metrics.AddProcessInstrumentation();
                 }
+
+                // Only add Console exporter for metrics in specific debug scenarios
+                // Comment out the console exporter for metrics to reduce noise
+                // if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+                // {
+                //     metrics.AddConsoleExporter();
+                // }
+
+                // Add OTLP exporter for Aspire dashboard (always enabled)
+                metrics.AddOtlpExporter();
             });
 
         // Register ActivitySource as singleton

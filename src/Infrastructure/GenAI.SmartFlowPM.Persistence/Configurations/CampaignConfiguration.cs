@@ -50,6 +50,9 @@ public class CampaignConfiguration : IEntityTypeConfiguration<Campaign>
             .IsRequired()
             .HasDefaultValue(true);
 
+        builder.Property(x => x.CreatedByUserId)
+            .IsRequired();
+
         // Indexes for better query performance
         builder.HasIndex(x => x.Status)
             .HasDatabaseName("IX_Campaigns_Status");
@@ -60,14 +63,22 @@ public class CampaignConfiguration : IEntityTypeConfiguration<Campaign>
         builder.HasIndex(x => new { x.StartDate, x.EndDate })
             .HasDatabaseName("IX_Campaigns_DateRange");
 
+        builder.HasIndex(x => x.CreatedByUserId)
+            .HasDatabaseName("IX_Campaigns_CreatedByUserId");
+
         // Configure relationships
-        builder.HasMany<CampaignGroup>()
-            .WithOne()
+        builder.HasOne(x => x.CreatedByUser)
+            .WithMany()
+            .HasForeignKey(x => x.CreatedByUserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasMany(x => x.Groups)
+            .WithOne(x => x.Campaign)
             .HasForeignKey(x => x.CampaignId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasMany<CampaignEvaluation>()
-            .WithOne()
+        builder.HasMany(x => x.Evaluations)
+            .WithOne(x => x.Campaign)
             .HasForeignKey(x => x.CampaignId)
             .OnDelete(DeleteBehavior.Cascade);
     }
@@ -81,8 +92,7 @@ public class CampaignGroupConfiguration : IEntityTypeConfiguration<CampaignGroup
 
         builder.HasKey(x => x.Id);
 
-        builder.Property(x => x.CampaignId)
-            .IsRequired();
+        builder.Property(x => x.CampaignId); // Nullable for standalone groups
 
         builder.Property(x => x.Name)
             .IsRequired()

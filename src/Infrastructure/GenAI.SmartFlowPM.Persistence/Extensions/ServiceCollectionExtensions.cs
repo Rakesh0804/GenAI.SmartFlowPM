@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using GenAI.SmartFlowPM.Domain.Interfaces;
 using GenAI.SmartFlowPM.Domain.Interfaces.Services;
 using GenAI.SmartFlowPM.Persistence.Context;
@@ -16,7 +17,17 @@ public static class ServiceCollectionExtensions
     {
         // Add DbContext
         services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+        {
+            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"));
+            
+            // Enable sensitive data logging in development for better debugging
+            if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+            {
+                options.EnableSensitiveDataLogging();
+                options.EnableDetailedErrors();
+                options.LogTo(Console.WriteLine, LogLevel.Information);
+            }
+        });
 
         // Add repositories and unit of work
         services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));

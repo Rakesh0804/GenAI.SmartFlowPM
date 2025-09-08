@@ -6,10 +6,7 @@ var builder = DistributedApplication.CreateBuilder(args);
 // Add the API project with comprehensive observability
 // The API will use its own connection string from appsettings.Development.json
 var apiService = builder.AddProject<Projects.GenAI_SmartFlowPM_WebAPI>("api")
-    .WithEnvironment("ASPNETCORE_ENVIRONMENT", builder.Environment.EnvironmentName)
-    .WithEnvironment("OTEL_EXPORTER_OTLP_ENDPOINT", "http://localhost:4317")
-    .WithEnvironment("OTEL_SERVICE_NAME", "SmartFlowPM.WebAPI")
-    .WithEnvironment("OTEL_SERVICE_VERSION", "1.0.0");
+    .WithEnvironment("ASPNETCORE_ENVIRONMENT", builder.Environment.EnvironmentName);
 
 // Clean up any existing Next.js processes and generate configuration
 CleanupNextjsProcesses();

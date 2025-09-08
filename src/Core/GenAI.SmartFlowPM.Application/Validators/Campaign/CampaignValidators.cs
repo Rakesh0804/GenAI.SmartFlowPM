@@ -10,6 +10,8 @@ public class CampaignDtoValidator : AbstractValidator<CampaignDto>
 {
     public CampaignDtoValidator()
     {
+        ClassLevelCascadeMode = CascadeMode.Stop;
+        
         RuleFor(x => x.Title)
             .NotEmpty().WithMessage("Campaign title is required")
             .MaximumLength(200).WithMessage("Campaign title must not exceed 200 characters");
@@ -46,6 +48,8 @@ public class CampaignGroupDtoValidator : AbstractValidator<CampaignGroupDto>
 {
     public CampaignGroupDtoValidator()
     {
+        ClassLevelCascadeMode = CascadeMode.Stop;
+        
         RuleFor(x => x.Name)
             .NotEmpty().WithMessage("Group name is required")
             .MaximumLength(200).WithMessage("Group name must not exceed 200 characters");
@@ -70,6 +74,8 @@ public class CampaignEvaluationDtoValidator : AbstractValidator<CampaignEvaluati
 {
     public CampaignEvaluationDtoValidator()
     {
+        ClassLevelCascadeMode = CascadeMode.Stop;
+        
         RuleFor(x => x.CampaignId)
             .NotEmpty().WithMessage("Campaign ID is required");
 
@@ -86,6 +92,8 @@ public class CreateCampaignCommandValidator : AbstractValidator<CreateCampaignCo
 {
     public CreateCampaignCommandValidator()
     {
+        ClassLevelCascadeMode = CascadeMode.Stop;
+        
         RuleFor(x => x.Name)
             .NotEmpty().WithMessage("Campaign name is required")
             .MaximumLength(200).WithMessage("Campaign name must not exceed 200 characters");
@@ -126,6 +134,8 @@ public class UpdateCampaignCommandValidator : AbstractValidator<UpdateCampaignCo
 {
     public UpdateCampaignCommandValidator()
     {
+        ClassLevelCascadeMode = CascadeMode.Stop;
+        
         RuleFor(x => x.Id)
             .NotEmpty().WithMessage("Campaign ID is required");
 
@@ -168,6 +178,8 @@ public class StartCampaignCommandValidator : AbstractValidator<StartCampaignComm
 {
     public StartCampaignCommandValidator()
     {
+        ClassLevelCascadeMode = CascadeMode.Stop;
+        
         RuleFor(x => x.CampaignId)
             .NotEmpty().WithMessage("Campaign ID is required");
     }
@@ -177,6 +189,8 @@ public class CompleteCampaignCommandValidator : AbstractValidator<CompleteCampai
 {
     public CompleteCampaignCommandValidator()
     {
+        ClassLevelCascadeMode = CascadeMode.Stop;
+        
         RuleFor(x => x.CampaignId)
             .NotEmpty().WithMessage("Campaign ID is required");
 
@@ -190,6 +204,8 @@ public class CancelCampaignCommandValidator : AbstractValidator<CancelCampaignCo
 {
     public CancelCampaignCommandValidator()
     {
+        ClassLevelCascadeMode = CascadeMode.Stop;
+        
         RuleFor(x => x.CampaignId)
             .NotEmpty().WithMessage("Campaign ID is required");
 
@@ -203,6 +219,8 @@ public class DeleteCampaignCommandValidator : AbstractValidator<DeleteCampaignCo
 {
     public DeleteCampaignCommandValidator()
     {
+        ClassLevelCascadeMode = CascadeMode.Stop;
+        
         RuleFor(x => x.Id)
             .NotEmpty().WithMessage("Campaign ID is required");
     }
@@ -212,6 +230,8 @@ public class CreateCampaignGroupCommandValidator : AbstractValidator<CreateCampa
 {
     public CreateCampaignGroupCommandValidator()
     {
+        ClassLevelCascadeMode = CascadeMode.Stop;
+        
         RuleFor(x => x.Name)
             .NotEmpty().WithMessage("Group name is required")
             .MaximumLength(200).WithMessage("Group name must not exceed 200 characters");
@@ -230,6 +250,8 @@ public class UpdateCampaignGroupCommandValidator : AbstractValidator<UpdateCampa
 {
     public UpdateCampaignGroupCommandValidator()
     {
+        ClassLevelCascadeMode = CascadeMode.Stop;
+        
         RuleFor(x => x.Id)
             .NotEmpty().WithMessage("Group ID is required");
 
@@ -247,11 +269,82 @@ public class UpdateCampaignGroupCommandValidator : AbstractValidator<UpdateCampa
     }
 }
 
+public class SubmitCampaignEvaluationCommandValidator : AbstractValidator<SubmitCampaignEvaluationCommand>
+{
+    public SubmitCampaignEvaluationCommandValidator()
+    {
+        ClassLevelCascadeMode = CascadeMode.Stop;
+        
+        RuleFor(x => x.CampaignId)
+            .NotEmpty().WithMessage("Campaign ID is required");
+
+        RuleFor(x => x.EvaluatedUserId)
+            .NotEmpty().WithMessage("Evaluated user ID is required");
+
+        RuleFor(x => x.EvaluationNotes)
+            .MaximumLength(2000).WithMessage("Evaluation notes must not exceed 2000 characters")
+            .When(x => !string.IsNullOrEmpty(x.EvaluationNotes));
+
+        RuleFor(x => x.RecommendedActions)
+            .MaximumLength(1000).WithMessage("Recommended actions must not exceed 1000 characters")
+            .When(x => !string.IsNullOrEmpty(x.RecommendedActions));
+
+        RuleFor(x => x.RoleEvaluations)
+            .NotNull().WithMessage("Role evaluations cannot be null");
+
+        RuleFor(x => x.ClaimEvaluations)
+            .NotNull().WithMessage("Claim evaluations cannot be null");
+
+        RuleForEach(x => x.RoleEvaluations)
+            .SetValidator(new RoleClaimEvaluationDtoValidator());
+
+        RuleForEach(x => x.ClaimEvaluations)
+            .SetValidator(new RoleClaimEvaluationDtoValidator());
+    }
+}
+
+public class RoleClaimEvaluationDtoValidator : AbstractValidator<RoleClaimEvaluationDto>
+{
+    public RoleClaimEvaluationDtoValidator()
+    {
+        ClassLevelCascadeMode = CascadeMode.Stop;
+        
+        RuleFor(x => x.ItemId)
+            .NotEmpty().WithMessage("Item ID is required");
+
+        RuleFor(x => x.ItemName)
+            .NotEmpty().WithMessage("Item name is required")
+            .MaximumLength(200).WithMessage("Item name must not exceed 200 characters");
+
+        RuleFor(x => x.ItemType)
+            .NotEmpty().WithMessage("Item type is required")
+            .Must(x => x == "Role" || x == "Claim").WithMessage("Item type must be either 'Role' or 'Claim'");
+
+        RuleFor(x => x.EvaluatorComments)
+            .MaximumLength(1000).WithMessage("Evaluator comments must not exceed 1000 characters")
+            .When(x => !string.IsNullOrEmpty(x.EvaluatorComments));
+
+        RuleFor(x => x.BusinessJustification)
+            .MaximumLength(1000).WithMessage("Business justification must not exceed 1000 characters")
+            .When(x => !string.IsNullOrEmpty(x.BusinessJustification));
+
+        RuleFor(x => x.RiskLevel)
+            .Must(x => string.IsNullOrEmpty(x) || new[] { "Low", "Medium", "High" }.Contains(x))
+            .WithMessage("Risk level must be 'Low', 'Medium', or 'High'");
+
+        RuleFor(x => x.ActionRequired)
+            .Must(x => string.IsNullOrEmpty(x) || new[] { "None", "Add", "Remove", "Review" }.Contains(x))
+            .WithMessage("Action required must be 'None', 'Add', 'Remove', or 'Review'");
+    }
+}
+
 // Query Validators
 public class GetCampaignsQueryValidator : AbstractValidator<GetCampaignsQuery>
 {
     public GetCampaignsQueryValidator()
     {
+        ClassLevelCascadeMode = CascadeMode.Stop;
+        
         RuleFor(x => x.Status)
             .IsInEnum().WithMessage("Invalid campaign status")
             .When(x => x.Status.HasValue);
@@ -270,6 +363,8 @@ public class GetCampaignByIdQueryValidator : AbstractValidator<GetCampaignByIdQu
 {
     public GetCampaignByIdQueryValidator()
     {
+        ClassLevelCascadeMode = CascadeMode.Stop;
+        
         RuleFor(x => x.Id)
             .NotEmpty().WithMessage("Campaign ID is required");
     }
@@ -279,6 +374,8 @@ public class GetMyCampaignsQueryValidator : AbstractValidator<GetMyCampaignsQuer
 {
     public GetMyCampaignsQueryValidator()
     {
+        ClassLevelCascadeMode = CascadeMode.Stop;
+        
         RuleFor(x => x.Status)
             .IsInEnum().WithMessage("Invalid campaign status")
             .When(x => x.Status.HasValue);
@@ -289,6 +386,8 @@ public class GetMyCampaignTargetsQueryValidator : AbstractValidator<GetMyCampaig
 {
     public GetMyCampaignTargetsQueryValidator()
     {
+        ClassLevelCascadeMode = CascadeMode.Stop;
+        
         RuleFor(x => x.Status)
             .IsInEnum().WithMessage("Invalid campaign status")
             .When(x => x.Status.HasValue);
@@ -299,6 +398,8 @@ public class GetCampaignStatisticsQueryValidator : AbstractValidator<GetCampaign
 {
     public GetCampaignStatisticsQueryValidator()
     {
+        ClassLevelCascadeMode = CascadeMode.Stop;
+        
         RuleFor(x => x.ToDate)
             .GreaterThan(x => x.FromDate).WithMessage("End date must be after start date")
             .When(x => x.FromDate.HasValue && x.ToDate.HasValue);
@@ -309,6 +410,8 @@ public class GetCampaignGroupByIdQueryValidator : AbstractValidator<GetCampaignG
 {
     public GetCampaignGroupByIdQueryValidator()
     {
+        ClassLevelCascadeMode = CascadeMode.Stop;
+        
         RuleFor(x => x.Id)
             .NotEmpty().WithMessage("Group ID is required");
     }
@@ -318,6 +421,8 @@ public class GetCampaignEvaluationsQueryValidator : AbstractValidator<GetCampaig
 {
     public GetCampaignEvaluationsQueryValidator()
     {
+        ClassLevelCascadeMode = CascadeMode.Stop;
+        
         RuleFor(x => x.CampaignId)
             .NotEmpty().WithMessage("Campaign ID is required");
     }
@@ -327,6 +432,8 @@ public class GetCampaignEvaluationByIdQueryValidator : AbstractValidator<GetCamp
 {
     public GetCampaignEvaluationByIdQueryValidator()
     {
+        ClassLevelCascadeMode = CascadeMode.Stop;
+        
         RuleFor(x => x.Id)
             .NotEmpty().WithMessage("Evaluation ID is required");
     }
@@ -336,6 +443,8 @@ public class GetCampaignProgressQueryValidator : AbstractValidator<GetCampaignPr
 {
     public GetCampaignProgressQueryValidator()
     {
+        ClassLevelCascadeMode = CascadeMode.Stop;
+        
         RuleFor(x => x.CampaignId)
             .NotEmpty().WithMessage("Campaign ID is required");
     }

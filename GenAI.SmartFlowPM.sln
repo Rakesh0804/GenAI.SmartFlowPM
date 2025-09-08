@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenAI.SmartFlowPM.WebAPI", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartFlowPM.AppHost", "SmartFlowPM.AppHost\SmartFlowPM.AppHost.csproj", "{6473BCA6-35DB-4527-94B2-5BC91D910452}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceDefaults", "ServiceDefaults\ServiceDefaults.csproj", "{F5DDA715-C87E-4429-B1AC-0DB02BCFB8AA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -105,6 +107,18 @@ Global
 		{6473BCA6-35DB-4527-94B2-5BC91D910452}.Release|x64.Build.0 = Release|Any CPU
 		{6473BCA6-35DB-4527-94B2-5BC91D910452}.Release|x86.ActiveCfg = Release|Any CPU
 		{6473BCA6-35DB-4527-94B2-5BC91D910452}.Release|x86.Build.0 = Release|Any CPU
+		{F5DDA715-C87E-4429-B1AC-0DB02BCFB8AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5DDA715-C87E-4429-B1AC-0DB02BCFB8AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5DDA715-C87E-4429-B1AC-0DB02BCFB8AA}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F5DDA715-C87E-4429-B1AC-0DB02BCFB8AA}.Debug|x64.Build.0 = Debug|Any CPU
+		{F5DDA715-C87E-4429-B1AC-0DB02BCFB8AA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F5DDA715-C87E-4429-B1AC-0DB02BCFB8AA}.Debug|x86.Build.0 = Debug|Any CPU
+		{F5DDA715-C87E-4429-B1AC-0DB02BCFB8AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5DDA715-C87E-4429-B1AC-0DB02BCFB8AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F5DDA715-C87E-4429-B1AC-0DB02BCFB8AA}.Release|x64.ActiveCfg = Release|Any CPU
+		{F5DDA715-C87E-4429-B1AC-0DB02BCFB8AA}.Release|x64.Build.0 = Release|Any CPU
+		{F5DDA715-C87E-4429-B1AC-0DB02BCFB8AA}.Release|x86.ActiveCfg = Release|Any CPU
+		{F5DDA715-C87E-4429-B1AC-0DB02BCFB8AA}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

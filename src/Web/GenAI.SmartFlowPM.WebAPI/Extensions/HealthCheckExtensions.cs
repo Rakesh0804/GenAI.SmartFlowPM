@@ -42,16 +42,13 @@ public static class HealthCheckExtensions
             tags: new[] { "external", "ready" },
             args: new object[] { "https://httpbin.org/status/200", "External API" });
 
-        // Self health check
-        healthChecksBuilder.AddCheck<SelfHealthCheck>(
-            name: "self",
-            failureStatus: HealthStatus.Unhealthy,
-            tags: new[] { "self", "ready" });
+        // Note: ServiceDefaults already adds a "self" health check, so we don't need to add another one
+        // to avoid duplicate registration conflicts
 
         // Add Health Checks UI with PostgreSQL storage
         services.AddHealthChecksUI(opt =>
         {
-            opt.SetEvaluationTimeInSeconds(10); // Check every 10 seconds
+            opt.SetEvaluationTimeInSeconds(300); // Check every 5 minutes (300 seconds)
             opt.MaximumHistoryEntriesPerEndpoint(60); // Keep 60 history entries
             opt.SetApiMaxActiveRequests(1);
             
@@ -96,10 +93,10 @@ public static class HealthCheckExtensions
             }
         });
 
-        // Liveness probe (application is running)
+        // Liveness probe (application is running) - uses ServiceDefaults "live" tag
         endpoints.MapHealthChecks("/health/live", new HealthCheckOptions()
         {
-            Predicate = check => check.Tags.Contains("self"),
+            Predicate = check => check.Tags.Contains("live"),
             ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse,
             ResultStatusCodes =
             {
@@ -191,23 +188,5 @@ public class HttpHealthCheck : IHealthCheck
             _logger.LogError(ex, "Health check failed for {Name} at {Url}", _name, _url);
             return HealthCheckResult.Unhealthy($"{_name} health check failed: {ex.Message}");
         }
-    }
-}
-
-// Self Health Check
-public class SelfHealthCheck : IHealthCheck
-{
-    public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
-    {
-        var data = new Dictionary<string, object>()
-        {
-            ["MachineName"] = Environment.MachineName,
-            ["ProcessId"] = Environment.ProcessId,
-            ["WorkingSet"] = Environment.WorkingSet,
-            ["ProcessorCount"] = Environment.ProcessorCount,
-            ["TickCount"] = Environment.TickCount64
-        };
-
-        return Task.FromResult(HealthCheckResult.Healthy("Application is running", data));
     }
 }

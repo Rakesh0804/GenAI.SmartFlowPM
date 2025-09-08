@@ -5,6 +5,7 @@ using GenAI.SmartFlowPM.Domain.Enums;
 using GenAI.SmartFlowPM.Domain.Interfaces.Services;
 using GenAI.SmartFlowPM.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace GenAI.SmartFlowPM.Persistence.Seeders;
 
@@ -67,6 +68,11 @@ public class ComprehensiveDataSeeder
         await SeedEntityIfEmpty<CalendarEvent>("Calendar Events", SeedCalendarEventsAsync);
         await SeedCalendarAttendeesIfNeeded();
         await SeedCalendarRemindersIfNeeded();
+
+        // Campaign entities
+        await SeedEntityIfEmpty<Campaign>("Campaigns", SeedCampaignsAsync);
+        await SeedEntityIfEmpty<CampaignGroup>("Campaign Groups", SeedCampaignGroupsAsync);
+        await SeedEntityIfEmpty<CampaignEvaluation>("Campaign Evaluations", SeedCampaignEvaluationsAsync);
 
         Console.WriteLine("Comprehensive data seeding completed successfully!");
     }
@@ -184,6 +190,20 @@ public class ComprehensiveDataSeeder
             new Claim { Id = Guid.NewGuid(), Name = "branches.read", Type = "permission", Description = "Read branches", IsActive = true, TenantId = _defaultTenantId, CreatedAt = DateTime.UtcNow, CreatedBy = "System" },
             new Claim { Id = Guid.NewGuid(), Name = "branches.update", Type = "permission", Description = "Update branches", IsActive = true, TenantId = _defaultTenantId, CreatedAt = DateTime.UtcNow, CreatedBy = "System" },
             new Claim { Id = Guid.NewGuid(), Name = "branches.delete", Type = "permission", Description = "Delete branches", IsActive = true, TenantId = _defaultTenantId, CreatedAt = DateTime.UtcNow, CreatedBy = "System" },
+            
+            // Campaign permissions
+            new Claim { Id = Guid.NewGuid(), Name = "campaigns.create", Type = "permission", Description = "Create campaigns", IsActive = true, TenantId = _defaultTenantId, CreatedAt = DateTime.UtcNow, CreatedBy = "System" },
+            new Claim { Id = Guid.NewGuid(), Name = "campaigns.read", Type = "permission", Description = "Read campaigns", IsActive = true, TenantId = _defaultTenantId, CreatedAt = DateTime.UtcNow, CreatedBy = "System" },
+            new Claim { Id = Guid.NewGuid(), Name = "campaigns.update", Type = "permission", Description = "Update campaigns", IsActive = true, TenantId = _defaultTenantId, CreatedAt = DateTime.UtcNow, CreatedBy = "System" },
+            new Claim { Id = Guid.NewGuid(), Name = "campaigns.delete", Type = "permission", Description = "Delete campaigns", IsActive = true, TenantId = _defaultTenantId, CreatedAt = DateTime.UtcNow, CreatedBy = "System" },
+            new Claim { Id = Guid.NewGuid(), Name = "campaigns.groups.create", Type = "permission", Description = "Create campaign groups", IsActive = true, TenantId = _defaultTenantId, CreatedAt = DateTime.UtcNow, CreatedBy = "System" },
+            new Claim { Id = Guid.NewGuid(), Name = "campaigns.groups.read", Type = "permission", Description = "Read campaign groups", IsActive = true, TenantId = _defaultTenantId, CreatedAt = DateTime.UtcNow, CreatedBy = "System" },
+            new Claim { Id = Guid.NewGuid(), Name = "campaigns.groups.update", Type = "permission", Description = "Update campaign groups", IsActive = true, TenantId = _defaultTenantId, CreatedAt = DateTime.UtcNow, CreatedBy = "System" },
+            new Claim { Id = Guid.NewGuid(), Name = "campaigns.groups.delete", Type = "permission", Description = "Delete campaign groups", IsActive = true, TenantId = _defaultTenantId, CreatedAt = DateTime.UtcNow, CreatedBy = "System" },
+            new Claim { Id = Guid.NewGuid(), Name = "campaigns.evaluations.create", Type = "permission", Description = "Create campaign evaluations", IsActive = true, TenantId = _defaultTenantId, CreatedAt = DateTime.UtcNow, CreatedBy = "System" },
+            new Claim { Id = Guid.NewGuid(), Name = "campaigns.evaluations.read", Type = "permission", Description = "Read campaign evaluations", IsActive = true, TenantId = _defaultTenantId, CreatedAt = DateTime.UtcNow, CreatedBy = "System" },
+            new Claim { Id = Guid.NewGuid(), Name = "campaigns.evaluations.update", Type = "permission", Description = "Update campaign evaluations", IsActive = true, TenantId = _defaultTenantId, CreatedAt = DateTime.UtcNow, CreatedBy = "System" },
+            new Claim { Id = Guid.NewGuid(), Name = "campaigns.dashboard.view", Type = "permission", Description = "View campaign dashboard", IsActive = true, TenantId = _defaultTenantId, CreatedAt = DateTime.UtcNow, CreatedBy = "System" },
             
             // General permissions
             new Claim { Id = Guid.NewGuid(), Name = "reports.view", Type = "permission", Description = "View reports", IsActive = true, TenantId = _defaultTenantId, CreatedAt = DateTime.UtcNow, CreatedBy = "System" },
@@ -963,6 +983,32 @@ public class ComprehensiveDataSeeder
                 _context.TeamMembers.RemoveRange(_context.TeamMembers);
             if (_context.Teams != null)
                 _context.Teams.RemoveRange(_context.Teams);
+
+            // Clear TimeTracker entities
+            if (_context.TimeEntries != null)
+                _context.TimeEntries.RemoveRange(_context.TimeEntries);
+            if (_context.ActiveTrackingSessions != null)
+                _context.ActiveTrackingSessions.RemoveRange(_context.ActiveTrackingSessions);
+            if (_context.Timesheets != null)
+                _context.Timesheets.RemoveRange(_context.Timesheets);
+            if (_context.TimeCategories != null)
+                _context.TimeCategories.RemoveRange(_context.TimeCategories);
+
+            // Clear Calendar entities
+            if (_context.EventReminders != null)
+                _context.EventReminders.RemoveRange(_context.EventReminders);
+            if (_context.EventAttendees != null)
+                _context.EventAttendees.RemoveRange(_context.EventAttendees);
+            if (_context.CalendarEvents != null)
+                _context.CalendarEvents.RemoveRange(_context.CalendarEvents);
+
+            // Clear Campaign entities
+            if (_context.CampaignEvaluations != null)
+                _context.CampaignEvaluations.RemoveRange(_context.CampaignEvaluations);
+            if (_context.CampaignGroups != null)
+                _context.CampaignGroups.RemoveRange(_context.CampaignGroups);
+            if (_context.Campaigns != null)
+                _context.Campaigns.RemoveRange(_context.Campaigns);
                 
             if (_context.UserClaims != null)
                 _context.UserClaims.RemoveRange(_context.UserClaims);
@@ -1596,8 +1642,12 @@ public class ComprehensiveDataSeeder
                 // Add 1-5 additional attendees for non-private events
                 if (!eventItem.IsPrivate)
                 {
-                    var attendeeCount = faker.Random.Int(1, 5);
-                    var eventUsers = faker.PickRandom(users.Where(u => u.Id != eventItem.EventCreatedBy), attendeeCount);
+                    var availableUsers = users.Where(u => u.Id != eventItem.EventCreatedBy).ToList();
+                    if (availableUsers.Any())
+                    {
+                        var maxAttendees = Math.Min(5, availableUsers.Count);
+                        var attendeeCount = faker.Random.Int(1, maxAttendees);
+                        var eventUsers = faker.PickRandom(availableUsers, attendeeCount);
                     
                     foreach (var user in eventUsers)
                     {
@@ -1619,6 +1669,7 @@ public class ComprehensiveDataSeeder
                             CreatedBy = eventItem.EventCreatedBy.ToString(),
                             CreatedAt = invitedAt
                         });
+                    }
                     }
                 }
             }
@@ -1713,6 +1764,279 @@ public class ComprehensiveDataSeeder
             Console.WriteLine($"Error seeding event reminders: {ex.Message}");
             throw;
         }
+    }
+
+    #endregion
+
+    #region Campaign Entities Seeding
+
+    private async Task SeedCampaignsAsync()
+    {
+        try
+        {
+            Console.WriteLine("Seeding Campaigns...");
+            
+            var users = await _context.Users.Where(u => !u.IsDeleted).ToListAsync();
+            var managers = users.Where(u => u.UserName == "admin" || u.UserName == "jmanager").ToList();
+            var allUsers = users.Take(10).ToList();
+            
+            if (!users.Any())
+            {
+                Console.WriteLine("No users found. Skipping campaigns seeding.");
+                return;
+            }
+
+            var faker = new Faker();
+            var campaigns = new List<Campaign>();
+
+            // Create different types of campaigns
+            var campaignTypes = new[] { 0, 1, 2, 3, 4 }; // RoleEvaluation, ClaimsAudit, ComplianceReview, SecurityAssessment, PerformanceReview
+            var campaignStatuses = new[] { 1, 2, 3 }; // Active, Completed, Cancelled (skip Draft for demo)
+
+            for (int i = 0; i < 8; i++)
+            {
+                var startDate = faker.Date.Between(DateTime.UtcNow.AddDays(-90), DateTime.UtcNow.AddDays(30));
+                var endDate = startDate.AddDays(faker.Random.Int(14, 60)); // 2 weeks to 2 months duration
+                var assignedManagersList = managers.Take(faker.Random.Int(1, managers.Count)).Select(m => m.Id).ToList();
+                var targetUsersList = allUsers.Take(faker.Random.Int(3, 6)).Select(u => u.Id).ToList();
+
+                var campaign = new Campaign
+                {
+                    Id = Guid.NewGuid(),
+                    Title = faker.PickRandom(new[]
+                    {
+                        "Q4 Role Evaluation Campaign",
+                        "Annual Claims Audit Review",
+                        "Security Access Assessment",
+                        "Compliance Review - SOX",
+                        "Performance & Access Review",
+                        "Department Access Audit",
+                        "Quarterly Permission Review",
+                        "Role Validation Campaign",
+                        "User Access Compliance Check",
+                        "Annual Security Assessment"
+                    }),
+                    Description = faker.Lorem.Paragraph(2),
+                    Type = faker.PickRandom(campaignTypes),
+                    Status = faker.PickRandom(campaignStatuses),
+                    StartDate = startDate,
+                    EndDate = endDate,
+                    ActualStartDate = startDate.AddDays(-faker.Random.Int(0, 5)),
+                    ActualEndDate = faker.Random.Bool(0.4f) ? endDate.AddDays(faker.Random.Int(-10, 10)) : null,
+                    AssignedManagers = "[]", // Will be set using helper method
+                    TargetUserIds = "[]", // Will be set using helper method
+                    IsActive = true,
+                    TenantId = _defaultTenantId,
+                    CreatedByUserId = managers.First().Id,
+                    CreatedAt = startDate.AddDays(-faker.Random.Int(5, 15))
+                };
+
+                // Set JSON properties using helper methods
+                campaign.SetAssignedManagers(assignedManagersList);
+                campaign.SetTargetUserIds(targetUsersList);
+
+                campaigns.Add(campaign);
+            }
+
+            await _context.Campaigns.AddRangeAsync(campaigns);
+            Console.WriteLine($"Successfully seeded {campaigns.Count} campaigns");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error seeding campaigns: {ex.Message}");
+            throw;
+        }
+    }
+
+    private async Task SeedCampaignGroupsAsync()
+    {
+        try
+        {
+            Console.WriteLine("Seeding Campaign Groups...");
+            
+            var campaigns = await _context.Campaigns.Where(c => !c.IsDeleted).ToListAsync();
+            var users = await _context.Users.Where(u => !u.IsDeleted).ToListAsync();
+            var managers = users.Where(u => u.UserName == "admin" || u.UserName == "jmanager").ToList();
+            
+            if (!campaigns.Any() || !users.Any())
+            {
+                Console.WriteLine("No campaigns or users found. Skipping campaign groups seeding.");
+                return;
+            }
+
+            var faker = new Faker();
+            var campaignGroups = new List<CampaignGroup>();
+
+            foreach (var campaign in campaigns)
+            {
+                // Create 2-4 groups per campaign
+                var groupCount = faker.Random.Int(2, 4);
+                
+                for (int i = 0; i < groupCount; i++)
+                {
+                    var manager = faker.PickRandom(managers);
+                    var targetUsers = users.Where(u => u.Id != manager.Id)
+                                          .OrderBy(x => Guid.NewGuid())
+                                          .Take(faker.Random.Int(2, 5))
+                                          .Select(u => u.Id)
+                                          .ToList();
+
+                    var group = new CampaignGroup
+                    {
+                        Id = Guid.NewGuid(),
+                        CampaignId = campaign.Id,
+                        Name = faker.PickRandom(new[]
+                        {
+                            $"Development Team - Group {i + 1}",
+                            $"QA Team - Group {i + 1}",
+                            $"Management Group {i + 1}",
+                            $"Support Team - Group {i + 1}",
+                            $"Operations Group {i + 1}",
+                            $"Security Team - Group {i + 1}",
+                            $"Admin Group {i + 1}",
+                            $"Regional Team {i + 1}"
+                        }),
+                        Description = faker.Lorem.Sentence(8),
+                        ManagerId = manager.Id,
+                        TargetUserIds = "[]", // Will be set using helper method
+                        IsActive = true,
+                        TenantId = _defaultTenantId,
+                        CreatedBy = manager.Id.ToString(),
+                        CreatedAt = campaign.CreatedAt.AddDays(faker.Random.Int(1, 3))
+                    };
+
+                    // Set target users using helper method
+                    group.SetTargetUserIds(targetUsers);
+
+                    campaignGroups.Add(group);
+                }
+            }
+
+            await _context.CampaignGroups.AddRangeAsync(campaignGroups);
+            Console.WriteLine($"Successfully seeded {campaignGroups.Count} campaign groups");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error seeding campaign groups: {ex.Message}");
+            throw;
+        }
+    }
+
+    private async Task SeedCampaignEvaluationsAsync()
+    {
+        try
+        {
+            Console.WriteLine("Seeding Campaign Evaluations...");
+            
+            var campaignGroups = await _context.CampaignGroups
+                .Include(cg => cg.Campaign)
+                .Where(cg => !cg.IsDeleted && cg.CampaignId != null) // Only groups with campaigns
+                .ToListAsync();
+            var users = await _context.Users.Where(u => !u.IsDeleted).ToListAsync();
+            
+            if (!campaignGroups.Any() || !users.Any())
+            {
+                Console.WriteLine("No campaign groups or users found. Skipping campaign evaluations seeding.");
+                return;
+            }
+
+            // Get existing evaluations to avoid duplicates
+            var existingEvaluations = await _context.CampaignEvaluations
+                .Select(ce => new { ce.CampaignId, ce.EvaluatedUserId, ce.EvaluatorId })
+                .ToHashSetAsync();
+
+            var faker = new Faker();
+            var evaluations = new List<CampaignEvaluation>();
+
+            foreach (var group in campaignGroups.Take(10)) // Limit to first 10 groups for demo
+            {
+                var targetUsers = group.GetTargetUserIds();
+                var manager = users.FirstOrDefault(u => u.Id == group.ManagerId);
+                
+                if (manager == null) continue;
+
+                foreach (var targetUserId in targetUsers.Take(3)) // Limit to 3 evaluations per group
+                {
+                    var targetUser = users.FirstOrDefault(u => u.Id == targetUserId);
+                    if (targetUser == null) continue;
+
+                    // Check if this combination already exists
+                    var combination = new { CampaignId = group.CampaignId!.Value, EvaluatedUserId = targetUserId, EvaluatorId = manager.Id };
+                    if (existingEvaluations.Contains(combination))
+                    {
+                        Console.WriteLine($"Skipping duplicate evaluation: Campaign {combination.CampaignId}, User {combination.EvaluatedUserId}, Evaluator {combination.EvaluatorId}");
+                        continue;
+                    }
+
+                    var isCompleted = faker.Random.Bool(0.7f); // 70% completion rate
+                    var submittedAt = isCompleted ? (DateTime?)group.CreatedAt.AddDays(faker.Random.Int(1, 14)) : null;
+
+                    var evaluation = new CampaignEvaluation
+                    {
+                        Id = Guid.NewGuid(),
+                        CampaignId = group.CampaignId!.Value, // Safe to use ! since we filtered for non-null
+                        GroupId = group.Id,
+                        EvaluatedUserId = targetUserId,
+                        EvaluatorId = manager.Id,
+                        RoleEvaluations = GenerateSampleRoleEvaluations(faker),
+                        ClaimEvaluations = GenerateSampleClaimEvaluations(faker),
+                        Feedback = isCompleted ? faker.Lorem.Paragraph() : null,
+                        IsCompleted = isCompleted,
+                        SubmittedAt = submittedAt,
+                        TenantId = _defaultTenantId,
+                        CreatedBy = manager.Id.ToString(),
+                        CreatedAt = group.CreatedAt.AddDays(faker.Random.Int(0, 5))
+                    };
+
+                    evaluations.Add(evaluation);
+                    
+                    // Add to existing set to prevent duplicates within this batch
+                    existingEvaluations.Add(combination);
+                }
+            }
+
+            if (evaluations.Any())
+            {
+                await _context.CampaignEvaluations.AddRangeAsync(evaluations);
+                Console.WriteLine($"Successfully seeded {evaluations.Count} campaign evaluations");
+            }
+            else
+            {
+                Console.WriteLine("No new campaign evaluations to seed (all combinations already exist)");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error seeding campaign evaluations: {ex.Message}");
+            throw;
+        }
+    }
+
+    private string GenerateSampleRoleEvaluations(Faker faker)
+    {
+        var roleEvaluations = new Dictionary<string, object>
+        {
+            { "Admin", new { approved = faker.Random.Bool(0.8f), comments = faker.Lorem.Sentence() } },
+            { "ProjectManager", new { approved = faker.Random.Bool(0.9f), comments = faker.Lorem.Sentence() } },
+            { "Developer", new { approved = faker.Random.Bool(0.95f), comments = faker.Lorem.Sentence() } },
+            { "Tester", new { approved = faker.Random.Bool(0.9f), comments = faker.Lorem.Sentence() } }
+        };
+        
+        return JsonSerializer.Serialize(roleEvaluations);
+    }
+
+    private string GenerateSampleClaimEvaluations(Faker faker)
+    {
+        var claimEvaluations = new Dictionary<string, object>
+        {
+            { "users.read", new { approved = faker.Random.Bool(0.95f), comments = "Standard access required" } },
+            { "users.update", new { approved = faker.Random.Bool(0.8f), comments = faker.Lorem.Sentence() } },
+            { "projects.read", new { approved = faker.Random.Bool(0.9f), comments = "Necessary for daily work" } },
+            { "projects.update", new { approved = faker.Random.Bool(0.7f), comments = faker.Lorem.Sentence() } },
+            { "admin.access", new { approved = faker.Random.Bool(0.3f), comments = "Requires justification" } }
+        };
+        
+        return JsonSerializer.Serialize(claimEvaluations);
     }
 
     #endregion

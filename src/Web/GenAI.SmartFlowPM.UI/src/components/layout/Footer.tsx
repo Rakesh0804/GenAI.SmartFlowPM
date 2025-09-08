@@ -5,7 +5,7 @@ export const Footer: React.FC = () => {
         <footer className="bg-gradient-to-r from-slate-50 to-slate-100 border-t border-primary-200/50 px-6 py-3">
             <div className="flex flex-col md:flex-row items-center justify-between text-sm text-slate-600">
                 <div className="flex items-center space-x-1">
-                    <span>© 2025 SmartFlowPM.</span>
+                    <span>© 2025 Flow.</span>
                     <span>All rights reserved.</span>
                 </div>
 

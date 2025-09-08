@@ -9,6 +9,7 @@ using GenAI.SmartFlowPM.Application.DTOs.Campaign;
 using GenAI.SmartFlowPM.Application.DTOs.Certificate;
 using GenAI.SmartFlowPM.Application.DTOs.Team;
 using GenAI.SmartFlowPM.Application.DTOs.TimeTracker;
+using System.Text.Json;
 using GenAI.SmartFlowPM.Application.DTOs.Calendar;
 using GenAI.SmartFlowPM.Domain.Entities;
 
@@ -124,7 +125,27 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.TargetUserIds, opt => opt.MapFrom(src => src.GetTargetUserIds()))
             .ForMember(dest => dest.ManagerName, opt => opt.MapFrom(src => $"{src.Manager.FirstName} {src.Manager.LastName}"));
 
-        CreateMap<CampaignEvaluation, CampaignEvaluationDto>();
+        CreateMap<CampaignEvaluation, CampaignEvaluationDto>()
+            .ForMember(dest => dest.CampaignTitle, opt => opt.Ignore()) // Will be populated separately if needed
+            .ForMember(dest => dest.EvaluatedUserName, opt => opt.Ignore()) // Will be populated separately if needed
+            .ForMember(dest => dest.EvaluatorName, opt => opt.Ignore()) // Will be populated separately if needed
+            .ForMember(dest => dest.GroupName, opt => opt.Ignore()) // Will be populated separately if needed
+            .ForMember(dest => dest.RoleEvaluations, opt => opt.MapFrom(src => 
+                DeserializeEvaluations(src.RoleEvaluations)))
+            .ForMember(dest => dest.ClaimEvaluations, opt => opt.MapFrom(src => 
+                DeserializeEvaluations(src.ClaimEvaluations)));
+        
+        CreateMap<User, CampaignTargetUserDto>()
+            .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.Id))
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.UserName))
+            .ForMember(dest => dest.IsEligible, opt => opt.MapFrom(src => src.IsActive && !src.IsDeleted))
+            .ForMember(dest => dest.ManagerName, opt => opt.MapFrom(src => 
+                src.Manager != null ? $"{src.Manager.FirstName} {src.Manager.LastName}" : null))
+            .ForMember(dest => dest.CurrentRoles, opt => opt.MapFrom(src => 
+                src.UserRoles.Select(ur => ur.Role.Name).ToList()))
+            .ForMember(dest => dest.CurrentClaims, opt => opt.MapFrom(src => 
+                src.UserClaims.Select(uc => uc.Claim.Name).ToList()))
+            .ForMember(dest => dest.LastEvaluationDate, opt => opt.Ignore()); // Would need to calculate from evaluations
 
         // Certificate mappings
         CreateMap<Certificate, CertificateDto>()
@@ -390,5 +411,20 @@ public class MappingProfile : Profile
             Domain.Enums.RecurrenceType.Yearly => $"Every {pattern.Interval} year(s)",
             _ => "Custom recurrence"
         };
+    }
+
+    private static List<RoleClaimEvaluationDto> DeserializeEvaluations(string? jsonString)
+    {
+        if (string.IsNullOrEmpty(jsonString))
+            return new List<RoleClaimEvaluationDto>();
+
+        try
+        {
+            return JsonSerializer.Deserialize<List<RoleClaimEvaluationDto>>(jsonString) ?? new List<RoleClaimEvaluationDto>();
+        }
+        catch
+        {
+            return new List<RoleClaimEvaluationDto>();
+        }
     }
 }

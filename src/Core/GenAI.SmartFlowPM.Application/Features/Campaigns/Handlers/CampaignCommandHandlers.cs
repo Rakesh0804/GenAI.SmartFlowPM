@@ -48,6 +48,7 @@ public class CreateCampaignCommandHandler : IRequestHandler<CreateCampaignComman
             EndDate = request.EndDate,
             Type = (int)request.Type,
             Status = (int)request.Status,
+            CreatedByUserId = Guid.Parse(_currentUserService.UserId ?? Guid.Empty.ToString()),
             CreatedBy = _currentUserService.UserId ?? "System"
         };
 
@@ -200,10 +201,12 @@ public class CompleteCampaignCommandHandler : IRequestHandler<CompleteCampaignCo
 public class CancelCampaignCommandHandler : IRequestHandler<CancelCampaignCommand, Result<bool>>
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ICurrentUserService _currentUserService;
 
-    public CancelCampaignCommandHandler(IUnitOfWork unitOfWork)
+    public CancelCampaignCommandHandler(IUnitOfWork unitOfWork, ICurrentUserService currentUserService)
     {
         _unitOfWork = unitOfWork;
+        _currentUserService = currentUserService;
     }
 
     public async Task<Result<bool>> Handle(CancelCampaignCommand request, CancellationToken cancellationToken)
@@ -221,6 +224,7 @@ public class CancelCampaignCommandHandler : IRequestHandler<CancelCampaignComman
 
         campaign.Status = (int)DomainEnums.CampaignStatus.Cancelled;
         campaign.UpdatedAt = DateTime.UtcNow;
+        campaign.UpdatedBy = _currentUserService.UserId ?? "System";
         // Store cancellation reason in a metadata field if needed
 
         await _unitOfWork.Campaigns.UpdateAsync(campaign, cancellationToken);
@@ -233,10 +237,12 @@ public class CancelCampaignCommandHandler : IRequestHandler<CancelCampaignComman
 public class DeleteCampaignCommandHandler : IRequestHandler<DeleteCampaignCommand, Result<bool>>
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ICurrentUserService _currentUserService;
 
-    public DeleteCampaignCommandHandler(IUnitOfWork unitOfWork)
+    public DeleteCampaignCommandHandler(IUnitOfWork unitOfWork, ICurrentUserService currentUserService)
     {
         _unitOfWork = unitOfWork;
+        _currentUserService = currentUserService;
     }
 
     public async Task<Result<bool>> Handle(DeleteCampaignCommand request, CancellationToken cancellationToken)
@@ -249,7 +255,10 @@ public class DeleteCampaignCommandHandler : IRequestHandler<DeleteCampaignComman
 
         // Soft delete
         campaign.IsDeleted = true;
+        campaign.DeletedAt = DateTime.UtcNow;
+        campaign.DeletedBy = _currentUserService.UserId ?? "System";
         campaign.UpdatedAt = DateTime.UtcNow;
+        campaign.UpdatedBy = _currentUserService.UserId ?? "System";
 
         await _unitOfWork.Campaigns.UpdateAsync(campaign, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -290,6 +299,7 @@ public class CreateCampaignGroupCommandHandler : IRequestHandler<CreateCampaignG
 
         var campaignGroup = new CampaignGroup
         {
+            CampaignId = null, // Standalone group, can be assigned to campaigns later
             Name = request.Name,
             Description = request.Description,
             ManagerId = Guid.TryParse(_currentUserService.UserId, out var currentUserId) ? currentUserId : Guid.Empty,
@@ -354,5 +364,93 @@ public class UpdateCampaignGroupCommandHandler : IRequestHandler<UpdateCampaignG
 
         var campaignGroupDto = _mapper.Map<CampaignGroupDto>(campaignGroup);
         return Result<CampaignGroupDto>.Success(campaignGroupDto, "Campaign group updated successfully");
+    }
+}
+
+public class SubmitCampaignEvaluationCommandHandler : IRequestHandler<SubmitCampaignEvaluationCommand, Result<CampaignEvaluationDto>>
+{
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IMapper _mapper;
+    private readonly ICurrentUserService _currentUserService;
+
+    public SubmitCampaignEvaluationCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, ICurrentUserService currentUserService)
+    {
+        _unitOfWork = unitOfWork;
+        _mapper = mapper;
+        _currentUserService = currentUserService;
+    }
+
+    public async Task<Result<CampaignEvaluationDto>> Handle(SubmitCampaignEvaluationCommand request, CancellationToken cancellationToken)
+    {
+        // Validate campaign exists and is active
+        var campaign = await _unitOfWork.Campaigns.GetByIdAsync(request.CampaignId, cancellationToken);
+        if (campaign == null)
+        {
+            return Result<CampaignEvaluationDto>.Failure("Campaign not found");
+        }
+
+        if (campaign.Status != (int)DomainEnums.CampaignStatus.Active)
+        {
+            return Result<CampaignEvaluationDto>.Failure("Campaign is not active");
+        }
+
+        // Validate evaluated user exists
+        if (!await _unitOfWork.Users.ExistsAsync(request.EvaluatedUserId, cancellationToken))
+        {
+            return Result<CampaignEvaluationDto>.Failure("Evaluated user not found");
+        }
+
+        // Check if evaluation already exists
+        var currentUserId = Guid.Parse(_currentUserService.UserId ?? Guid.Empty.ToString());
+        var existingEvaluation = await _unitOfWork.CampaignEvaluations.GetByEvaluatorAndUserAsync(
+            request.CampaignId, currentUserId, request.EvaluatedUserId, cancellationToken);
+
+        CampaignEvaluation evaluation;
+
+        if (existingEvaluation != null)
+        {
+            // Update existing evaluation
+            evaluation = existingEvaluation;
+            
+            // Convert DTOs to Dictionary for storage
+            var roleEvalDict = request.RoleEvaluations?.ToDictionary(r => r.ItemName, r => (object)r) ?? new Dictionary<string, object>();
+            var claimEvalDict = request.ClaimEvaluations?.ToDictionary(c => c.ItemName, c => (object)c) ?? new Dictionary<string, object>();
+            
+            evaluation.SetRoleEvaluations(roleEvalDict);
+            evaluation.SetClaimEvaluations(claimEvalDict);
+            evaluation.Feedback = request.EvaluationNotes;
+            evaluation.IsCompleted = true; // Submission means it's completed
+            evaluation.SubmittedAt = DateTime.UtcNow;
+
+            await _unitOfWork.CampaignEvaluations.UpdateAsync(evaluation, cancellationToken);
+        }
+        else
+        {
+            // Create new evaluation
+            evaluation = new CampaignEvaluation
+            {
+                CampaignId = request.CampaignId,
+                GroupId = null, // Will be determined based on campaign group assignment
+                EvaluatedUserId = request.EvaluatedUserId,
+                EvaluatorId = currentUserId,
+                Feedback = request.EvaluationNotes,
+                IsCompleted = true,
+                SubmittedAt = DateTime.UtcNow
+            };
+
+            // Convert DTOs to Dictionary for storage
+            var roleEvalDict = request.RoleEvaluations?.ToDictionary(r => r.ItemName, r => (object)r) ?? new Dictionary<string, object>();
+            var claimEvalDict = request.ClaimEvaluations?.ToDictionary(c => c.ItemName, c => (object)c) ?? new Dictionary<string, object>();
+            
+            evaluation.SetRoleEvaluations(roleEvalDict);
+            evaluation.SetClaimEvaluations(claimEvalDict);
+
+            await _unitOfWork.CampaignEvaluations.AddAsync(evaluation, cancellationToken);
+        }
+
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        var evaluationDto = _mapper.Map<CampaignEvaluationDto>(evaluation);
+        return Result<CampaignEvaluationDto>.Success(evaluationDto, "Campaign evaluation submitted successfully");
     }
 }
