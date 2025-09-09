@@ -21,7 +21,9 @@ var frontend = builder.AddNpmApp("frontend", "../src/Web/GenAI.SmartFlowPM.UI", 
     .WithEnvironment("PORT", "3001")
     .WithEnvironment("NEXT_PUBLIC_API_URL", "https://localhost:7149/api")
     .WithEnvironment("NEXT_PUBLIC_API_URL_HTTP", "http://localhost:5052/api")
-    .WithEnvironment("NEXT_PUBLIC_ENVIRONMENT", isDevelopment ? "development" : "production");
+    .WithEnvironment("NEXT_PUBLIC_ENVIRONMENT", isDevelopment ? "development" : "production")
+    .WithEnvironment("OTEL_SERVICE_NAME", "frontend")
+    .WithOtlpExporter();
 
 // Add Docker publishing for production
 if (!isDevelopment)

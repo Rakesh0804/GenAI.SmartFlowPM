@@ -7,7 +7,7 @@ import {
   BarChart3, 
   FileText, 
   Settings,
-  Plus,
+  CirclePlus,
   List
 } from 'lucide-react';
 import TimeTrackerDashboard from './TimeTrackerDashboard';
@@ -95,7 +95,7 @@ export const TimeTrackerPage: React.FC<TimeTrackerPageProps> = ({
             onClick={() => handleCreateEntry()}
             className="flex items-center px-4 py-2 bg-brand-primary text-white rounded-md hover:bg-brand-primaryDark transition-colors"
           >
-            <Plus className="h-4 w-4 mr-2" />
+            <CirclePlus className="h-4 w-4 mr-2" />
             Add Entry
           </button>
         </div>

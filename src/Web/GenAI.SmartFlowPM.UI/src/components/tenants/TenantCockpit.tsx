@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { tenantService } from '../../services/tenant.service';
 import { TenantDto } from '../../types/api.types';
 import { 
-  Building, Building2, Calendar, Globe, Mail, Phone, MapPin, Search, Filter, Plus, 
+  Building, Building2, Calendar, Globe, Mail, Phone, MapPin, Search, Filter, CirclePlus, 
   MoreVertical, Edit, Eye, X, Clock, CheckCircle, XCircle, Users, FolderOpen, 
   CreditCard, AlertTriangle, Crown, DollarSign, CalendarDays, Server 
 } from 'lucide-react';
@@ -120,31 +120,31 @@ const TenantCard: React.FC<TenantCardProps> = ({ tenant, onEdit, onView, onDelet
         </div>
         
         {/* Action Buttons */}
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 ml-auto">
           <button
             onClick={() => onView(tenant)}
-            className="p-2 text-gray-500 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200"
+            className="p-1.5 text-gray-500 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200"
             title="View Details"
           >
-            <Eye className="w-5 h-5" />
+            <Eye className="w-4 h-4" />
           </button>
           
           <button
             onClick={() => onEdit(tenant)}
-            className="p-2 text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all duration-200"
+            className="p-1.5 text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all duration-200"
             title="Edit Tenant"
           >
-            <Edit className="w-5 h-5" />
+            <Edit className="w-4 h-4" />
           </button>
           
           {/* More Actions Dropdown */}
           <div className="relative">
             <button
               onClick={() => setShowDropdown(!showDropdown)}
-              className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-all duration-200"
+              className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-all duration-200"
               title="More Actions"
             >
-              <MoreVertical className="w-5 h-5" />
+              <MoreVertical className="w-4 h-4" />
             </button>
             
             {showDropdown && (
@@ -480,7 +480,7 @@ export const TenantCockpit: React.FC<TenantCockpitProps> = ({
               onClick={onNewTenant}
               className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
             >
-              <Plus className="w-4 h-4" />
+              <CirclePlus className="w-4 h-4" />
               <span>Add Tenant</span>
             </button>
 
@@ -582,7 +582,7 @@ export const TenantCockpit: React.FC<TenantCockpitProps> = ({
                 onClick={onNewTenant}
                 className="inline-flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
               >
-                <Plus className="w-4 h-4" />
+                <CirclePlus className="w-4 h-4" />
                 <span>Add First Tenant</span>
               </button>
             </div>

@@ -26,7 +26,7 @@ import {
   Clock, 
   Calendar, 
   BarChart3, 
-  Plus,
+  CirclePlus,
   Edit,
   Trash2,
   Filter,
@@ -492,7 +492,7 @@ const TimeTrackerDashboard: React.FC<TimeTrackerDashboardProps> = ({ userId }) =
             Recent Entries
           </h2>
           <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-            <Plus className="w-4 h-4" />
+            <CirclePlus className="w-4 h-4" />
             Add Entry
           </button>
         </div>

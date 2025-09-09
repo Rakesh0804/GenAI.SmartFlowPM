@@ -18,8 +18,13 @@ public static class ServiceCollectionExtensions
         // Add DbContext
         services.AddDbContext<ApplicationDbContext>(options =>
         {
-            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"));
-            
+            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"), npgsqlOptions =>
+            {
+                // Configure query splitting behavior globally to improve performance when loading multiple collections
+                // This splits queries with multiple Include() operations into separate queries to avoid Cartesian explosion
+                npgsqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+            });
+
             // Enable sensitive data logging in development for better debugging
             if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
             {
@@ -51,13 +56,13 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICertificateTemplateRepository, CertificateTemplateRepository>();
         services.AddScoped<ITeamRepository, TeamRepository>();
         services.AddScoped<ITeamMemberRepository, TeamMemberRepository>();
-        
+
         // TimeTracker repositories
         services.AddScoped<ITimeCategoryRepository, TimeCategoryRepository>();
         services.AddScoped<ITimeEntryRepository, TimeEntryRepository>();
         services.AddScoped<ITimesheetRepository, TimesheetRepository>();
         services.AddScoped<IActiveTrackingSessionRepository, ActiveTrackingSessionRepository>();
-        
+
         services.AddScoped<IUnitOfWork, UnitOfWork.UnitOfWork>();
 
         // Add services

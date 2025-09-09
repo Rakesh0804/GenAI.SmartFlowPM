@@ -13,8 +13,7 @@ import {
   ArrowLeft, 
   Edit, 
   Trash2, 
-  Plus,
-  PlusCircle,
+  CirclePlus,
   User,
   Users,
   Mail,
@@ -88,25 +87,25 @@ const UserCard: React.FC<UserCardProps> = ({ user, onEdit, onView, onDelete, onT
         </div>
         
         {/* Action Icons in Header */}
-        <div className="flex items-center space-x-1">
+        <div className="flex items-center space-x-1 ml-auto">
           <button
             onClick={onView}
-            className="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-md transition-all duration-200"
+            className="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-md transition-all duration-200"
             title="View User"
           >
-            <Eye className="w-5 h-5" />
+            <Eye className="w-4 h-4" />
           </button>
           <button
             onClick={onEdit}
-            className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-all duration-200"
+            className="p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-all duration-200"
             title="Edit User"
           >
-            <Edit className="w-5 h-5" />
+            <Edit className="w-4 h-4" />
           </button>
           <div className="relative">
             <button
               onClick={() => setShowDropdown(!showDropdown)}
-              className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+              className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
               title="More options"
             >
               <MoreHorizontal className="w-4 h-4" />
@@ -447,7 +446,7 @@ export const UserCockpit: React.FC<UserCockpitProps> = ({
               onClick={onNewUser}
               className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
             >
-              <PlusCircle className="w-4 h-4" />
+              <CirclePlus className="w-4 h-4" />
               <span>New User</span>
             </button>
 
@@ -548,7 +547,7 @@ export const UserCockpit: React.FC<UserCockpitProps> = ({
                   onClick={onNewUser} 
                   className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
                 >
-                  <PlusCircle className="w-4 h-4 mr-2" />
+                  <CirclePlus className="w-4 h-4 mr-2" />
                   Create New User
                 </button>
               )}

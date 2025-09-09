@@ -14,7 +14,7 @@ import {
   ArrowLeft, 
   Edit, 
   Trash2,
-  PlusCircle,
+  CirclePlus,
   Key,
   Users,
   Calendar,
@@ -390,7 +390,7 @@ export const ClaimCockpit: React.FC<ClaimCockpitProps> = ({
               onClick={handleAddNew}
               className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-primary-600 to-primary-700 border border-transparent rounded-md hover:from-primary-700 hover:to-primary-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 shadow-lg transition-all duration-200"
             >
-              <PlusCircle className="w-5 h-5" />
+              <CirclePlus className="w-4 h-4" />
               <span>Add Claim</span>
             </button>
 
@@ -478,7 +478,7 @@ export const ClaimCockpit: React.FC<ClaimCockpitProps> = ({
                     onClick={handleAddNew}
                     className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 mx-auto"
                   >
-                    <PlusCircle className="w-4 h-4" />
+                    <CirclePlus className="w-4 h-4" />
                     <span>Add First Claim</span>
                   </button>
                 )}

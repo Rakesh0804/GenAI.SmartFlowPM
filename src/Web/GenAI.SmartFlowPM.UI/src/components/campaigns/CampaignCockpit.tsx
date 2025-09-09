@@ -11,7 +11,7 @@ import {
   Clock, 
   Search, 
   Filter, 
-  Plus, 
+  CirclePlus, 
   MoreVertical, 
   Edit, 
   Eye, 
@@ -197,11 +197,6 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
       <div className="bg-gray-50 px-4 py-3 border-b border-gray-200 flex items-center justify-between">
         <div className="flex items-center space-x-3 flex-1 min-w-0">
           <div className="flex items-center space-x-2">
-            {/* Campaign Status Badge */}
-            <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium border ${statusBadge.className}`}>
-              {statusBadge.icon}
-              <span className="ml-1">{statusBadge.text}</span>
-            </span>
             {/* Campaign Type Badge */}
             <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium border ${typeBadge.className}`}>
               {typeBadge.text}
@@ -210,31 +205,31 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
         </div>
         
         {/* Action Buttons */}
-        <div className="flex items-center space-x-1">
+        <div className="flex items-center space-x-1 ml-auto">
           <button
             onClick={() => onView(campaign)}
-            className="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-md transition-all duration-200"
+            className="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-md transition-all duration-200"
             title="View Details"
           >
-            <Eye className="w-5 h-5" />
+            <Eye className="w-4 h-4" />
           </button>
           
           <button
             onClick={() => onEdit(campaign)}
-            className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-all duration-200"
+            className="p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-all duration-200"
             title="Edit Campaign"
           >
-            <Edit className="w-5 h-5" />
+            <Edit className="w-4 h-4" />
           </button>
           
           {/* More Actions Dropdown */}
           <div className="relative">
             <button
               onClick={() => setShowDropdown(!showDropdown)}
-              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-all duration-200"
+              className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-all duration-200"
               title="More Actions"
             >
-              <MoreVertical className="w-5 h-5" />
+              <MoreVertical className="w-4 h-4" />
             </button>
             
             {showDropdown && (
@@ -275,17 +270,30 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
 
       {/* Card Body */}
       <div className="p-4 space-y-3 flex-1">
-        {/* Campaign Name and Description */}
-        <div className="flex items-start space-x-3">
-          <div className="flex-shrink-0 mt-0.5">
+        {/* Campaign Name */}
+        <div className="flex items-start space-x-3 mb-3">
+          <div className="flex-shrink-0 mt-1">
             <div className="w-2 h-2 bg-primary-500 rounded-full"></div>
           </div>
           <div className="flex-1 min-w-0">
-            <h4 className="text-sm font-bold text-gray-900 mb-1">{campaign.name}</h4>
-            <p className="text-sm text-gray-600 break-words">
-              {campaign.description || 'No description provided'}
-            </p>
+            <h4 className="text-sm font-bold text-gray-900 leading-tight">{campaign.title}</h4>
           </div>
+        </div>
+
+        {/* Campaign Description */}
+        <div className="mb-3">
+          <p className="text-sm text-gray-600 break-words">
+            {campaign.description || 'No description provided'}
+          </p>
+        </div>
+
+        {/* Campaign Status */}
+        <div className="flex items-center space-x-2">
+          <span className="text-sm text-gray-600">Status:</span>
+          <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium border ${statusBadge.className}`}>
+            {statusBadge.icon}
+            <span className="ml-1">{statusBadge.text}</span>
+          </span>
         </div>
 
         {/* Campaign Dates */}
@@ -480,7 +488,7 @@ export const CampaignCockpit: React.FC<CampaignCockpitProps> = ({
   const handleStartCampaign = async (campaign: CampaignDto) => {
     showConfirmation({
       title: 'Start Campaign',
-      message: `Are you sure you want to start "${campaign.name}"? This will make the campaign active and begin the evaluation process.`,
+      message: `Are you sure you want to start "${campaign.title}"? This will make the campaign active and begin the evaluation process.`,
       confirmText: 'Start Campaign',
       onConfirm: async () => {
         try {
@@ -498,7 +506,7 @@ export const CampaignCockpit: React.FC<CampaignCockpitProps> = ({
   const handleCompleteCampaign = async (campaign: CampaignDto) => {
     showConfirmation({
       title: 'Complete Campaign',
-      message: `Are you sure you want to complete "${campaign.name}"? This will finalize all evaluations and mark the campaign as completed.`,
+      message: `Are you sure you want to complete "${campaign.title}"? This will finalize all evaluations and mark the campaign as completed.`,
       confirmText: 'Complete Campaign',
       onConfirm: async () => {
         try {
@@ -516,7 +524,7 @@ export const CampaignCockpit: React.FC<CampaignCockpitProps> = ({
   const handleCancelCampaign = async (campaign: CampaignDto) => {
     showConfirmation({
       title: 'Cancel Campaign',
-      message: `Are you sure you want to cancel "${campaign.name}"? This action cannot be undone and will stop all evaluation activities.`,
+      message: `Are you sure you want to cancel "${campaign.title}"? This action cannot be undone and will stop all evaluation activities.`,
       confirmText: 'Cancel Campaign',
       onConfirm: async () => {
         try {
@@ -574,7 +582,7 @@ export const CampaignCockpit: React.FC<CampaignCockpitProps> = ({
               onClick={onNewCampaign}
               className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
             >
-              <Plus className="w-4 h-4" />
+              <CirclePlus className="w-4 h-4" />
               <span>New Campaign</span>
             </button>
 
@@ -725,7 +733,7 @@ export const CampaignCockpit: React.FC<CampaignCockpitProps> = ({
                 onClick={onNewCampaign}
                 className="inline-flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
               >
-                <Plus className="w-4 h-4" />
+                <CirclePlus className="w-4 h-4" />
                 <span>Create First Campaign</span>
               </button>
             </div>

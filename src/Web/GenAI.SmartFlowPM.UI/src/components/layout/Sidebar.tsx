@@ -158,7 +158,7 @@ export const Sidebar: React.FC = () => {
     return (
         <>
             <div className={`fixed left-0 top-0 h-full border-r border-orange-200 transition-all duration-300 ease-in-out z-50 ${isCollapsed ? 'w-16' : 'w-64'
-                }`} style={{backgroundColor: '#FFF8F0'}}>
+                }`} style={{backgroundColor: '#FFF8F0', overflowY: 'auto'}}>
             {/* Header */}
             <div className={`flex items-center p-4 border-b border-orange-200/50 ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
                 {!isCollapsed && (

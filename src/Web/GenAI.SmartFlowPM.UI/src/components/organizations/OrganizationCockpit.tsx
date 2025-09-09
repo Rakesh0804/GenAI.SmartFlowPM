@@ -14,7 +14,7 @@ import {
   ArrowLeft, 
   Edit, 
   Trash2,
-  PlusCircle,
+  CirclePlus,
   Building2,
   MapPin,
   Calendar,
@@ -92,30 +92,30 @@ const OrganizationCard: React.FC<OrganizationCardProps> = ({
         </div>
         
         {/* Action Icons in Header */}
-        <div className="flex items-center space-x-1">
+        <div className="flex items-center space-x-1 ml-auto">
           <button
             onClick={onView}
-            className="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-md transition-all duration-200"
+            className="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-md transition-all duration-200"
             title="View Organization"
           >
-            <Eye className="w-5 h-5" />
+            <Eye className="w-4 h-4" />
           </button>
           <button
             onClick={onEdit}
-            className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-all duration-200"
+            className="p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-all duration-200"
             title="Edit Organization"
           >
-            <Edit className="w-5 h-5" />
+            <Edit className="w-4 h-4" />
           </button>
           
           {/* More Actions Dropdown */}
           <div className="relative">
             <button
               onClick={() => setShowDropdown(!showDropdown)}
-              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-all duration-200"
+              className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-all duration-200"
               title="More Actions"
             >
-              <MoreHorizontal className="w-5 h-5" />
+              <MoreHorizontal className="w-4 h-4" />
             </button>
             
             {showDropdown && (
@@ -482,7 +482,7 @@ export const OrganizationCockpit: React.FC<OrganizationCockpitProps> = ({
               onClick={onNewOrganization}
               className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
             >
-              <PlusCircle className="w-4 h-4" />
+              <CirclePlus className="w-4 h-4" />
               <span>New Organization</span>
             </button>
 
@@ -591,7 +591,7 @@ export const OrganizationCockpit: React.FC<OrganizationCockpitProps> = ({
                   onClick={onNewOrganization}
                   className="inline-flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
                 >
-                  <PlusCircle className="w-4 h-4" />
+                  <CirclePlus className="w-4 h-4" />
                   <span>Create Organization</span>
                 </button>
               )}

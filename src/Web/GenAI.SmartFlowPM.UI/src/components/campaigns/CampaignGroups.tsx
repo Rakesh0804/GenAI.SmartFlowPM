@@ -10,7 +10,7 @@ import {
   Clock, 
   Search, 
   Filter, 
-  Plus, 
+  CirclePlus, 
   MoreVertical, 
   Edit, 
   Eye, 
@@ -90,31 +90,31 @@ const CampaignGroupCard: React.FC<CampaignGroupCardProps> = ({
         </div>
         
         {/* Action Buttons */}
-        <div className="flex items-center space-x-1">
+        <div className="flex items-center space-x-1 ml-auto">
           <button
             onClick={() => onView(group)}
-            className="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-md transition-all duration-200"
+            className="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-md transition-all duration-200"
             title="View Details"
           >
-            <Eye className="w-5 h-5" />
+            <Eye className="w-4 h-4" />
           </button>
           
           <button
             onClick={() => onEdit(group)}
-            className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-all duration-200"
+            className="p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-all duration-200"
             title="Edit Group"
           >
-            <Edit className="w-5 h-5" />
+            <Edit className="w-4 h-4" />
           </button>
           
           {/* More Actions Dropdown */}
           <div className="relative">
             <button
               onClick={() => setShowDropdown(!showDropdown)}
-              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-all duration-200"
+              className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-all duration-200"
               title="More Actions"
             >
-              <MoreVertical className="w-5 h-5" />
+              <MoreVertical className="w-4 h-4" />
             </button>
             
             {showDropdown && (
@@ -374,7 +374,7 @@ export const CampaignGroups: React.FC<CampaignGroupsProps> = ({
               onClick={onNewGroup}
               className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
             >
-              <Plus className="w-4 h-4" />
+              <CirclePlus className="w-4 h-4" />
               <span>New Group</span>
             </button>
 
@@ -458,7 +458,7 @@ export const CampaignGroups: React.FC<CampaignGroupsProps> = ({
                 onClick={onNewGroup}
                 className="inline-flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
               >
-                <Plus className="w-4 h-4" />
+                <CirclePlus className="w-4 h-4" />
                 <span>Create First Group</span>
               </button>
             </div>

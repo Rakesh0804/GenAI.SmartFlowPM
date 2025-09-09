@@ -6,7 +6,7 @@ import {
   ChevronRight, 
   Calendar, 
   Clock, 
-  Plus,
+  CirclePlus,
   Edit,
   Trash2,
   Filter
@@ -296,7 +296,7 @@ export const TimeCalendar: React.FC<TimeCalendarProps> = ({
                       onClick={() => onCreateEntry?.(day.date)}
                       className="p-1 hover:bg-gray-200 rounded opacity-0 group-hover:opacity-100 transition-opacity"
                     >
-                      <Plus className="h-3 w-3 text-gray-500" />
+                      <CirclePlus className="h-3 w-3 text-gray-500" />
                     </button>
                   )}
                 </div>
@@ -359,7 +359,7 @@ export const TimeCalendar: React.FC<TimeCalendarProps> = ({
                 <span>Click entries to edit</span>
               </div>
               <div className="flex items-center gap-2">
-                <Plus className="h-3 w-3" />
+                <CirclePlus className="h-3 w-3" />
                 <span>Click dates to add time</span>
               </div>
             </div>
