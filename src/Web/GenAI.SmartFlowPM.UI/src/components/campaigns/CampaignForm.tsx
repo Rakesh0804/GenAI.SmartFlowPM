@@ -78,7 +78,7 @@ const CampaignForm: React.FC<CampaignFormProps> = ({
       const targetUserGroups = campaign.targetUserGroups || [];
 
       setFormData({
-        name: (campaign as any).title || campaign.name || '',
+        name: campaign.title || '',
         description: campaign.description || '',
         type: campaign.type,
         startDate: new Date(campaign.startDate).toISOString().split('T')[0],

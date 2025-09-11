@@ -27,7 +27,13 @@ public class AuthController : BaseController
     {
         var command = new LoginUserCommand { LoginDto = loginDto };
         var result = await _mediator.Send(command);
+
+        // Option 1: Use traditional Result handling (recommended)
         return HandleResult(result);
+
+        // Option 2: Use exception-based approach (uncomment if preferred)
+        // var loginResponse = ResultHelper.GetValueOrThrow(result);
+        // return Success(loginResponse, "Login successful");
     }
 
     /// <summary>
@@ -155,9 +161,11 @@ public class AuthController : BaseController
                 message = "Token refreshed successfully"
             });
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return BadRequest(new { success = false, message = "Token refresh failed" });
+            // Log and let global handler manage the response
+            // The global exception handler will create proper RFC 7807 response
+            throw new InvalidOperationException("Token refresh failed", ex);
         }
     }
 

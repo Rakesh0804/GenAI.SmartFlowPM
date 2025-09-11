@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import '../styles/globals.css';
 import { AuthProvider } from '../hooks/useAuth';
 import { ToastProvider } from '../contexts/ToastContext';
+import TracingComponent from '../components/TracingComponent';
 
 export const metadata: Metadata = {
   title: 'SmartFlowPM - Project Management System',
@@ -26,6 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="font-ubuntu antialiased">
+        <TracingComponent />
         <ToastProvider>
           <AuthProvider>
             {children}

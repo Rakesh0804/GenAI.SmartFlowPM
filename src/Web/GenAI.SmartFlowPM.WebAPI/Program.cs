@@ -24,6 +24,9 @@ builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddFluentValidationClientsideAdapters();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
+// Add Global Exception Handling
+builder.Services.AddGlobalExceptionHandling();
+
 // Add custom services
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices();
@@ -149,6 +152,9 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseSmartFlowCors(app.Environment);
+
+// Add comprehensive exception handling middleware (should be early in pipeline)
+app.UseComprehensiveExceptionHandling();
 
 app.UseAuthentication();
 app.UseAuthorization();

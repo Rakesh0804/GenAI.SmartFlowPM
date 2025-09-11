@@ -11,22 +11,27 @@ export function register() {
   console.log('- OTEL_EXPORTER_OTLP_ENDPOINT:', process.env.OTEL_EXPORTER_OTLP_ENDPOINT);
   console.log('- OTEL_SERVICE_NAME:', process.env.OTEL_SERVICE_NAME);
   console.log('- NODE_ENV:', process.env.NODE_ENV);
+  console.log('- All env vars:', Object.keys(process.env).filter(key => key.startsWith('OTEL_')));
   
   // Check if we have the required environment variables set by Aspire
-  const otlpEndpoint = process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
+  let otlpEndpoint = process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
   
+  // Fallback to default Aspire OTLP endpoint if not set
   if (!otlpEndpoint) {
-    console.log('❌ OTEL_EXPORTER_OTLP_ENDPOINT not set, OpenTelemetry will not be initialized');
-    return;
+    otlpEndpoint = 'http://localhost:18889';
+    console.log('⚠️  OTEL_EXPORTER_OTLP_ENDPOINT not set, using default Aspire endpoint:', otlpEndpoint);
   }
   
   console.log('✅ Initializing OpenTelemetry with endpoint:', otlpEndpoint);
   
   try {
+    const traceEndpoint = `${otlpEndpoint}/v1/traces`;
+    console.log('📤 Trace export endpoint:', traceEndpoint);
+    
     const sdk = new NodeSDK({
       serviceName: process.env.OTEL_SERVICE_NAME || 'frontend',
       traceExporter: new OTLPTraceExporter({
-        url: `${otlpEndpoint}/v1/traces`,
+        url: traceEndpoint,
       }),
     instrumentations: [
       getNodeAutoInstrumentations({

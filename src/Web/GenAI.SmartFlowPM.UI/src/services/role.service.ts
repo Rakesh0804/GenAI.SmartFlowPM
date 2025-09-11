@@ -16,14 +16,14 @@ class RoleService extends BaseApiService {
       ...(searchTerm && { searchTerm }),
     });
 
-    return this.get<PaginatedResponse<RoleDto>>(`/Role?${params}`);
+    return this.get<PaginatedResponse<RoleDto>>(`/Roles?${params}`);
   }
 
   /**
    * Get all roles (no pagination) for dropdowns
    */
   async getAllRoles(): Promise<RoleDto[]> {
-    const result = await this.get<PaginatedResponse<RoleDto>>('/Role?pageSize=100');
+    const result = await this.get<PaginatedResponse<RoleDto>>('/Roles?pageSize=100');
     return result.items;
   }
 
@@ -31,28 +31,28 @@ class RoleService extends BaseApiService {
    * Get role by ID
    */
   async getRoleById(id: string): Promise<RoleDto> {
-    return this.get<RoleDto>(`/Role/${id}`);
+    return this.get<RoleDto>(`/Roles/${id}`);
   }
 
   /**
    * Create new role
    */
   async createRole(roleData: CreateRoleDto): Promise<RoleDto> {
-    return this.post<RoleDto>('/Role', roleData);
+    return this.post<RoleDto>('/Roles', roleData);
   }
 
   /**
    * Update existing role
    */
   async updateRole(id: string, roleData: UpdateRoleDto): Promise<RoleDto> {
-    return this.put<RoleDto>(`/Role/${id}`, roleData);
+    return this.put<RoleDto>(`/Roles/${id}`, roleData);
   }
 
   /**
    * Delete role (soft delete)
    */
   async deleteRole(id: string): Promise<void> {
-    return this.delete(`/Role/${id}`);
+    return this.delete(`/Roles/${id}`);
   }
 
   /**

@@ -5,19 +5,15 @@ using GenAI.SmartFlowPM.Application.Features.Roles.Commands;
 using GenAI.SmartFlowPM.Application.Features.Roles.Queries;
 using GenAI.SmartFlowPM.Application.DTOs.Role;
 using GenAI.SmartFlowPM.Application.Common.Models;
+using GenAI.SmartFlowPM.WebAPI.Controllers.Base;
 
 namespace GenAI.SmartFlowPM.WebAPI.Controllers;
 
-[ApiController]
-[Route("api/[controller]")]
 [Authorize]
-public class RolesController : ControllerBase
+public class RolesController : BaseController
 {
-    private readonly IMediator _mediator;
-
-    public RolesController(IMediator mediator)
+    public RolesController(IMediator mediator) : base(mediator)
     {
-        _mediator = mediator;
     }
 
     /// <summary>
@@ -26,17 +22,11 @@ public class RolesController : ControllerBase
     /// <param name="pagedQuery">Pagination parameters</param>
     /// <returns>Paginated list of roles</returns>
     [HttpGet]
-    public async Task<ActionResult<Result<PaginatedResult<RoleDto>>>> GetAllRoles([FromQuery] PagedQuery pagedQuery)
+    public async Task<IActionResult> GetAllRoles([FromQuery] PagedQuery pagedQuery)
     {
         var query = new GetAllRolesQuery { PagedQuery = pagedQuery };
         var result = await _mediator.Send(query);
-
-        if (result.IsSuccess)
-        {
-            return Ok(result);
-        }
-
-        return BadRequest(result);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -45,17 +35,11 @@ public class RolesController : ControllerBase
     /// <param name="id">Role ID</param>
     /// <returns>Role details</returns>
     [HttpGet("{id}")]
-    public async Task<ActionResult<Result<RoleDto>>> GetRoleById(Guid id)
+    public async Task<IActionResult> GetRoleById(Guid id)
     {
         var query = new GetRoleByIdQuery { Id = id };
         var result = await _mediator.Send(query);
-
-        if (result.IsSuccess)
-        {
-            return Ok(result);
-        }
-
-        return NotFound(result);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -64,17 +48,24 @@ public class RolesController : ControllerBase
     /// <param name="createRoleDto">Role creation data</param>
     /// <returns>Created role</returns>
     [HttpPost]
-    public async Task<ActionResult<Result<RoleDto>>> CreateRole([FromBody] CreateRoleDto createRoleDto)
+    public async Task<IActionResult> CreateRole([FromBody] CreateRoleDto createRoleDto)
     {
         var command = new CreateRoleCommand { CreateRoleDto = createRoleDto };
         var result = await _mediator.Send(command);
 
         if (result.IsSuccess)
         {
-            return CreatedAtAction(nameof(GetRoleById), new { id = result.Data!.Id }, result);
+            return CreatedAtAction(nameof(GetRoleById), new { id = result.Data!.Id }, new
+            {
+                isSuccess = true,
+                data = result.Data,
+                message = result.Message,
+                correlationId = GetCorrelationId(),
+                timestamp = DateTime.UtcNow
+            });
         }
 
-        return BadRequest(result);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -84,17 +75,11 @@ public class RolesController : ControllerBase
     /// <param name="updateRoleDto">Role update data</param>
     /// <returns>Updated role</returns>
     [HttpPut("{id}")]
-    public async Task<ActionResult<Result<RoleDto>>> UpdateRole(Guid id, [FromBody] UpdateRoleDto updateRoleDto)
+    public async Task<IActionResult> UpdateRole(Guid id, [FromBody] UpdateRoleDto updateRoleDto)
     {
         var command = new UpdateRoleCommand { Id = id, UpdateRoleDto = updateRoleDto };
         var result = await _mediator.Send(command);
-
-        if (result.IsSuccess)
-        {
-            return Ok(result);
-        }
-
-        return BadRequest(result);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -103,16 +88,10 @@ public class RolesController : ControllerBase
     /// <param name="id">Role ID</param>
     /// <returns>Deletion result</returns>
     [HttpDelete("{id}")]
-    public async Task<ActionResult<Result>> DeleteRole(Guid id)
+    public async Task<IActionResult> DeleteRole(Guid id)
     {
         var command = new DeleteRoleCommand { Id = id };
         var result = await _mediator.Send(command);
-
-        if (result.IsSuccess)
-        {
-            return Ok(result);
-        }
-
-        return BadRequest(result);
+        return HandleResult(result);
     }
 }

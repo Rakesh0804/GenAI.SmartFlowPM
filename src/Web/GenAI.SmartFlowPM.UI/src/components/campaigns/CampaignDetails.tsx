@@ -89,19 +89,19 @@ const CampaignDetails: React.FC<CampaignDetailsProps> = ({
     const actionConfig = {
       start: {
         title: 'Start Campaign',
-        message: `Are you sure you want to start "${campaign.name}"? This will make the campaign active and begin the evaluation process.`,
+        message: `Are you sure you want to start "${campaign.title}"? This will make the campaign active and begin the evaluation process.`,
         confirmText: 'Start Campaign',
         action: () => campaignService.startCampaign(campaignId)
       },
       complete: {
         title: 'Complete Campaign',
-        message: `Are you sure you want to complete "${campaign.name}"? This will finalize all evaluations and mark the campaign as completed.`,
+        message: `Are you sure you want to complete "${campaign.title}"? This will finalize all evaluations and mark the campaign as completed.`,
         confirmText: 'Complete Campaign',
         action: () => campaignService.completeCampaign(campaignId)
       },
       cancel: {
         title: 'Cancel Campaign',
-        message: `Are you sure you want to cancel "${campaign.name}"? This action cannot be undone and will stop all evaluation activities.`,
+        message: `Are you sure you want to cancel "${campaign.title}"? This action cannot be undone and will stop all evaluation activities.`,
         confirmText: 'Cancel Campaign',
         action: () => campaignService.cancelCampaign(campaignId)
       }
@@ -263,7 +263,7 @@ const CampaignDetails: React.FC<CampaignDetailsProps> = ({
           <div className="flex items-start justify-between">
             <div>
               <div className="flex items-center space-x-3 mb-2">
-                <h1 className="text-3xl font-bold text-gray-900">{campaign.name}</h1>
+                <h1 className="text-3xl font-bold text-gray-900">{campaign.title}</h1>
                 <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${statusBadge.className}`}>
                   {statusBadge.icon}
                   <span className="ml-1">{statusBadge.text}</span>

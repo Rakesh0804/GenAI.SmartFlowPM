@@ -17,4 +17,5 @@ export * from '../interfaces/team.interfaces';
 export * from '../interfaces/timetracker.interfaces';
 export * from '../interfaces/campaign.interfaces';
 export * from '../interfaces/enums.interfaces';
+export * from '../interfaces/error.interfaces';
 // export * from '../interfaces/common.interfaces';

@@ -75,22 +75,41 @@ export default function LoginForm() {
       await login(formData, rememberMe);
       success('Login Successful!', 'Welcome to SmartFlowPM System');
     } catch (err: any) {
-      // Extract proper error message from API response
+      // Extract proper error message from enhanced API response
       let errorMessage = 'Login failed. Please try again.';
       
       if (err?.response?.data) {
         const responseData = err.response.data;
-        if (responseData.message) {
+        
+        // Check for RFC 7807 fields first
+        if (responseData.detail) {
+          errorMessage = responseData.detail;
+        } else if (responseData.message) {
           errorMessage = responseData.message;
         } else if (Array.isArray(responseData.errors) && responseData.errors.length > 0) {
           errorMessage = responseData.errors.join(', ');
+        }
+        
+        // Handle validation errors in RFC 7807 format
+        if (responseData.validationErrors) {
+          const validationMessages = Object.entries(responseData.validationErrors)
+            .map(([field, messages]: [string, any]) => 
+              `${field}: ${Array.isArray(messages) ? messages.join(', ') : messages}`)
+            .join('\n');
+          errorMessage = validationMessages;
         }
       } else if (err?.message && !err.message.includes('status code') && !err.message.includes('Request failed')) {
         errorMessage = err.message;
       }
       
+      // Show correlation ID in development
+      const correlationId = err?.response?.data?.correlationId || err?.response?.headers?.['x-correlation-id'];
+      const correlationSuffix = correlationId && process.env.NODE_ENV === 'development' 
+        ? ` (ID: ${correlationId.slice(-8)})` 
+        : '';
+      
       setError(errorMessage);
-      showError('Authentication Failed', errorMessage, true);
+      showError(`Authentication Failed${correlationSuffix}`, errorMessage, true);
     } finally {
       setIsLoading(false);
     }

@@ -12,6 +12,9 @@ export interface Toast {
     message?: string;
     duration?: number;
     persistent?: boolean;
+    correlationId?: string;
+    details?: string;
+    validationErrors?: Array<{ field: string; messages: string[] }>;
 }
 
 // Maximum number of toasts to show at once
@@ -22,10 +25,12 @@ interface ToastContextType {
     addToast: (toast: Omit<Toast, 'id'>) => string;
     removeToast: (id: string) => void;
     success: (title: string, message?: string, duration?: number) => string;
-    error: (title: string, message?: string, persistent?: boolean) => string;
+    error: (title: string, message?: string, persistent?: boolean, correlationId?: string, details?: string) => string;
     warning: (title: string, message?: string, duration?: number) => string;
     info: (title: string, message?: string, duration?: number) => string;
     clearAll: () => void;
+    // Enhanced method for processed errors
+    showProcessedError: (processedError: any) => string;
 }
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
@@ -170,6 +175,31 @@ const ToastItem: React.FC<ToastItemProps> = ({ toast, onRemove }) => {
                                     {toast.message}
                                 </p>
                             )}
+                            
+                            {/* Validation Errors */}
+                            {toast.validationErrors && toast.validationErrors.length > 0 && (
+                                <div className="mt-2 space-y-1">
+                                    {toast.validationErrors.map((error, index) => (
+                                        <div key={index} className={`text-xs ${colors.message} bg-white/30 rounded px-2 py-1`}>
+                                            <span className="font-medium">{error.field}:</span> {error.messages.join(', ')}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Details */}
+                            {toast.details && (
+                                <p className={`text-xs ${colors.message} mt-2 opacity-80`}>
+                                    {toast.details}
+                                </p>
+                            )}
+
+                            {/* Correlation ID for debugging (only in development) */}
+                            {toast.correlationId && process.env.NODE_ENV === 'development' && (
+                                <p className={`text-xs ${colors.message} mt-1 opacity-60 font-mono`}>
+                                    ID: {toast.correlationId.slice(-8)}
+                                </p>
+                            )}
                         </div>
                         <div className="ml-3 flex-shrink-0">
                             <button
@@ -247,13 +277,28 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         return addToast({ type: 'success', title, message, duration });
     }, [addToast]);
 
-    const error = useCallback((title: string, message?: string, persistent?: boolean) => {
+    const error = useCallback((title: string, message?: string, persistent?: boolean, correlationId?: string, details?: string) => {
         return addToast({
             type: 'error',
             title,
             message,
             persistent,
+            correlationId,
+            details,
             duration: persistent ? undefined : 6000 // Slightly longer for errors
+        });
+    }, [addToast]);
+
+    const showProcessedError = useCallback((processedError: any) => {
+        return addToast({
+            type: 'error',
+            title: processedError.title || 'Error',
+            message: processedError.message,
+            correlationId: processedError.correlationId,
+            details: processedError.details,
+            validationErrors: processedError.validationErrors,
+            persistent: !processedError.isRetryable,
+            duration: processedError.isRetryable ? 6000 : undefined
         });
     }, [addToast]);
 
@@ -278,7 +323,8 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             error,
             warning,
             info,
-            clearAll
+            clearAll,
+            showProcessedError
         }}>
             {children}
 

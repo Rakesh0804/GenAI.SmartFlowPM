@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, AxiosResponse, AxiosError, AxiosRequestConfig } from 'axios';
 import { ApiResponse } from '../types/api.types';
+import { traceApiCall } from './tracing';
 
 // Token management utility
 export class TokenManager {
@@ -247,11 +248,15 @@ export class BaseApiService {
   }
 
   private setupInterceptors(): void {
-    // Request interceptor to add auth token and tenant ID
+    // Request interceptor to add auth token, tenant ID, and correlation ID
     this.api.interceptors.request.use(
       async (config) => {
         const token = TokenManager.getToken();
         const tenantId = TokenManager.getTenantId();
+
+        // Add correlation ID for request tracking
+        const correlationId = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        config.headers['X-Correlation-ID'] = correlationId;
 
         // Check if token is expiring soon and proactively refresh it
         if (token && TokenManager.isTokenExpiringSoon(5) && !config.url?.includes('/auth/refresh')) {
@@ -375,18 +380,44 @@ export class BaseApiService {
 
   // Generic API response handler
   protected handleResponse<T>(response: AxiosResponse<ApiResponse<T>>): T {
-    if (response.data.isSuccess) {
+    // Handle cases where response.data might be null or undefined
+    if (!response.data) {
+      console.error('API response data is null or undefined:', response);
+      throw new Error('Invalid API response: no data received');
+    }
+
+    // Check for success status
+    const isSuccess = response.data.isSuccess ?? (response.status >= 200 && response.status < 300);
+    
+    if (isSuccess) {
       // For responses where data might be null/undefined (like logout), return null as T
       return response.data.data ?? null as T;
     } else {
-      const error = new Error(response.data.message || 'An error occurred') as any;
-      error.errors = response.data.errors;
+      // Enhanced error handling with better debugging info
+      const errorMessage = response.data.message || 
+                          (response.data as any)?.title || 
+                          `HTTP ${response.status}: An error occurred`;
+      
+      const error = new Error(errorMessage) as any;
+      error.errors = response.data.errors || [];
       error.isApiError = true;
+      error.status = response.status;
+      error.correlationId = response.data.correlationId;
+      
+      // Log error details for debugging
+      console.error('API Error Details:', {
+        message: errorMessage,
+        errors: error.errors,
+        status: response.status,
+        correlationId: error.correlationId,
+        response: response.data
+      });
+      
       throw error;
     }
   }
 
-  // Helper method to extract error messages from API error
+  // Enhanced helper method to extract error messages from API error (RFC 7807 + backward compatible)
   public static extractErrorMessage(error: any): string {
     if (error?.isApiError) {
       // If it's an API error with validation errors, format them
@@ -401,6 +432,10 @@ export class BaseApiService {
     if (error?.response?.data) {
       const responseData = error.response.data;
       
+      // RFC 7807 fields (priority order)
+      if (responseData.detail) return responseData.detail;
+      if (responseData.title && responseData.title !== 'An error occurred') return responseData.title;
+      
       // Check for API response format
       if (responseData.errors && Array.isArray(responseData.errors) && responseData.errors.length > 0) {
         return responseData.errors.join(', ');
@@ -410,11 +445,26 @@ export class BaseApiService {
         return responseData.message;
       }
       
-      // Handle FluentValidation errors format
-      if (responseData.title && responseData.title.includes('validation')) {
+      // Handle validation errors (both old ModelState and new RFC 7807 format)
+      if (responseData.validationErrors) {
+        const validationErrors: string[] = [];
+        Object.entries(responseData.validationErrors).forEach(([field, messages]: [string, any]) => {
+          if (Array.isArray(messages)) {
+            messages.forEach((msg: string) => validationErrors.push(`${field}: ${msg}`));
+          } else if (typeof messages === 'string') {
+            validationErrors.push(`${field}: ${messages}`);
+          }
+        });
+        if (validationErrors.length > 0) {
+          return validationErrors.join(', ');
+        }
+      }
+      
+      // Handle FluentValidation errors format (legacy)
+      if (responseData.title && responseData.title.includes('validation') && responseData.errors) {
         const validationErrors: string[] = [];
         
-        if (responseData.errors) {
+        if (typeof responseData.errors === 'object' && !Array.isArray(responseData.errors)) {
           // Extract validation errors from ModelState format
           Object.keys(responseData.errors).forEach(key => {
             const fieldErrors = responseData.errors[key];
@@ -438,13 +488,17 @@ export class BaseApiService {
 
   // Generic CRUD operations
   protected async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    const response = await this.api.get<ApiResponse<T>>(url, config);
-    return this.handleResponse(response);
+    return traceApiCall(`GET ${url}`, async () => {
+      const response = await this.api.get<ApiResponse<T>>(url, config);
+      return this.handleResponse(response);
+    });
   }
 
   protected async post<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
-    const response = await this.api.post<ApiResponse<T>>(url, data, config);
-    return this.handleResponse(response);
+    return traceApiCall(`POST ${url}`, async () => {
+      const response = await this.api.post<ApiResponse<T>>(url, data, config);
+      return this.handleResponse(response);
+    });
   }
 
   protected async put<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {

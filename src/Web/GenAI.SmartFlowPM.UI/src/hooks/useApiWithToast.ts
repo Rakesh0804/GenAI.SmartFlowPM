@@ -2,6 +2,7 @@
 
 import { useCallback } from 'react';
 import { useToast } from '../contexts/ToastContext';
+import { BaseApiService } from '../lib/base-api.service';
 import { 
     authService, 
     userService, 
@@ -21,57 +22,10 @@ import {
 export const useApiWithToast = () => {
     const { success, error: showError, warning, info } = useToast();
 
-    // Helper function to extract error messages from API response
+    // Helper function to extract error messages from API response (Enhanced for RFC 7807)
     const extractErrorMessage = useCallback((error: any): string => {
-        // Handle API errors converted by BaseApiService
-        if (error?.isApiError && error.message) {
-            return error.message;
-        }
-
-        // Handle errors with message property directly (but not generic axios messages)
-        if (error?.message && !error.message.includes('status code') && !error.message.includes('Request failed')) {
-            return error.message;
-        }
-        
-        if (error.response?.data) {
-            const responseData = error.response.data;
-            
-            // Handle standard API response format: { isSuccess, data, message, errors }
-            if (responseData.message) {
-                return responseData.message;
-            }
-            
-            // Handle array of errors in the errors property
-            if (Array.isArray(responseData.errors) && responseData.errors.length > 0) {
-                return responseData.errors.join(', ');
-            }
-            
-            // Handle FluentValidation errors format (ModelState)
-            if (responseData.errors && typeof responseData.errors === 'object') {
-                const validationErrors: string[] = [];
-                
-                // Check if it's a ModelState errors object
-                Object.keys(responseData.errors).forEach(key => {
-                    const fieldErrors = responseData.errors[key];
-                    if (Array.isArray(fieldErrors)) {
-                        fieldErrors.forEach((err: string) => validationErrors.push(err));
-                    } else if (typeof fieldErrors === 'string') {
-                        validationErrors.push(fieldErrors);
-                    }
-                });
-                
-                if (validationErrors.length > 0) {
-                    return validationErrors.join(', ');
-                }
-            }
-            
-            // Check for other common message properties
-            return responseData.title || 
-                   responseData.detail ||
-                   'An error occurred';
-        }
-        
-        return error.message || 'An unexpected error occurred';
+        // Use the existing BaseApiService method which is backward compatible
+        return BaseApiService.extractErrorMessage(error);
     }, []);
 
     // Helper function to handle API errors
@@ -83,34 +37,50 @@ export const useApiWithToast = () => {
             const status = error.response.status;
             const message = extractErrorMessage(error);
 
+            // Try to get correlation ID for debugging
+            const correlationId = error.response?.data?.correlationId || error.response?.headers?.['x-correlation-id'];
+            const correlationSuffix = correlationId && process.env.NODE_ENV === 'development' 
+                ? ` (ID: ${correlationId.slice(-8)})` 
+                : '';
+
             switch (status) {
                 case 400:
-                    showError('Validation Error', message);
+                    // Check for validation errors in RFC 7807 format
+                    const validationErrors = error.response?.data?.validationErrors;
+                    if (validationErrors) {
+                        const validationMessages = Object.entries(validationErrors)
+                            .map(([field, messages]: [string, any]) => 
+                                `${field}: ${Array.isArray(messages) ? messages.join(', ') : messages}`)
+                            .join('\n');
+                        showError(`Validation Error${correlationSuffix}`, validationMessages);
+                    } else {
+                        showError(`Validation Error${correlationSuffix}`, message);
+                    }
                     break;
                 case 401:
                     if (operation.toLowerCase() === 'login') {
                         showError('Login Failed', message || 'Invalid email or password. Please try again.');
                     } else {
-                        showError('Unauthorized', 'Please login again to continue', true);
+                        showError(`Unauthorized${correlationSuffix}`, 'Please login again to continue', true);
                     }
                     break;
                 case 403:
-                    showError('Access Denied', `You don't have permission to ${operation.toLowerCase()}`, true);
+                    showError(`Access Denied${correlationSuffix}`, `You don't have permission to ${operation.toLowerCase()}`, true);
                     break;
                 case 404:
                     showError('Not Found', `The requested resource was not found`);
                     break;
                 case 409:
-                    warning('Conflict', `${operation} conflict: ${message}`);
+                    warning(`Conflict${correlationSuffix}`, `${operation} conflict: ${message}`);
                     break;
                 case 422:
-                    showError('Validation Error', message || `Please check your ${operation.toLowerCase()} data`);
+                    showError(`Validation Error${correlationSuffix}`, message || `Please check your ${operation.toLowerCase()} data`);
                     break;
                 case 500:
-                    showError('Server Error', 'An internal server error occurred. Please try again later.', true);
+                    showError(`Server Error${correlationSuffix}`, 'An internal server error occurred. Please try again later.', true);
                     break;
                 default:
-                    showError(`${operation} Failed`, message || 'An unexpected error occurred');
+                    showError(`${operation} Failed${correlationSuffix}`, message || 'An unexpected error occurred');
             }
         } else if (error.request) {
             // Network error

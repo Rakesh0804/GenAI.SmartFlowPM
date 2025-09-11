@@ -5,6 +5,8 @@ export interface ApiResponse<T> {
   isSuccess: boolean;
   message?: string;
   errors?: string[];
+  correlationId?: string;
+  timestamp?: string;
 }
 
 export interface PaginatedResponse<T> {
@@ -15,4 +17,14 @@ export interface PaginatedResponse<T> {
   totalPages: number;
   hasPreviousPage: boolean;
   hasNextPage: boolean;
+}
+
+/**
+ * Request configuration with correlation tracking
+ */
+export interface ApiRequestConfig {
+  correlationId?: string;
+  skipAuth?: boolean;
+  timeout?: number;
+  retryable?: boolean;
 }

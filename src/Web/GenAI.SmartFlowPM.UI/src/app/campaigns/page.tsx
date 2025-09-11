@@ -150,7 +150,7 @@ const CampaignsPage = () => {
   };
 
   const filteredCampaigns = allCampaigns.filter(campaign =>
-    campaign.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    campaign.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     campaign.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -408,15 +408,15 @@ const CampaignsPage = () => {
                 <div key={activity.id} className="flex items-center space-x-4 py-3 border-b border-gray-100 last:border-b-0">
                   <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
                     <span className="text-sm font-medium text-gray-600">
-                      {activity.performedByName.split(' ').map(n => n[0]).join('')}
+                      {activity.performedByName?.split(' ').map(n => n[0]).join('') || '??'}
                     </span>
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-gray-900">
-                      {activity.description}
+                      {activity.description || 'Activity description not available'}
                     </p>
                     <p className="text-sm text-gray-500">
-                      {activity.campaignName} • {new Date(activity.timestamp).toLocaleDateString()}
+                      {activity.campaignName || 'Unknown Campaign'} • {activity.timestamp ? new Date(activity.timestamp).toLocaleDateString() : 'No date'}
                     </p>
                   </div>
                   <Activity className="h-4 w-4 text-gray-400" />
@@ -443,7 +443,7 @@ const CampaignsPage = () => {
                 <div className="flex items-start justify-between">
                   <div className="space-y-2 flex-1">
                     <div className="flex items-center space-x-2">
-                      <h3 className="text-lg font-semibold text-gray-900">{campaign.name}</h3>
+                      <h3 className="text-lg font-semibold text-gray-900">{campaign.title}</h3>
                     </div>
                     <p className="text-sm text-gray-600">{campaign.description}</p>
                     <div className="flex items-center space-x-2">
@@ -457,7 +457,7 @@ const CampaignsPage = () => {
                       </div>
                       <div className="flex items-center space-x-1">
                         <Users className="h-4 w-4" />
-                        <span>{campaign.assignedManagers.length} managers • {campaign.targetUserGroups.length} groups</span>
+                        <span>{campaign.assignedManagers?.length || 0} managers • {campaign.targetUserGroups?.length || 0} groups</span>
                       </div>
                     </div>
                   </div>
@@ -518,7 +518,7 @@ const CampaignsPage = () => {
                   <div className="flex items-center justify-between">
                     <div className="space-y-2 flex-1">
                       <div className="flex items-center space-x-3">
-                        <h3 className="text-lg font-medium text-gray-900">{campaign.name}</h3>
+                        <h3 className="text-lg font-medium text-gray-900">{campaign.title}</h3>
                         <StatusBadge status={campaign.status} />
                         <TypeBadge type={campaign.type} />
                       </div>
@@ -530,11 +530,11 @@ const CampaignsPage = () => {
                         </div>
                         <div className="flex items-center space-x-1">
                           <Users className="h-4 w-4" />
-                          <span>{campaign.assignedManagers.length} managers</span>
+                          <span>{campaign.assignedManagers?.length || 0} managers</span>
                         </div>
                         <div className="flex items-center space-x-1">
                           <Target className="h-4 w-4" />
-                          <span>{campaign.targetUserGroups.length} groups</span>
+                          <span>{campaign.targetUserGroups?.length || 0} groups</span>
                         </div>
                       </div>
                     </div>
